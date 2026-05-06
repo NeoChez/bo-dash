@@ -11,8 +11,13 @@ config_version=5
 [application]
 
 config/name="Bo-Dash"
+run/main_scene="uid://cj7fb7gxwn0di"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
+
+[global_group]
+
+player=""
 
 [physics]
 
