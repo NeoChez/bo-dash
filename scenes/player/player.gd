@@ -4,7 +4,7 @@ extends CharacterBody2D
 
 
 # Deklarasikan SPEED sebagai konstanta di sini
-const SPEED: float = 150.0 
+const SPEED: float = 200.0 
 
 var _last_anim = "front_idle"
 var dash : float
@@ -27,22 +27,9 @@ signal died
 var flash_toggle: bool = false
 
 func _physics_process(delta: float) -> void:
-	var input = Vector2.ZERO
-	input.x = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
-	input.y = Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
+	var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 
-	# 1. Normalisasi input awal agar pergerakan diagonal tidak lebih cepat
-	if input.length() > 0:
-		input = input.normalized()
+	input_dir = input_dir.round().normalized()
 
-	# 2. Ubah input menjadi pergerakan serong isometrik (Rasio X dan Y = 2:1)
-	var iso_direction = Vector2(
-		input.x - input.y,
-		(input.x + input.y) * 0.5
-	)
-
-
-
-	# 3. Terapkan kecepatan dan gerakkan karakter
-	velocity = iso_direction * (SPEED + dash_velocity)
+	velocity = input_dir * (SPEED + dash_velocity)
 	move_and_slide()
