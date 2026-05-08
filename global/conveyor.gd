@@ -31,6 +31,6 @@ func _cleanup_obstacles() -> void:
 		if not is_instance_valid(obs):
 			active_obstacles.remove_at(i)
 		elif obs.global_position.x < despawn_x_limit or obs.global_position.y < despawn_y_limit:
-			print("🗑️ Ground menghapus obstacle di koordinat: X=", obs.global_position.x, " Y=", obs.global_position.y)
+		
 			obs.queue_free()
 			active_obstacles.remove_at(i)

@@ -4,6 +4,11 @@ extends Node3D
 @export var spawn_interval: float = 1.5
 @export var move_speed: float = 8.0 
 
+# --- PENGATURAN ARAH JADI LEBIH MUDAH ---
+# Ini akan membuat dropdown di Inspector untuk memilih Kiri (-1) atau Kanan (1)
+@export_enum("Ke Kiri:-1", "Ke Kanan:1") var arah_x: int = -1
+# ----------------------------------------
+
 # Referensi ke node Ground agar Spawner bisa melapor
 @export var ground_node: Node3D 
 
@@ -12,8 +17,6 @@ var last_spawn_index: int = -1
 
 func _ready() -> void:
 	randomize()
-	
-
 	
 	for child in get_children():
 		if child is Marker3D:
@@ -46,18 +49,20 @@ func spawn_obstacle(spawn_point: Marker3D):
 	obs.top_level = true
 	obs.global_transform = spawn_point.global_transform
 	
+	# --- UBAH ARAH_X MENJADI VECTOR3 SECARA OTOMATIS ---
+	var move_direction = Vector3(arah_x, 0, 0)
+	
 	if obs.has_method("set_movement"):
-		obs.set_movement(Vector3(-1, 0, 0), move_speed)
+		obs.set_movement(move_direction, move_speed)
 	else:
 		obs.move_speed = move_speed
-		obs.move_direction = Vector3(-1, 0, 0)
+		obs.move_direction = move_direction
+	# ---------------------------------------------------
 	
 	if not obs.is_in_group("item"):
 		obs.add_to_group("item")
 	if not obs.is_in_group("obstacle"):
 		obs.add_to_group("obstacle")
 	
-	# --- PERUBAHAN DI SINI ---
-	# Spawner tidak lagi menyimpan array, melainkan mengirimkannya ke Ground
 	if ground_node:
 		ground_node.register_obstacle(obs)

@@ -46,6 +46,9 @@ animations = [{
 "speed": 7.0
 }]
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_p47bc"]
+radius = 0.4542067
+
 [node name="Player" type="CharacterBody3D" unique_id=33911984 groups=["player"]]
 collision_mask = 7
 script = ExtResource("1_h6syq")
@@ -64,4 +67,8 @@ shape = SubResource("CapsuleShape3D_ouxva")
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 2.1472855, 0)
 sprite_frames = SubResource("SpriteFrames_vlpqo")
 animation = &"walk"
-frame_progress = 0.9306736
+frame_progress = 0.23945878
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="." unique_id=1881968393]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.537221, 3.44632, 0)
+shape = SubResource("SphereShape3D_p47bc")

@@ -10,7 +10,7 @@ material = SubResource("StandardMaterial3D_obstacle")
 size = Vector3(2, 5, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vlygw"]
-size = Vector3(2.0828369, 2.828125, 0.7789062)
+size = Vector3(2.0627334, 3.6220703, 0.7789062)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground_detect"]
 size = Vector3(2, 1, 0.8)
@@ -26,7 +26,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4971626, 0)
 mesh = SubResource("BoxMesh_duh60")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=458946471]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05521238, 1.4268609, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.019388705, 1.8238336, 0)
 shape = SubResource("BoxShape3D_vlygw")
 
 [node name="GroundDetector" type="Area3D" parent="." unique_id=611526657]

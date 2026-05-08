@@ -1,7 +1,7 @@
 extends StaticBody3D
 
-@export var conveyor_direction: Vector3 = Vector3(-1, 0, 0)  # Arah conveyor (default ke kiri)
-@export var conveyor_speed: float = 5.0  # Kecepatan conveyor
+@export var conveyor_direction: Vector3 = Vector3(-1, 0, 0)
+@export var conveyor_speed: float = 5.0
 
 var active_obstacles: Array = []
 var despawn_x_limit: float = -80.0 
@@ -13,14 +13,14 @@ func _ready() -> void:
 	constant_linear_velocity = push_velocity
 
 	
-	# Timer untuk cleanup obstacle yang sudah lewat
+	
 	var cleanup_timer = Timer.new()
 	cleanup_timer.wait_time = 0.5
 	cleanup_timer.autostart = true
 	cleanup_timer.timeout.connect(_cleanup_obstacles)
 	add_child(cleanup_timer)
 
-# Fungsi ini akan dipanggil oleh Spawner untuk mendaftarkan obstacle baru
+
 func register_obstacle(obs: Node3D) -> void:
 	active_obstacles.append(obs)
 
