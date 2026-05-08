@@ -1,15 +1,15 @@
 extends StaticBody3D
 
-@export var conveyor_direction: Vector3 = Vector3(-1, 0, 0)  
-@export var conveyor_speed: float = 5.0 
+@export var conveyor_direction: Vector3 = Vector3(-1, 0, 0)  # Arah conveyor (default ke kiri)
+@export var conveyor_speed: float = 5.0  # Kecepatan conveyor
 
 var active_obstacles: Array = []
-var despawn_x_limit: float = -80.0  
+var despawn_x_limit: float = -80.0 
 var despawn_y_limit: float = -20.0  
 
 func _ready() -> void:
 	# Setup conveyor velocity untuk mendorong player
-	var push_velocity = conveyor_direction.normalized() * conveyor_speed
+	var push_velocity = conveyor_direction.normalized() * -conveyor_speed
 	constant_linear_velocity = push_velocity
 
 	

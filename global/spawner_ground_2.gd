@@ -13,7 +13,6 @@ var last_spawn_index: int = -1
 func _ready() -> void:
 	randomize()
 	
-
 	
 	for child in get_children():
 		if child is Marker3D:
@@ -47,17 +46,16 @@ func spawn_obstacle(spawn_point: Marker3D):
 	obs.global_transform = spawn_point.global_transform
 	
 	if obs.has_method("set_movement"):
-		obs.set_movement(Vector3(-1, 0, 0), move_speed)
+		obs.set_movement(Vector3(1, 0, 0), move_speed)
 	else:
 		obs.move_speed = move_speed
-		obs.move_direction = Vector3(-1, 0, 0)
+		obs.move_direction = Vector3(1, 0, 0)
 	
 	if not obs.is_in_group("item"):
 		obs.add_to_group("item")
 	if not obs.is_in_group("obstacle"):
 		obs.add_to_group("obstacle")
 	
-	# --- PERUBAHAN DI SINI ---
-	# Spawner tidak lagi menyimpan array, melainkan mengirimkannya ke Ground
+
 	if ground_node:
 		ground_node.register_obstacle(obs)

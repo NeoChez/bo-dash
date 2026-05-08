@@ -1,79 +1,71 @@
 extends CharacterBody3D
 
-const SPEED = 5.0
+const SPEED = 10
 const JUMP_VELOCITY = 8.0
-const LANE_DISTANCE = 2.0  # Jarak antar jalur
-const LANE_SWITCH_SPEED = 12.0
+const KNOCKBACK_FORCE = 15.0 
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
-var current_lane = 1  # 0 = kiri, 1 = tengah, 2 = kanan
-var target_z = 0.0
 var is_alive = true
 
-# Custom input actions untuk Player 2 (WASD + U)
-var input_left = "p2_left"    # A
-var input_right = "p2_right"  # D  
-var input_up = "p2_up"        # W
-var input_down = "p2_down"    # S
-var input_jump = "p2_jump"    # U
-
-func _ready():
-	_calculate_target_z()
+@onready var animated_sprite = $AnimatedSprite3D
 
 func _physics_process(delta: float) -> void:
 	if not is_alive:
 		return
 	
-	# Add the gravity.
+	# Terapkan gravitasi
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 	
-	# Handle jump dengan tombol U (p2_jump).
-	if Input.is_action_just_pressed(input_jump) and is_on_floor():
+	# Handle jump (Ubah ke action "jump")
+	if Input.is_action_just_pressed("p2_jump") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 	
-	# Player diam di posisi X (obstacle yang datang ke arah player).
-	velocity.x = 0
+	# Dapatkan input pergerakan 8 arah menggunakan WASD actions
+	# Format: get_vector("kiri (A)", "kanan (D)", "depan/atas (W)", "belakang/bawah (S)")
+	var input_dir = Input.get_vector("p2_left", "p2_right", "p2_up", "p2_down")
+	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
-	# Handle pindah jalur dengan A dan D.
-	if Input.is_action_just_pressed(input_left):
-		change_lane(-1)
-	if Input.is_action_just_pressed(input_right):
-		change_lane(1)
-	
-	# Smooth movement ke target lane (Z axis).
-	_calculate_target_z()
-	var z_diff = target_z - global_position.z
-	velocity.z = z_diff * LANE_SWITCH_SPEED
+	# --- LOGIKA ANIMASI & ARAH HADAP ---
+	if input_dir != Vector2.ZERO:
+		animated_sprite.play("walk")
+		
+		if input_dir.x < 0:
+			animated_sprite.flip_h = true  
+		elif input_dir.x > 0:
+			animated_sprite.flip_h = false 
+	else:
+		animated_sprite.stop()
+	# --------------------------------------
+
+	if direction:
+		velocity.x = move_toward(velocity.x, direction.x * SPEED, SPEED * delta * 10)
+		velocity.z = move_toward(velocity.z, direction.z * SPEED, SPEED * delta * 10)
+	else:
+		velocity.x = move_toward(velocity.x, 0, SPEED * delta * 5)
+		velocity.z = move_toward(velocity.z, 0, SPEED * delta * 5)
 	
 	move_and_slide()
-	
-	# Cek collision dengan obstacle.
 	_check_collisions()
-
-func _calculate_target_z():
-	# Lane 0 = -2, Lane 1 = 0, Lane 2 = +2.
-	target_z = (current_lane - 1) * LANE_DISTANCE
-
-func change_lane(direction: int):
-	var new_lane = current_lane + direction
-	if new_lane >= 0 and new_lane <= 2:
-		current_lane = new_lane
 
 func _check_collisions():
 	for i in range(get_slide_collision_count()):
 		var collision = get_slide_collision(i)
 		if collision:
 			var collider = collision.get_collider()
-			# Cek jika bertabrakan dengan obstacle.
+			
 			if collider and collider.is_in_group("obstacle"):
-				die()
-				return
+				var push_dir = (global_position - collider.global_position).normalized()
+				push_dir.y = 0 
+				
+				velocity.x += push_dir.x * KNOCKBACK_FORCE
+				velocity.z += push_dir.z * KNOCKBACK_FORCE
 
 func die():
 	if not is_alive:
 		return
 	is_alive = false
-	print("Player 2 Game Over! Restarting...")
+	print("Game Over! Restarting...")
+	velocity = Vector3.ZERO 
 	await get_tree().create_timer(1.0).timeout
 	get_tree().reload_current_scene()

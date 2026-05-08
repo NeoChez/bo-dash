@@ -7,7 +7,7 @@ var mat: StandardMaterial3D
 
 func _ready() -> void:
 	# Tambahkan ke group conveyor
-	add_to_group("conveyor")
+	
 	
 	# Visual setup - duplikasi material agar bisa di-scroll
 	var original_mat = get_active_material(0)

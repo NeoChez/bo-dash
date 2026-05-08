@@ -7,28 +7,32 @@ albedo_color = Color(0.8, 0.2, 0.2, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_duh60"]
 material = SubResource("StandardMaterial3D_obstacle")
-size = Vector3(2, 3, 1)
+size = Vector3(2, 5, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vlygw"]
-size = Vector3(2.3816407, 2.828125, 0.7789062)
+size = Vector3(2.0828369, 2.828125, 0.7789062)
 
-[node name="obstacle_3d" type="AnimatableBody3D" unique_id=1136077686 groups=["item", "obstacle"]]
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground_detect"]
+size = Vector3(2, 1, 0.8)
+
+[node name="obstacle_3d" type="AnimatableBody3D" unique_id=725112794 groups=["item", "obstacle"]]
 collision_layer = 2
 collision_mask = 7
+sync_to_physics = false
 script = ExtResource("1_obstacle")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1879379549]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1151072468]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4971626, 0)
 mesh = SubResource("BoxMesh_duh60")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=971753957]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.050195307, 0.7841797, 0.010546893)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=458946471]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05521238, 1.4268609, 0)
 shape = SubResource("BoxShape3D_vlygw")
 
-[node name="ConveyorDetector" type="Area3D" parent="." unique_id=879873192]
+[node name="GroundDetector" type="Area3D" parent="." unique_id=611526657]
 collision_layer = 0
-collision_mask = 8
+collision_mask = 4
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="ConveyorDetector" unique_id=1334206322]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
-shape = SubResource("BoxShape3D_vlygw")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GroundDetector" unique_id=264521618]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_ground_detect")

@@ -23,6 +23,9 @@ window/size/mode=3
 
 player=""
 item=""
+conveyor=""
+ground=""
+spawner=""
 
 [input]
 
