@@ -1,10 +1,9 @@
 [gd_scene format=3 uid="uid://bo1t80jofmdre"]
 
 [ext_resource type="Script" uid="uid://0nia4bme67b6" path="res://global/conveyor.gd" id="1_kmy1e"]
-[ext_resource type="Script" uid="uid://bbqkd0vwvd3ih" path="res://scripts/player_3d.gd" id="1_player"]
 [ext_resource type="Script" uid="uid://cpwactebxbw3v" path="res://scripts/spawner_3d.gd" id="2_spawner"]
-[ext_resource type="Texture2D" uid="uid://c1dftshldf4w3" path="res://assets/player/1.PNG" id="3_player_tex"]
 [ext_resource type="PackedScene" uid="uid://c7l7l7l7l7l7l" path="res://scenes/conveyor_3d.tscn" id="4_conveyor"]
+[ext_resource type="PackedScene" uid="uid://clbs4ut175fn5" path="res://scenes/player/player.tscn" id="5_kmy1e"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
 albedo_color = Color(0.25, 0.25, 0.3, 1)
@@ -15,9 +14,6 @@ size = Vector3(100, 2, 20)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(100, 1.6403809, 20)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_player"]
-size = Vector3(2.6958861, 2.6753907, 3.4477296)
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.5, 0.7, 0.9, 1)
@@ -61,20 +57,6 @@ scroll_speed = 3.0
 transform = Transform3D(100, 0, 0, 0, 0.1, 0, 0, 0, 1.8, 0, -0.05, 2)
 scroll_speed = 3.0
 
-[node name="Player" type="CharacterBody3D" parent="." unique_id=99650917 groups=["player"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 2.5866947, 0)
-collision_mask = 7
-script = ExtResource("1_player")
-
-[node name="Sprite3D" type="Sprite3D" parent="Player" unique_id=894758087]
-transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0.9, 0)
-billboard = 1
-texture = ExtResource("3_player_tex")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Player" unique_id=984184527]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18387985, 0.4623046, 1.3238647)
-shape = SubResource("BoxShape3D_player")
-
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1172004855]
 transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, -5, 8, 12)
 fov = 90.0
@@ -103,3 +85,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 0.75, 0)
 
 [node name="Lane3" type="Marker3D" parent="Spawner" unique_id=1398297149]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 0.75, 2)
+
+[node name="Player" parent="." unique_id=33911984 instance=ExtResource("5_kmy1e")]

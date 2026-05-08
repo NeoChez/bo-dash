@@ -7,25 +7,45 @@ const KNOCKBACK_FORCE = 15.0 # Atur angka ini untuk mengubah kekuatan dorongan
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var is_alive = true
 
+# 1. Tambahkan referensi ke node AnimatedSprite3D
+# Pastikan nama node di scene tree kamu sama persis dengan "AnimatedSprite3D"
+@onready var animated_sprite = $AnimatedSprite3D
+
 func _physics_process(delta: float) -> void:
 	if not is_alive:
 		return
 	
-	# 1. Terapkan gravitasi
+	# Terapkan gravitasi
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 	
-	# 2. Handle jump
+	# Handle jump
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 	
-	# 3. Dapatkan input pergerakan 8 arah
+	# Dapatkan input pergerakan 8 arah
 	var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
-	# 4. Terapkan kecepatan (dengan transisi halus menggunakan lerp/move_toward)
+	# --- 2. LOGIKA ANIMASI & ARAH HADAP ---
+	if input_dir != Vector2.ZERO:
+		# Mainkan animasi walk jika ada input
+		animated_sprite.play("walk")
+		
+		# Flip (balik) sprite berdasarkan arah X
+		if input_dir.x < 0:
+			animated_sprite.flip_h = true  # Menghadap kiri
+		elif input_dir.x > 0:
+			animated_sprite.flip_h = false # Menghadap kanan
+	else:
+	
+		# (Atau ubah ke animated_sprite.play("idle") jika kamu punya animasi diam)
+		animated_sprite.stop()
+	
+	# --------------------------------------
+	
+
 	if direction:
-		# Gunakan move_toward agar efek dorongan tidak langsung hilang secara instan
 		velocity.x = move_toward(velocity.x, direction.x * SPEED, SPEED * delta * 10)
 		velocity.z = move_toward(velocity.z, direction.z * SPEED, SPEED * delta * 10)
 	else:
@@ -34,7 +54,7 @@ func _physics_process(delta: float) -> void:
 	
 	move_and_slide()
 	
-	# 5. Cek tabrakan
+	# Cek tabrakan
 	_check_collisions()
 
 func _check_collisions():
@@ -43,22 +63,13 @@ func _check_collisions():
 		if collision:
 			var collider = collision.get_collider()
 			
-			# Jika menabrak objek di grup "obstacle"
 			if collider and collider.is_in_group("obstacle"):
-				# --- LOGIKA DORONGAN (KNOCKBACK) ---
-				
-				# Dapatkan arah dorongan (menjauh dari obstacle ke arah player)
 				var push_dir = (global_position - collider.global_position).normalized()
-				
-				# Set Y menjadi 0 agar player tidak terlempar terbang ke atas
 				push_dir.y = 0 
 				
-				# Terapkan gaya dorong ke velocity player
 				velocity.x += push_dir.x * KNOCKBACK_FORCE
 				velocity.z += push_dir.z * KNOCKBACK_FORCE
 
-# (Fungsi die bisa dibiarkan jika sewaktu-waktu dibutuhkan untuk rintangan lain, 
-#  misalnya jatuh ke jurang)
 func die():
 	if not is_alive:
 		return

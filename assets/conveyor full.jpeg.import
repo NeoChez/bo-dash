@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cyoojbt6riva4"
-path.s3tc="res://.godot/imported/2.PNG-d425e748d6ae86c0ef9fa9f18109debb.s3tc.ctex"
+uid="uid://bdxpl2v7mw5df"
+path.s3tc="res://.godot/imported/conveyor full.jpeg-b45f66ac0f332fdf0bc8199eb82a6683.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/player/2.PNG"
-dest_files=["res://.godot/imported/2.PNG-d425e748d6ae86c0ef9fa9f18109debb.s3tc.ctex"]
+source_file="res://assets/conveyor full.jpeg"
+dest_files=["res://.godot/imported/conveyor full.jpeg-b45f66ac0f332fdf0bc8199eb82a6683.s3tc.ctex"]
 
 [params]
 
