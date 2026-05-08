@@ -2,21 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bdxpl2v7mw5df"
-path.s3tc="res://.godot/imported/conveyor full.jpeg-b45f66ac0f332fdf0bc8199eb82a6683.s3tc.ctex"
+uid="uid://bu8if02075kmi"
+path="res://.godot/imported/2.PNG-b34233009e6be344653387cf85d40907.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/conveyor full.jpeg"
-dest_files=["res://.godot/imported/conveyor full.jpeg-b45f66ac0f332fdf0bc8199eb82a6683.s3tc.ctex"]
+source_file="res://assets/player/Babi/2.PNG"
+dest_files=["res://.godot/imported/2.PNG-b34233009e6be344653387cf85d40907.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -24,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
@@ -38,4 +37,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

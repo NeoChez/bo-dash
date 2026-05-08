@@ -1,16 +1,22 @@
-[gd_scene format=3 uid="uid://5k3vcqhe7ves"]
+[gd_scene load_steps=3 format=3 uid="uid://do6qyfjsw08lh"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_brmmc"]
-size = Vector2(33, 122)
+[ext_resource type="Script" path="res://scripts/obstacle.gd" id="1_obstacle"]
 
-[node name="obstacle" type="AnimatableBody2D" unique_id=47665168]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_obs"]
+size = Vector2(64, 64)
 
-[node name="ColorRect" type="ColorRect" parent="." unique_id=1612900894]
-offset_left = -16.0
-offset_top = -123.0
-offset_right = 17.0
-color = Color(0.67443275, 0.5290829, 0.32649025, 1)
+[node name="Obstacle" type="AnimatableBody2D" groups=["obstacle"]]
+collision_layer = 4
+collision_mask = 0
+sync_to_physics = false
+script = ExtResource("1_obstacle")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1467018276]
-position = Vector2(0.5, -62)
-shape = SubResource("RectangleShape2D_brmmc")
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_left = -32.0
+offset_top = -32.0
+offset_right = 32.0
+offset_bottom = 32.0
+color = Color(0.85, 0.27, 0.18, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_obs")

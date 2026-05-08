@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://ck60vyn1cwd5g"]
+
+[ext_resource type="Script" uid="uid://bpdvl6ue85evi" path="res://scripts/conveyor.gd" id="1_sc43q"]
+[ext_resource type="Texture2D" uid="uid://bttox5t30qgha" path="res://assets/Full Conveyor.png" id="2_5b5br"]
+
+[node name="Conveyor" type="Area2D" unique_id=1663330885 groups=["conveyor"]]
+scale = Vector2(-1, 1)
+collision_layer = 8
+collision_mask = 2
+script = ExtResource("1_sc43q")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=916902989]
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("2_5b5br")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="." unique_id=244834927]
+polygon = PackedVector2Array(-674, -183, 619, -189, 719, 221, -555, 220)

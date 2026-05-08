@@ -1,0 +1,95 @@
+[gd_scene format=3 uid="uid://bv2n5lwfkqfxj"]
+
+[ext_resource type="Script" uid="uid://cepmsjkc0xn44" path="res://scripts/world.gd" id="1_world"]
+[ext_resource type="PackedScene" uid="uid://cv0nvxr1conv1" path="res://scenes/conveyor/conveyor.tscn" id="2_conveyor"]
+[ext_resource type="PackedScene" uid="uid://clbs4ut175fn5" path="res://scenes/player/player.tscn" id="3_player"]
+[ext_resource type="PackedScene" uid="uid://ck60vyn1cwd5g" path="res://scenes/conveyor/conveyor_left.tscn" id="4_4mrxx"]
+[ext_resource type="PackedScene" uid="uid://do6qyfjsw08lh" path="res://scenes/obstacle/obstacle.tscn" id="4_obstacle"]
+[ext_resource type="Script" uid="uid://b23q02ofen7ts" path="res://scripts/rope.gd" id="5_rope"]
+[ext_resource type="PackedScene" uid="uid://bl41ekkm0bfd2" path="res://scenes/player/player2.tscn" id="6_7r4gi"]
+[ext_resource type="Script" uid="uid://cgadxn5rrys8h" path="res://scripts/obstacle_spawner.gd" id="6_spawner"]
+[ext_resource type="Script" uid="uid://do1waqs53bfe3" path="res://scripts/pit.gd" id="7_pit"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pit"]
+size = Vector2(1920, 1071)
+
+[node name="World" type="Node2D" unique_id=931596350]
+script = ExtResource("1_world")
+
+[node name="Background" type="ColorRect" parent="." unique_id=279246976]
+offset_right = 1920.0
+offset_bottom = 1080.0
+color = Color(0.08, 0.1, 0.14, 1)
+
+[node name="PitFire" type="ColorRect" parent="." unique_id=2082995487]
+offset_top = 1002.0
+offset_right = 1920.0
+offset_bottom = 1080.0
+color = Color(0.85, 0.3, 0.15, 1)
+
+[node name="Pit" type="Area2D" parent="." unique_id=224950884]
+collision_layer = 16
+collision_mask = 2
+script = ExtResource("7_pit")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pit" unique_id=1198191982]
+position = Vector2(960, 1544.5)
+shape = SubResource("RectangleShape2D_pit")
+
+[node name="RightConveyor" parent="." unique_id=1663330885 instance=ExtResource("2_conveyor")]
+position = Vector2(1850, 645)
+push_speed = 200.0
+push_direction = Vector2(-1, 0)
+
+[node name="LeftConveyor" parent="." unique_id=1493475449 instance=ExtResource("4_4mrxx")]
+position = Vector2(50, 645)
+push_speed = 200.0
+
+[node name="Player1" parent="." unique_id=1342988458 instance=ExtResource("3_player")]
+position = Vector2(220, 665)
+spawn_position = Vector2(220, 665)
+sprite_color = Color(0.55, 0.85, 1, 1)
+bounds_min = Vector2(20, 440)
+bounds_max = Vector2(1000, 800)
+
+[node name="Player2" parent="." unique_id=686472171 instance=ExtResource("6_7r4gi")]
+position = Vector2(1700, 665)
+player_id = 2
+spawn_position = Vector2(1700, 665)
+bounds_min = Vector2(900, 440)
+bounds_max = Vector2(1900, 800)
+
+[node name="Rope" type="Node2D" parent="." unique_id=862969457]
+script = ExtResource("5_rope")
+player_a_path = NodePath("../Player1")
+player_b_path = NodePath("../Player2")
+rest_length_buffer = 25.0
+segment_count = 50
+rest_length = 950.0
+max_length = 980.0
+rope_gravity = Vector2(0, 500)
+spring_constant = 1.0
+
+[node name="Line2D" type="Line2D" parent="Rope" unique_id=425997830]
+width = 6.0
+default_color = Color(0.65, 0.45, 0.25, 1)
+
+[node name="Spawner" type="Node2D" parent="." unique_id=1798129509]
+position = Vector2(953, 665)
+script = ExtResource("6_spawner")
+obstacle_scene = ExtResource("4_obstacle")
+spawn_interval_min = 0.3
+spawn_interval_max = 1.0
+
+[node name="LeftSpawn" type="Marker2D" parent="Spawner" unique_id=964162098]
+position = Vector2(-1103, 13)
+metadata/direction = Vector2(1, 0)
+metadata/speed = 220.0
+
+[node name="RightSpawn" type="Marker2D" parent="Spawner" unique_id=1278216468]
+position = Vector2(1120, 16)
+metadata/direction = Vector2(-1, 0)
+metadata/speed = 220.0
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=2012405975]
+position = Vector2(960, 540)

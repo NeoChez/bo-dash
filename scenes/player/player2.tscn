@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://bl41ekkm0bfd2"]
+
+[ext_resource type="Script" uid="uid://cv85fiaallyce" path="res://scripts/player.gd" id="1_4ftps"]
+[ext_resource type="Texture2D" uid="uid://wah4opci2exf" path="res://assets/player/Babi/1.PNG" id="2_jpx7o"]
+[ext_resource type="Texture2D" uid="uid://bu8if02075kmi" path="res://assets/player/Babi/2.PNG" id="3_4ftps"]
+[ext_resource type="Texture2D" uid="uid://drn8vbt8wadp0" path="res://assets/player/Babi/3.PNG" id="4_x7ksw"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_walk"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_jpx7o")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_4ftps")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_x7ksw")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 8.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_player"]
+radius = 32.0
+
+[node name="Player" type="CharacterBody2D" unique_id=686472171 groups=["player"]]
+collision_layer = 2
+collision_mask = 4
+script = ExtResource("1_4ftps")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1286933321]
+scale = Vector2(0.07, 0.07)
+sprite_frames = SubResource("SpriteFrames_walk")
+animation = &"walk"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=335925223]
+shape = SubResource("CircleShape2D_player")
