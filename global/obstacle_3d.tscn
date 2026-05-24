@@ -3,36 +3,29 @@
 [ext_resource type="Script" uid="uid://oaqowpciif2p" path="res://global/obstacle_3d.gd" id="1_obstacle"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_obstacle"]
-albedo_color = Color(0.8, 0.2, 0.2, 1)
+albedo_color = Color(0.85, 0.2, 0.15, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_duh60"]
 material = SubResource("StandardMaterial3D_obstacle")
-size = Vector3(2, 5, 1)
+size = Vector3(4, 1.5, 3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_vlygw"]
-size = Vector3(2.0627334, 3.6220703, 0.7789062)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_ground_detect"]
-size = Vector3(2, 1, 0.8)
+size = Vector3(4.0, 1.5, 3.0)
 
 [node name="obstacle_3d" type="AnimatableBody3D" unique_id=725112794 groups=["item", "obstacle"]]
 collision_layer = 2
-collision_mask = 7
+collision_mask = 5
 sync_to_physics = false
 script = ExtResource("1_obstacle")
+rope_push_half_x = 2.1
+rope_push_half_y = 0.85
+rope_push_half_z = 1.6
+rope_push_y_offset = 0.75
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1151072468]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4971626, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
 mesh = SubResource("BoxMesh_duh60")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=458946471]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.019388705, 1.8238336, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
 shape = SubResource("BoxShape3D_vlygw")
-
-[node name="GroundDetector" type="Area3D" parent="." unique_id=611526657]
-collision_layer = 0
-collision_mask = 4
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="GroundDetector" unique_id=264521618]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-shape = SubResource("BoxShape3D_ground_detect")

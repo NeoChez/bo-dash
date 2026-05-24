@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://wall_obstacle_1"]
+
+[ext_resource type="Script" uid="uid://oaqowpciif2p" path="res://global/obstacle_3d.gd" id="1_obstacle"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
+albedo_color = Color(0.35, 0.1, 0.75, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall"]
+material = SubResource("StandardMaterial3D_wall")
+size = Vector3(1.5, 2.0, 20.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall"]
+size = Vector3(1.5, 2.0, 20.0)
+
+[node name="obstacle_wall" type="AnimatableBody3D" groups=["item", "obstacle"]]
+collision_layer = 2
+collision_mask = 5
+sync_to_physics = false
+script = ExtResource("1_obstacle")
+is_full_width = true
+rope_push_half_x = 0.85
+rope_push_half_y = 1.1
+rope_push_half_z = 10.5
+rope_push_y_offset = 1.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+mesh = SubResource("BoxMesh_wall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+shape = SubResource("BoxShape3D_wall")
