@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://obstacle_sphere_bo"]
+
+[ext_resource type="Script" uid="uid://oaqowpciif2p" path="res://global/obstacle_3d.gd" id="1_obstacle"]
+
+[sub_resource type="StandardMaterial3D" id="mat_sphere"]
+albedo_color = Color(0.48, 0.48, 0.48, 1)
+roughness = 0.85
+
+[sub_resource type="SphereMesh" id="mesh_sphere"]
+material = SubResource("mat_sphere")
+radius = 2.0
+height = 4.0
+
+[sub_resource type="SphereShape3D" id="shape_sphere"]
+radius = 2.0
+
+[node name="obstacle_sphere" type="AnimatableBody3D" groups=["item", "obstacle"]]
+collision_layer = 2
+collision_mask = 5
+sync_to_physics = false
+script = ExtResource("1_obstacle")
+rope_push_half_x = 2.1
+rope_push_half_y = 2.1
+rope_push_half_z = 2.1
+rope_push_y_offset = 2.0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
+mesh = SubResource("mesh_sphere")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
+shape = SubResource("shape_sphere")

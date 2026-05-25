@@ -8,10 +8,11 @@ extends CharacterBody3D
 @export var action_down: String = "ui_down"
 @export var action_jump: String = "ui_accept"
 @export var action_dash: String = "p1_dash"
+@export var action_skill: String = "p1_skill"
 
 
-const SPEED = 10
-const JUMP_VELOCITY = 5.0
+const SPEED = 15
+const JUMP_VELOCITY = 10.0
 const KNOCKBACK_FORCE = 0
 const DASH_SPEED: float = 22.0
 const DASH_COOLDOWN: float = 0.7
@@ -19,6 +20,7 @@ const DASH_COOLDOWN: float = 0.7
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var is_alive = true
 var can_move = true
+var match_active = true
 var spawn_position: Vector3
 var rope_pull: Vector3 = Vector3.ZERO
 @export_range(0.0, 1.0) var rope_resist_factor: float = 0.65
@@ -32,8 +34,8 @@ var slow_end_time: float = 0.0
 var yank_end_time: float = 0.0
 var yank_strength: float = 0.0
 var yank_source: Node3D = null
-var carry_velocity: Vector3 = Vector3.ZERO
 var _dash_timer: float = 0.0
+var _rope_constraint_pull: Vector3 = Vector3.ZERO
 
 
 @onready var animated_sprite = $AnimatedSprite3D
@@ -42,7 +44,7 @@ func _ready():
 	spawn_position = global_position
 
 func _physics_process(delta: float) -> void:
-	if not is_alive or not can_move:
+	if not match_active or not is_alive or not can_move:
 		return
 	
 	# Terapkan gravitasi
@@ -58,6 +60,10 @@ func _physics_process(delta: float) -> void:
 		_dash_timer -= delta
 	if Input.is_action_just_pressed(action_dash) and _dash_timer <= 0.0:
 		_do_dash()
+
+	# Handle skill use
+	if Input.is_action_just_pressed(action_skill):
+		get_tree().call_group("match_controller", "use_skill", player_id)
 
 	# Dapatkan input pergerakan 8 arah menggunakan variabel export
 	var input_dir = Input.get_vector(action_left, action_right, action_up, action_down)
@@ -88,11 +94,12 @@ func _physics_process(delta: float) -> void:
 		velocity.x += rope_pull.x
 		velocity.z += rope_pull.z
 		rope_pull = Vector3.ZERO
+	if _rope_constraint_pull != Vector3.ZERO:
+		velocity.x += _rope_constraint_pull.x
+		velocity.z += _rope_constraint_pull.z
+		_rope_constraint_pull = Vector3.ZERO
 
 	_apply_yank_force(delta)
-
-	if carry_velocity != Vector3.ZERO:
-		velocity += carry_velocity
 	
 	move_and_slide()
 	
@@ -100,8 +107,6 @@ func _physics_process(delta: float) -> void:
 	_check_collisions()
 
 func _check_collisions():
-	var best_carry = Vector3.ZERO
-	var best_len = 0.0
 	for i in range(get_slide_collision_count()):
 		var collision = get_slide_collision(i)
 		if collision:
@@ -113,15 +118,6 @@ func _check_collisions():
 				
 				velocity.x += push_dir.x * KNOCKBACK_FORCE
 				velocity.z += push_dir.z * KNOCKBACK_FORCE
-
-				if collider.has_method("get_current_velocity"):
-					var candidate = collider.get_current_velocity()
-					var candidate_len = candidate.length()
-					if candidate_len > best_len:
-						best_len = candidate_len
-						best_carry = candidate
-
-	carry_velocity = best_carry
 
 func _do_dash() -> void:
 	var input_dir := Input.get_vector(action_left, action_right, action_up, action_down)
@@ -147,6 +143,16 @@ func apply_rope_pull(pull: Vector3) -> void:
 				var counter: float = clamp(-move_dir.dot(pull_dir), 0.0, 1.0)
 				pull = pull * (1.0 - counter * rope_resist_factor)
 	rope_pull += pull
+
+func apply_rope_constraint(pull: Vector3) -> void:
+	_rope_constraint_pull += pull
+
+func get_move_intent_world() -> Vector3:
+	var input_dir := Input.get_vector(action_left, action_right, action_up, action_down)
+	if input_dir == Vector2.ZERO:
+		return Vector3.ZERO
+	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	return direction * SPEED * _get_speed_multiplier()
 
 func apply_powerup(powerup_type: String, duration: float, magnitude: float) -> void:
 	match powerup_type:
@@ -231,25 +237,29 @@ func fall_to_death():
 	if not is_alive:
 		return
 	print("Player jatuh! Respawn dalam 3 detik...")
+	_notify_match_player_down()
 	is_alive = false
 	can_move = false
 	visible = false
 	velocity = Vector3.ZERO
 	
 	await get_tree().create_timer(3.0).timeout
-	respawn()
+	if match_active:
+		respawn()
 
 func die():
 	if not is_alive:
 		return
 	print("Player mati! Respawn dalam 3 detik...")
+	_notify_match_player_down()
 	is_alive = false
 	can_move = false
 	visible = false
 	velocity = Vector3.ZERO
 	
 	await get_tree().create_timer(3.0).timeout
-	respawn()
+	if match_active:
+		respawn()
 
 func respawn():
 	global_position = spawn_position
@@ -258,3 +268,13 @@ func respawn():
 	can_move = true
 	visible = true
 	print("Player respawn!")
+
+func set_match_active(active: bool) -> void:
+	match_active = active
+	can_move = active and is_alive
+	if not active:
+		velocity = Vector3.ZERO
+
+
+func _notify_match_player_down() -> void:
+	get_tree().call_group("match_controller", "on_player_down", player_id)

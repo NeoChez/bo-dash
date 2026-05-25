@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://skill_item_bodash"]
+
+[ext_resource type="Script" path="res://scripts/skill_item_3d.gd" id="1_skill"]
+
+[sub_resource type="TorusMesh" id="mesh_skill"]
+inner_radius = 0.35
+outer_radius = 0.85
+
+[sub_resource type="BoxShape3D" id="shape_skill"]
+size = Vector3(2.0, 0.7, 2.0)
+
+[node name="SkillItem" type="Area3D" groups=["item"]]
+script = ExtResource("1_skill")
+bob_height = 0.08
+bob_speed = 3.0
+
+[node name="Visual" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+mesh = SubResource("mesh_skill")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+shape = SubResource("shape_skill")

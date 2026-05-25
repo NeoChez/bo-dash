@@ -4,11 +4,20 @@ extends Node3D
 @export var player_b_path: NodePath
 
 @export_category("Rope Physics")
-@export var rope_max_length: float = 14.0
+@export var rope_max_length: float = 7.5
 ## Seberapa kuat tali menolak peregangan kecepatan (0 = tidak ada, 1 = sempurna inelastis)
 @export_range(0.0, 1.0) var constraint_stiffness: float = 0.92
-## Spring mikro untuk koreksi drift kecil (hanya aktif saat excess < 1 unit)
-@export var micro_spring_strength: float = 15.0
+@export var spring_strength: float = 9.0
+@export var max_spring_excess: float = 4.0
+@export var passive_pull_bonus: float = 0.35
+@export var tug_intent_threshold: float = 2.0
+@export var tug_speed_lock_tolerance: float = 1.25
+@export var tug_winner_bias: float = 0.65
+@export var hard_limit_strength: float = 24.0
+@export var hard_limit_max_excess: float = 2.0
+@export var equal_walk_lock_threshold: float = 1.0
+@export var equal_walk_speed_tolerance: float = 1.6
+@export var tug_lock_grace_duration: float = 0.18
 ## Durasi bebas tension setelah respawn / game start (detik)
 @export var grace_duration: float = 2.0
 @export var segment_iterations: int = 16
@@ -36,9 +45,11 @@ var _rope_mat: StandardMaterial3D
 var _grace_timer: float = 0.0
 var _a_was_alive: bool = true
 var _b_was_alive: bool = true
+var _tug_lock_timer: float = 0.0
 
 
 func _ready() -> void:
+	add_to_group("player_rope")
 	player_a = get_node_or_null(player_a_path) as CharacterBody3D
 	player_b = get_node_or_null(player_b_path) as CharacterBody3D
 	segment_rest_length = rope_max_length / float(segment_count)
@@ -172,38 +183,107 @@ func _constrain(a_pos: Vector3, b_pos: Vector3) -> void:
 
 
 func _apply_player_tension(a_pos: Vector3, b_pos: Vector3, delta: float) -> void:
-	# Hitung jarak horizontal saja (Y tidak relevan untuk tension)
 	var a_flat := Vector3(a_pos.x, 0.0, a_pos.z)
 	var b_flat := Vector3(b_pos.x, 0.0, b_pos.z)
-	var dist   := a_flat.distance_to(b_flat)
+	var dist := a_flat.distance_to(b_flat)
 	if dist < 0.001 or dist <= rope_max_length:
 		return
 
-	var excess := dist - rope_max_length
-	var dir    := (b_flat - a_flat) / dist
+	var dir: Vector3 = (b_flat - a_flat) / dist
+	var excess: float = minf(dist - rope_max_length, max_spring_excess)
+	var hard_excess: float = minf(dist - rope_max_length, hard_limit_max_excess)
+	var a_outward_intent: float = _get_outward_intent(player_a, -dir)
+	var b_outward_intent: float = _get_outward_intent(player_b, dir)
+	var a_outward_speed: float = _get_outward_speed(player_a, -dir)
+	var b_outward_speed: float = _get_outward_speed(player_b, dir)
+	var both_walking_outward: bool = a_outward_intent >= equal_walk_lock_threshold and b_outward_intent >= equal_walk_lock_threshold
+	var speed_gap: float = absf(a_outward_speed - b_outward_speed)
+	var should_lock_walk: bool = both_walking_outward and speed_gap <= equal_walk_speed_tolerance
+	if should_lock_walk:
+		_tug_lock_timer = tug_lock_grace_duration
+	elif _tug_lock_timer > 0.0:
+		_tug_lock_timer = maxf(0.0, _tug_lock_timer - delta)
 
-	# ── Velocity constraint (impulse — tanpa × delta) ─────────────────────────
-	# Tali inextensible menghilangkan kecepatan pemisahan secara instan.
-	# Ini yang membuat feel tug-of-war terasa nyata.
-	#
-	# sep_vel > 0  →  kedua player sedang memisah  →  tali kencang & menarik
-	# sep_vel ≤ 0  →  player mendekati satu sama lain  →  tali kendor, bebas
+	if should_lock_walk or _tug_lock_timer > 0.0:
+		_cancel_horizontal_motion(player_a)
+		_cancel_horizontal_motion(player_b)
+		_apply_hard_limit_correction(dir, hard_excess, delta)
+		return
+
+	if a_outward_intent >= tug_intent_threshold and b_outward_intent >= tug_intent_threshold:
+		if speed_gap <= tug_speed_lock_tolerance:
+			_cancel_horizontal_motion(player_a)
+			_cancel_horizontal_motion(player_b)
+			_apply_hard_limit_correction(dir, hard_excess, delta)
+			return
+
 	var vel_a_proj := player_a.velocity.dot(dir)
 	var vel_b_proj := player_b.velocity.dot(dir)
-	var sep_vel    := vel_b_proj - vel_a_proj
-
+	var sep_vel := vel_b_proj - vel_a_proj
 	if sep_vel > 0.0:
-		var impulse := sep_vel * 0.5 * constraint_stiffness
+		var impulse: float = sep_vel * 0.5 * constraint_stiffness
 		player_a.apply_rope_pull(dir * impulse)
 		player_b.apply_rope_pull(-dir * impulse)
 
-	# ── Micro-spring (× delta) — hanya untuk koreksi drift kecil ─────────────
-	# Diaktifkan hanya saat excess sangat kecil (< 1 unit) agar tidak
-	# menyebabkan force besar saat player jauh (mis. setelah respawn).
-	if excess < 1.0:
-		var spring := dir * excess * micro_spring_strength * delta
-		player_a.apply_rope_pull(spring)
-		player_b.apply_rope_pull(-spring)
+	var spring_force: Vector3 = dir * excess * spring_strength * delta
+	var pull_factor_a: float = _get_pull_factor(player_a)
+	var pull_factor_b: float = _get_pull_factor(player_b)
+	if a_outward_speed > b_outward_speed + tug_speed_lock_tolerance:
+		pull_factor_a = max(0.2, pull_factor_a - tug_winner_bias)
+		pull_factor_b += tug_winner_bias
+	elif b_outward_speed > a_outward_speed + tug_speed_lock_tolerance:
+		pull_factor_b = max(0.2, pull_factor_b - tug_winner_bias)
+		pull_factor_a += tug_winner_bias
+
+	player_a.apply_rope_pull(spring_force * pull_factor_a)
+	player_b.apply_rope_pull(-spring_force * pull_factor_b)
+	_apply_hard_limit_correction(dir, hard_excess, delta)
+
+
+func _get_pull_factor(player: CharacterBody3D) -> float:
+	if player == null or not player.has_method("get_move_intent_world"):
+		return 1.0
+	var intent: Vector3 = player.get_move_intent_world()
+	if intent == Vector3.ZERO:
+		return 1.0 + passive_pull_bonus
+	return 1.0
+
+
+func _get_outward_intent(player: CharacterBody3D, outward_dir: Vector3) -> float:
+	if player == null or not player.has_method("get_move_intent_world"):
+		return 0.0
+	var intent: Vector3 = player.get_move_intent_world()
+	if intent == Vector3.ZERO:
+		return 0.0
+	return maxf(0.0, intent.dot(outward_dir))
+
+
+func _get_outward_speed(player: CharacterBody3D, outward_dir: Vector3) -> float:
+	if player == null:
+		return 0.0
+	return maxf(0.0, player.velocity.dot(outward_dir))
+
+
+func _cancel_horizontal_motion(player: CharacterBody3D) -> void:
+	if player == null:
+		return
+	var flat_velocity := Vector3(player.velocity.x, 0.0, player.velocity.z)
+	if flat_velocity.length_squared() <= 0.0001:
+		return
+	if player.has_method("apply_rope_constraint"):
+		player.apply_rope_constraint(-flat_velocity)
+
+
+
+
+func _apply_hard_limit_correction(dir: Vector3, excess: float, delta: float) -> void:
+	if excess <= 0.0:
+		return
+	var correction: Vector3 = dir * excess * hard_limit_strength * delta
+	if player_a.has_method("apply_rope_constraint"):
+		player_a.apply_rope_constraint(correction)
+	if player_b.has_method("apply_rope_constraint"):
+		player_b.apply_rope_constraint(-correction)
 
 
 func _push_from_bodies() -> void:
