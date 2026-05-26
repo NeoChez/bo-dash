@@ -83,14 +83,27 @@ func _ready():
 			
 		# 3. Dynamic GLB loading and calibrated dimensions applying
 		var model_scene: PackedScene
-		if char_name == "hamm":
-			model_scene = load("res://assets/player/kingdom_hearts_iii_-_hamm.glb")
-			rex_model_scale = Vector3(20.0, 20.0, 20.0) # Hamm scale calibration
-			rex_model_offset = Vector3(0.0, 0.0, 0.0)
-		else:
-			model_scene = load("res://assets/player/kingdom_hearts_iii_-_rex.glb")
-			rex_model_scale = Vector3(25.0, 25.0, 25.0) # Rex scale calibration
-			rex_model_offset = Vector3(0.0, 0.0, 0.0)
+		match char_name:
+			"hamm":
+				model_scene = load("res://assets/player/kingdom_hearts_iii_-_hamm.glb")
+				rex_model_scale = Vector3(20.0, 20.0, 20.0) # Hamm scale calibration
+				rex_model_offset = Vector3(0.0, 0.0, 0.0)
+			"alien":
+				model_scene = load("res://assets/player/kingdom_hearts_iii_-_alienlgm.glb")
+				rex_model_scale = Vector3(22.0, 22.0, 22.0) # Alien uniform scale calibration (fixes flat/gepeng issue)
+				rex_model_offset = Vector3(0.0, 0.0, 0.0)
+			"wheezy":
+				model_scene = load("res://assets/player/wii_-_toy_story_3_-_wheezy.glb")
+				rex_model_scale = Vector3(0.35, 0.35, 0.35) # Wheezy scaled up slightly as requested
+				rex_model_offset = Vector3(0.0, 0.0, 0.0)
+			"slinky":
+				model_scene = load("res://assets/player/wii_-_toy_story_3_-_slinky_dog.glb")
+				rex_model_scale = Vector3(0.22, 0.22, 0.22) # Slinky Dog scaled down to fit nicely on conveyor belt
+				rex_model_offset = Vector3(0.0, 0.0, 0.0)
+			_:
+				model_scene = load("res://assets/player/kingdom_hearts_iii_-_rex.glb")
+				rex_model_scale = Vector3(25.0, 25.0, 25.0) # Rex scale calibration
+				rex_model_offset = Vector3(0.0, 0.0, 0.0)
 			
 		if model_scene:
 			var new_model = model_scene.instantiate()
