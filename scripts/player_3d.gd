@@ -9,10 +9,10 @@ extends CharacterBody3D
 @export var action_jump: String = "ui_accept"
 @export var action_dash: String = "p1_dash"
 @export var action_skill: String = "p1_skill"
-
+@export var jump_velocity: float = 16.0
+@export var gravity_scale: float = 3.2
 
 const SPEED = 15
-const JUMP_VELOCITY = 10.0
 const KNOCKBACK_FORCE = 0
 const DASH_SPEED: float = 22.0
 const DASH_COOLDOWN: float = 0.7
@@ -39,9 +39,65 @@ var _rope_constraint_pull: Vector3 = Vector3.ZERO
 
 
 @onready var animated_sprite = $AnimatedSprite3D
+@onready var visuals = $Visuals
+
+# 3D Visuals & Procedural Animations
+@export_group("3D Visuals & Animation")
+@export var model_scale_factor: float = 1.0
+@export var rex_model_scale: Vector3 = Vector3(25.0, 25.0, 25.0)
+@export var rex_model_offset: Vector3 = Vector3(0.0, 0.0, 0.0)
+@export var rotation_speed: float = 18.0
+@export var base_y_offset: float = 0.53
+@export var enable_procedural_animations: bool = true
+
+var _was_on_floor: bool = true
+var _anim_time: float = 0.0
+var _squash_timer: float = 0.0
+var _landing_recoil_time: float = 0.0
+var _is_recoil_active: bool = false
 
 func _ready():
 	spawn_position = global_position
+	
+	# Map action_jump to action_up (W for Player 2, Up Arrow for Player 1)
+	action_jump = action_up
+	
+	# Aligns Visuals container with the base center of the CapsuleShape3D
+	if visuals:
+		visuals.position = Vector3(0.82488, base_y_offset, 0.09399593)
+		
+		# 1. Determine selected character (persistent autoload fallback is Rex)
+		var char_name = "rex"
+		var global_settings = get_node_or_null("/root/GlobalSettings")
+		if global_settings:
+			if player_id == 1:
+				char_name = global_settings.player_1_character
+			else:
+				char_name = global_settings.player_2_character
+			
+		# 2. Remove default placeholder model
+		var old_model = visuals.get_node_or_null("RexModel")
+		if old_model:
+			visuals.remove_child(old_model)
+			old_model.queue_free()
+			
+		# 3. Dynamic GLB loading and calibrated dimensions applying
+		var model_scene: PackedScene
+		if char_name == "hamm":
+			model_scene = load("res://assets/player/kingdom_hearts_iii_-_hamm.glb")
+			rex_model_scale = Vector3(20.0, 20.0, 20.0) # Hamm scale calibration
+			rex_model_offset = Vector3(0.0, 0.0, 0.0)
+		else:
+			model_scene = load("res://assets/player/kingdom_hearts_iii_-_rex.glb")
+			rex_model_scale = Vector3(25.0, 25.0, 25.0) # Rex scale calibration
+			rex_model_offset = Vector3(0.0, 0.0, 0.0)
+			
+		if model_scene:
+			var new_model = model_scene.instantiate()
+			new_model.name = "RexModel" # Keep name to ensure animation lookup works seamlessly
+			visuals.add_child(new_model)
+			new_model.scale = rex_model_scale
+			new_model.position = rex_model_offset
 
 func _physics_process(delta: float) -> void:
 	if not match_active or not is_alive or not can_move:
@@ -49,11 +105,11 @@ func _physics_process(delta: float) -> void:
 	
 	# Terapkan gravitasi
 	if not is_on_floor():
-		velocity.y -= gravity * delta
+		velocity.y -= gravity * gravity_scale * delta
 	
 	# Handle jump (Menggunakan variabel action_jump)
 	if Input.is_action_just_pressed(action_jump) and is_on_floor():
-		velocity.y = JUMP_VELOCITY
+		velocity.y = jump_velocity
 
 	# Handle dash
 	if _dash_timer > 0.0:
@@ -101,10 +157,120 @@ func _physics_process(delta: float) -> void:
 
 	_apply_yank_force(delta)
 	
+	var was_on_floor_before = is_on_floor()
 	move_and_slide()
+	var just_landed = is_on_floor() and not was_on_floor_before
+	
+	_update_3d_animations(delta, input_dir, direction, was_on_floor_before, just_landed)
 	
 	# Cek tabrakan
 	_check_collisions()
+
+func _update_3d_animations(delta: float, input_dir: Vector2, direction: Vector3, was_on_floor_before: bool, just_landed: bool) -> void:
+	if not visuals:
+		return
+		
+	# Pastikan base scale model benar
+	var base_scale = Vector3(model_scale_factor, model_scale_factor, model_scale_factor)
+	
+	# 1. Rotasi model ke arah pergerakan (Y-axis)
+	var horiz_vel = Vector2(velocity.x, velocity.z)
+	if horiz_vel.length() > 0.5:
+		# Gunakan atan2(x, z) untuk menghitung arah hadap di plane X-Z
+		var target_angle = atan2(velocity.x, velocity.z)
+		visuals.rotation.y = rotate_toward(visuals.rotation.y, target_angle, delta * rotation_speed)
+	
+	if not enable_procedural_animations:
+		visuals.scale = base_scale
+		visuals.position.y = base_y_offset
+		return
+
+	# 2. Trigger landing spring recoil
+	if just_landed:
+		_is_recoil_active = true
+		_landing_recoil_time = 0.0
+	
+	# 3. Hitung posisi Y, Rotasi X/Z (Waddle/Recoil), dan Skala (Squash & Stretch)
+	if is_on_floor():
+		# Reset rotasi X ke normal secara bertahap
+		visuals.rotation.x = rotate_toward(visuals.rotation.x, 0.0, delta * 12.0)
+		
+		# Jika sedang membal setelah mendarat
+		if _is_recoil_active:
+			_landing_recoil_time += delta * 15.0 # Kecepatan pantulan pegas
+			if _landing_recoil_time > PI * 2.0:
+				_is_recoil_active = false
+				visuals.scale = base_scale
+				visuals.position.y = base_y_offset
+			else:
+				# Persamaan pegas: Sinus teredam secara eksponensial (Boing!)
+				var amp = exp(-_landing_recoil_time * 0.6) * sin(_landing_recoil_time)
+				var squash_y = 1.0 - amp * 0.40  # Amplitudo squash Y hingga 40%
+				var squash_xz = 1.0 + amp * 0.18 # Amplitudo stretch X/Z
+				visuals.scale.y = base_scale.y * squash_y
+				visuals.scale.x = base_scale.x * squash_xz
+				visuals.scale.z = base_scale.z * squash_xz
+				
+				# Kemiringan sedikit ke depan saat pertama menyentuh tanah, lalu membal balik
+				visuals.rotation.x = rotate_toward(visuals.rotation.x, amp * 0.12, delta * 15.0)
+				visuals.position.y = base_y_offset - amp * 0.16
+				
+		elif horiz_vel.length() > 0.5:
+			# Berjalan (Waddle walk)
+			# Kecepatan animasi berskala dengan pergerakan player
+			var speed_factor = clamp(horiz_vel.length() / SPEED, 0.3, 1.8)
+			_anim_time += delta * speed_factor * 10.0
+			
+			# Kemiringan badan ke samping kiri-kanan (Waddle)
+			visuals.rotation.z = rotate_toward(visuals.rotation.z, sin(_anim_time) * 0.12, delta * 12.0)
+			
+			# Bobbing atas-bawah (naik sedikit saat waddle)
+			visuals.position.y = lerp(visuals.position.y, base_y_offset + abs(sin(_anim_time)) * 0.08, delta * 15.0)
+			
+			# Sedikit pitching maju mundur saat berlari
+			visuals.rotation.x = rotate_toward(visuals.rotation.x, abs(cos(_anim_time)) * 0.03, delta * 8.0)
+			
+			# Kembalikan skala ke normal
+			visuals.scale = visuals.scale.lerp(base_scale, delta * 10.0)
+		else:
+			# Idle (Breathe effect)
+			_anim_time += delta * 2.0
+			visuals.rotation.z = rotate_toward(visuals.rotation.z, 0.0, delta * 10.0)
+			visuals.position.y = lerp(visuals.position.y, base_y_offset, delta * 10.0)
+			
+			# Efek bernafas (breathe) lembut pada skala
+			var breathe_y = 1.0 + sin(_anim_time) * 0.015
+			var breathe_xz = 1.0 - sin(_anim_time) * 0.007
+			var target_scale = Vector3(base_scale.x * breathe_xz, base_scale.y * breathe_y, base_scale.z * breathe_xz)
+			visuals.scale = visuals.scale.lerp(target_scale, delta * 5.0)
+			
+	else:
+		# Sedang melompat atau jatuh (Di udara)
+		_is_recoil_active = false # matikan recoil saat lepas landas
+		
+		# Animasi kepak sayap/ekor bergoyang di udara agar tidak kaku
+		_anim_time += delta * 8.0
+		visuals.rotation.z = rotate_toward(visuals.rotation.z, sin(_anim_time) * 0.06, delta * 8.0)
+		visuals.position.y = lerp(visuals.position.y, base_y_offset, delta * 10.0)
+		
+		if velocity.y > 0.1:
+			# Naik (Melompat / Stretch Y Kuat untuk pelepasan energi)
+			var stretch_y = 1.0 + clamp(velocity.y / jump_velocity, 0.0, 1.0) * 0.42
+			var compress_xz = 1.0 - clamp(velocity.y / jump_velocity, 0.0, 1.0) * 0.20
+			var target_scale = Vector3(base_scale.x * compress_xz, base_scale.y * stretch_y, base_scale.z * compress_xz)
+			visuals.scale = visuals.scale.lerp(target_scale, delta * 15.0)
+			
+			# Mendongak ke atas saat melompat terbang naik
+			visuals.rotation.x = rotate_toward(visuals.rotation.x, -0.28, delta * 12.0)
+		elif velocity.y < -0.1:
+			# Turun (Jatuh / Bersiap mendarat)
+			var stretch_xz = 1.0 + clamp(abs(velocity.y) / jump_velocity, 0.0, 1.0) * 0.16
+			var compress_y = 1.0 - clamp(abs(velocity.y) / jump_velocity, 0.0, 1.0) * 0.10
+			var target_scale = Vector3(base_scale.x * stretch_xz, base_scale.y * compress_y, base_scale.z * stretch_xz)
+			visuals.scale = visuals.scale.lerp(target_scale, delta * 10.0)
+			
+			# Condong maju ke bawah melihat pendaratan
+			visuals.rotation.x = rotate_toward(visuals.rotation.x, 0.35, delta * 10.0)
 
 func _check_collisions():
 	for i in range(get_slide_collision_count()):

@@ -1,10 +1,11 @@
-[gd_scene load_steps=13 format=3 uid="uid://clbs4ut175fn5"]
+[gd_scene load_steps=14 format=3 uid="uid://clbs4ut175fn5"]
 
 [ext_resource type="Script" uid="uid://bbqkd0vwvd3ih" path="res://scripts/player_3d.gd" id="1_h6syq"]
 [ext_resource type="Texture2D" uid="uid://c1dftshldf4w3" path="res://assets/player/1.PNG" id="2_v2miy"]
 [ext_resource type="Texture2D" uid="uid://cyoojbt6riva4" path="res://assets/player/2.PNG" id="3_d5dr7"]
 [ext_resource type="Texture2D" uid="uid://b4bnuofbtxiat" path="res://assets/player/3.PNG" id="4_toylo"]
 [ext_resource type="Texture2D" uid="uid://djat880cmtnka" path="res://assets/player/4.PNG" id="5_tb4ck"]
+[ext_resource type="PackedScene" uid="uid://dggg4ombyv4f5" path="res://assets/player/kingdom_hearts_iii_-_rex.glb" id="6_rex"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ouxva"]
 radius = 0.5288086
@@ -65,6 +66,7 @@ shape = SubResource("CapsuleShape3D_ouxva")
 
 [node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="."]
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 2.1472855, 0)
+visible = false
 sprite_frames = SubResource("SpriteFrames_vlpqo")
 animation = &"walk"
 frame_progress = 0.23945878
@@ -72,3 +74,9 @@ frame_progress = 0.23945878
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.537221, 3.44632, 0)
 shape = SubResource("SphereShape3D_p47bc")
+
+[node name="Visuals" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.82488, 0.53, 0.09399593)
+
+[node name="RexModel" parent="Visuals" instance=ExtResource("6_rex")]
+transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, 0)
