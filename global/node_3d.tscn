@@ -88,10 +88,10 @@ size = Vector3(100, 2, 20)
 size = Vector3(100, 1.6403809, 20)
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
-sky_top_color = Color(0.5, 0.7, 0.9, 1)
-sky_horizon_color = Color(0.8, 0.9, 1, 1)
-ground_bottom_color = Color(0.2, 0.2, 0.3, 1)
-ground_horizon_color = Color(0.5, 0.6, 0.7, 1)
+sky_top_color = Color(0.28, 0.54, 0.88, 1)
+sky_horizon_color = Color(0.52, 0.76, 1.0, 1)
+ground_bottom_color = Color(0.22, 0.32, 0.48, 1)
+ground_horizon_color = Color(0.38, 0.6, 0.85, 1)
 
 [sub_resource type="Sky" id="Sky_sky"]
 sky_material = SubResource("ProceduralSkyMaterial_sky")
@@ -520,3 +520,4 @@ collision_mask = 0
 [node name="CollisionShape3D" type="CollisionShape3D" parent="WallLeft"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.692, 0.074)
 shape = SubResource("BoxShape3D_yw17d")
+
