@@ -87,10 +87,10 @@ func _on_play_pressed() -> void:
 func _on_settings_pressed() -> void:
 	_play_press_anim(settings_btn, func():
 		var dialog = AcceptDialog.new()
-		dialog.title = "Settings"
-		dialog.dialog_text = "Controls:\nPlayer Left (P2): WASD to move, W to jump.\nPlayer Right (P1): Arrow Keys to move, Up Arrow to jump."
+		dialog.title = "HOW TO PLAY"
+		dialog.dialog_text = "=== BO-DASH CONTROLS ===\n\nPLAYER 1\nMove: P (up)  L (left)  ; (down)  ' (right)\nJump: Right Alt   Dash: Right Shift   Skill: Enter\n\nPLAYER 2\nMove: W  A  S  D\nJump: Left Alt   Dash: Left Shift   Skill: Caps Lock"
 		add_child(dialog)
-		dialog.popup_centered(Vector2i(350, 150))
+		dialog.popup_centered(Vector2i(480, 220))
 	)
 
 func _on_exit_pressed() -> void:
