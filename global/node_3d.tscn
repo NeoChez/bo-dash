@@ -5,10 +5,8 @@
 [ext_resource type="PackedScene" uid="uid://clbs4ut175fn5" path="res://scenes/player/player.tscn" id="5_kmy1e"]
 [ext_resource type="PackedScene" uid="uid://dqw1lht300uu3" path="res://assets/conveyor.glb" id="5_yw17d"]
 [ext_resource type="Script" uid="uid://cdswhror157d0" path="res://global/death_area.gd" id="7_gj00n"]
-[ext_resource type="PackedScene" uid="uid://2uwdpea6iavo" path="res://global/conveyor3d_left.tscn" id="8_l633n"]
 [ext_resource type="Script" uid="uid://c4qmujd6nywag" path="res://scripts/player_rope_3d.gd" id="8_rope"]
 [ext_resource type="Script" uid="uid://cw8yk6kn6nmgo" path="res://scripts/match_controller.gd" id="9_match"]
-[ext_resource type="PackedScene" uid="uid://c3uqkeu4wa7kp" path="res://global/conveyor3d_right.tscn" id="9_yw17d"]
 [ext_resource type="Script" uid="uid://b268wyxqn0oxc" path="res://scripts/stage/conveyor_divider.gd" id="9_s8d85"]
 [ext_resource type="Script" uid="uid://ctko058g4f6r0" path="res://scripts/pause_menu.gd" id="10_pause"]
 
@@ -80,12 +78,15 @@ corner_radius_bottom_left = 24
 shadow_color = Color(0, 0, 0, 0.35)
 shadow_size = 10
 
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+size = Vector3(100, 2, 20)
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(88.92154, 1.6403809, 20)
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.28, 0.54, 0.88, 1)
-sky_horizon_color = Color(0.52, 0.76, 1.0, 1)
+sky_horizon_color = Color(0.52, 0.76, 1, 1)
 ground_bottom_color = Color(0.22, 0.32, 0.48, 1)
 ground_horizon_color = Color(0.38, 0.6, 0.85, 1)
 
@@ -397,9 +398,9 @@ collision_layer = 5
 
 [node name="conveyor" parent="Ground2" unique_id=239295526 instance=ExtResource("5_yw17d")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, -16.553692)
+visible = false
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground2" unique_id=931950376]
-visible = false
 mesh = SubResource("BoxMesh_ground")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground2" unique_id=836916938]
@@ -424,6 +425,8 @@ environment = SubResource("Environment_world")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102.85442, 1.602, 0)
 script = ExtResource("2_spawner")
 offset_obstacle3 = Vector3(0, 0, -1)
+offset_obstacle5 = Vector3(0, 2, -2.5)
+offset_obstacle6 = Vector3(0, 2, 2.5)
 move_speed = 10.0
 ground_node = NodePath("../Ground")
 
@@ -431,11 +434,16 @@ ground_node = NodePath("../Ground")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15951538, 0.03716135, 0)
 
 [node name="Spawner_Ground2" type="Node3D" parent="." unique_id=269807295 node_paths=PackedStringArray("ground_node") groups=["spawner"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90.912415, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -101.0187, 0.12945175, 0)
 script = ExtResource("2_spawner")
+offset_obstacle1 = Vector3(0, 10, 0)
+offset_obstacle3 = Vector3(0, 0, -1.5)
+offset_obstacle5 = Vector3(0, 2, -2.5)
+offset_obstacle6 = Vector3(0, 2, 2.5)
 move_speed = 10.0
 spawn_interval = 6.0
 arah_x = 1
+ground_node = NodePath("../Ground2")
 
 [node name="Lane" type="Marker3D" parent="Spawner_Ground2" unique_id=1440972763]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15951538, 0.03716135, 0)
