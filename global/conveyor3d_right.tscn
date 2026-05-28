@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3 uid="uid://c3uqkeu4wa7kp"]
+
+[ext_resource type="Script" uid="uid://0nia4bme67b6" path="res://global/conveyor.gd" id="1_kmquc"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
+albedo_color = Color(0.25, 0.25, 0.3, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+material = SubResource("StandardMaterial3D_ground")
+size = Vector3(100, 2, 20)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(100, 1.6403809, 20)
+
+[node name="Ground" type="StaticBody3D" groups=["ground"]]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_kmquc")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_ground")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32019043, 0)
+shape = SubResource("BoxShape3D_ground")

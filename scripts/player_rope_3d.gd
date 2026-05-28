@@ -4,25 +4,24 @@ extends Node3D
 @export var player_b_path: NodePath
 
 @export_category("Rope Physics")
-@export var rope_max_length: float = 7.5
-## Seberapa kuat tali menolak peregangan kecepatan (0 = tidak ada, 1 = sempurna inelastis)
-@export_range(0.0, 1.0) var constraint_stiffness: float = 0.92
-@export var spring_strength: float = 9.0
-@export var max_spring_excess: float = 4.0
-@export var passive_pull_bonus: float = 0.35
-@export var tug_intent_threshold: float = 2.0
-@export var tug_speed_lock_tolerance: float = 1.25
-@export var tug_winner_bias: float = 0.65
-@export var hard_limit_strength: float = 24.0
-@export var hard_limit_max_excess: float = 2.0
-@export var equal_walk_lock_threshold: float = 1.0
-@export var equal_walk_speed_tolerance: float = 1.6
-@export var tug_lock_grace_duration: float = 0.18
-## Durasi bebas tension setelah respawn / game start (detik)
+## Must match actual arena scale. Players start ~60 units apart; belt pushes them in.
+## Rope is slack when dist < rope_max_length, tension begins once they pull apart past this.
+@export var rope_max_length: float = 25.0
+## Primary spring: gentle pull per unit of stretch. Tuned to match 2D prototype feel.
+@export var spring_strength: float = 8.0
+## Extra units past rope_max_length before the emergency correction kicks in.
+@export var hard_limit_extra: float = 5.0
+## Damps SEPARATING velocity only — gives rope pull some punch without fighting closing motion.
+@export var damping_strength: float = 2.0
+## Force multiplier applied when either player is actively dashing — the Kinetic Yank.
+@export var dash_yank_multiplier: float = 5.0
+## Grace period after respawn/game-start before tension is applied (seconds).
 @export var grace_duration: float = 2.0
-@export var segment_iterations: int = 16
-@export var gravity_scale: float = 9.8
-@export var velocity_damping: float = 0.985
+## Seconds after grace ends to ramp spring from 0 to full — prevents snap-to-center on respawn.
+@export var tension_ramp_duration: float = 3.0
+@export var segment_iterations: int = 20
+@export var gravity_scale: float = 70.0
+@export var velocity_damping: float = 0.98
 
 @export_category("Rope Appearance")
 @export var segment_count: int = 16
@@ -41,11 +40,10 @@ var segment_meshes: Array[MeshInstance3D] = []
 var segment_rest_length: float
 var _rope_mat: StandardMaterial3D
 
-# Grace period & death tracking
 var _grace_timer: float = 0.0
+var _tension_ramp: float = 0.0
 var _a_was_alive: bool = true
 var _b_was_alive: bool = true
-var _tug_lock_timer: float = 0.0
 
 
 func _ready() -> void:
@@ -54,6 +52,7 @@ func _ready() -> void:
 	player_b = get_node_or_null(player_b_path) as CharacterBody3D
 	segment_rest_length = rope_max_length / float(segment_count)
 	_grace_timer = grace_duration
+	_tension_ramp = 0.0
 	_init_rope()
 	_build_segment_meshes()
 
@@ -83,7 +82,6 @@ func _build_segment_meshes() -> void:
 	_rope_mat.metallic = 0.0
 	_rope_mat.emission_enabled = true
 	_rope_mat.emission = Color(0, 0, 0)
-	var mat := _rope_mat
 
 	for i in range(segment_count):
 		var mi := MeshInstance3D.new()
@@ -96,7 +94,7 @@ func _build_segment_meshes() -> void:
 		cyl.cap_top = false
 		cyl.cap_bottom = false
 		mi.mesh = cyl
-		mi.material_override = mat
+		mi.material_override = _rope_mat
 		add_child(mi)
 		segment_meshes.append(mi)
 
@@ -108,22 +106,27 @@ func _physics_process(delta: float) -> void:
 	var a_pos := _attach_pos(player_a, player_a_offset, Vector3.ZERO)
 	var b_pos := _attach_pos(player_b, player_b_offset, Vector3.ZERO)
 
-	# Baca status hidup player — property is_alive ada di player_3d.gd
 	var a_alive: bool = player_a.get("is_alive") != false
 	var b_alive: bool = player_b.get("is_alive") != false
 
-	# Deteksi respawn: player baru kembali hidup → mulai grace period
 	if (not _a_was_alive and a_alive) or (not _b_was_alive and b_alive):
 		_grace_timer = grace_duration
+		_tension_ramp = 0.0
 		_reinit_to(a_pos, b_pos)
 	_a_was_alive = a_alive
 	_b_was_alive = b_alive
 
-	# Tension diblokir selama: (1) salah satu player mati, (2) grace period aktif
+	if not (a_alive and b_alive):
+		for mi in segment_meshes:
+			mi.visible = false
+		return
+
 	var tension_ok := a_alive and b_alive and _grace_timer <= 0.0
 
 	if _grace_timer > 0.0:
 		_grace_timer -= delta
+	elif _tension_ramp < 1.0:
+		_tension_ramp = minf(_tension_ramp + delta / tension_ramp_duration, 1.0)
 
 	if not _rope_is_valid():
 		_reinit_to(a_pos, b_pos)
@@ -133,6 +136,7 @@ func _physics_process(delta: float) -> void:
 	for _i in range(segment_iterations):
 		_constrain(a_pos, b_pos)
 		_push_from_bodies()
+	_push_from_ground()
 
 	if tension_ok:
 		_apply_player_tension(a_pos, b_pos, delta)
@@ -183,107 +187,34 @@ func _constrain(a_pos: Vector3, b_pos: Vector3) -> void:
 
 
 func _apply_player_tension(a_pos: Vector3, b_pos: Vector3, delta: float) -> void:
-	var a_flat := Vector3(a_pos.x, 0.0, a_pos.z)
-	var b_flat := Vector3(b_pos.x, 0.0, b_pos.z)
-	var dist := a_flat.distance_to(b_flat)
-	if dist < 0.001 or dist <= rope_max_length:
+	var diff_flat := Vector2(b_pos.x - a_pos.x, b_pos.z - a_pos.z)
+	var dist := diff_flat.length()
+
+	if dist <= rope_max_length or dist < 0.001:
 		return
 
-	var dir: Vector3 = (b_flat - a_flat) / dist
-	var excess: float = minf(dist - rope_max_length, max_spring_excess)
-	var hard_excess: float = minf(dist - rope_max_length, hard_limit_max_excess)
-	var a_outward_intent: float = _get_outward_intent(player_a, -dir)
-	var b_outward_intent: float = _get_outward_intent(player_b, dir)
-	var a_outward_speed: float = _get_outward_speed(player_a, -dir)
-	var b_outward_speed: float = _get_outward_speed(player_b, dir)
-	var both_walking_outward: bool = a_outward_intent >= equal_walk_lock_threshold and b_outward_intent >= equal_walk_lock_threshold
-	var speed_gap: float = absf(a_outward_speed - b_outward_speed)
-	var should_lock_walk: bool = both_walking_outward and speed_gap <= equal_walk_speed_tolerance
-	if should_lock_walk:
-		_tug_lock_timer = tug_lock_grace_duration
-	elif _tug_lock_timer > 0.0:
-		_tug_lock_timer = maxf(0.0, _tug_lock_timer - delta)
+	var dir_flat := diff_flat / dist
+	var dir3d := Vector3(dir_flat.x, 0.0, dir_flat.y)
 
-	if should_lock_walk or _tug_lock_timer > 0.0:
-		_cancel_horizontal_motion(player_a)
-		_cancel_horizontal_motion(player_b)
-		_apply_hard_limit_correction(dir, hard_excess, delta)
-		return
+	var stretch := dist - rope_max_length
 
-	if a_outward_intent >= tug_intent_threshold and b_outward_intent >= tug_intent_threshold:
-		if speed_gap <= tug_speed_lock_tolerance:
-			_cancel_horizontal_motion(player_a)
-			_cancel_horizontal_motion(player_b)
-			_apply_hard_limit_correction(dir, hard_excess, delta)
-			return
+	# Soft spring — smooth elastic pull proportional to stretch, ramped up after respawn
+	var force := stretch * spring_strength * _tension_ramp
 
-	var vel_a_proj := player_a.velocity.dot(dir)
-	var vel_b_proj := player_b.velocity.dot(dir)
-	var sep_vel := vel_b_proj - vel_a_proj
-	if sep_vel > 0.0:
-		var impulse: float = sep_vel * 0.5 * constraint_stiffness
-		player_a.apply_rope_pull(dir * impulse)
-		player_b.apply_rope_pull(-dir * impulse)
+	# Kinetic Yank: dash amplifies the pull so snapping away yanks your opponent hard
+	var a_dashing: bool = player_a.has_method("is_dashing") and player_a.is_dashing()
+	var b_dashing: bool = player_b.has_method("is_dashing") and player_b.is_dashing()
+	if a_dashing or b_dashing:
+		force *= dash_yank_multiplier
 
-	var spring_force: Vector3 = dir * excess * spring_strength * delta
-	var pull_factor_a: float = _get_pull_factor(player_a)
-	var pull_factor_b: float = _get_pull_factor(player_b)
-	if a_outward_speed > b_outward_speed + tug_speed_lock_tolerance:
-		pull_factor_a = max(0.2, pull_factor_a - tug_winner_bias)
-		pull_factor_b += tug_winner_bias
-	elif b_outward_speed > a_outward_speed + tug_speed_lock_tolerance:
-		pull_factor_b = max(0.2, pull_factor_b - tug_winner_bias)
-		pull_factor_a += tug_winner_bias
+	# Damp only separating velocity — adds punch without fighting closing motion
+	var rel_vel := (player_b.velocity - player_a.velocity).dot(dir3d)
+	if rel_vel > 0.0:
+		force += rel_vel * damping_strength
 
-	player_a.apply_rope_pull(spring_force * pull_factor_a)
-	player_b.apply_rope_pull(-spring_force * pull_factor_b)
-	_apply_hard_limit_correction(dir, hard_excess, delta)
-
-
-func _get_pull_factor(player: CharacterBody3D) -> float:
-	if player == null or not player.has_method("get_move_intent_world"):
-		return 1.0
-	var intent: Vector3 = player.get_move_intent_world()
-	if intent == Vector3.ZERO:
-		return 1.0 + passive_pull_bonus
-	return 1.0
-
-
-func _get_outward_intent(player: CharacterBody3D, outward_dir: Vector3) -> float:
-	if player == null or not player.has_method("get_move_intent_world"):
-		return 0.0
-	var intent: Vector3 = player.get_move_intent_world()
-	if intent == Vector3.ZERO:
-		return 0.0
-	return maxf(0.0, intent.dot(outward_dir))
-
-
-func _get_outward_speed(player: CharacterBody3D, outward_dir: Vector3) -> float:
-	if player == null:
-		return 0.0
-	return maxf(0.0, player.velocity.dot(outward_dir))
-
-
-func _cancel_horizontal_motion(player: CharacterBody3D) -> void:
-	if player == null:
-		return
-	var flat_velocity := Vector3(player.velocity.x, 0.0, player.velocity.z)
-	if flat_velocity.length_squared() <= 0.0001:
-		return
-	if player.has_method("apply_rope_constraint"):
-		player.apply_rope_constraint(-flat_velocity)
-
-
-
-
-func _apply_hard_limit_correction(dir: Vector3, excess: float, delta: float) -> void:
-	if excess <= 0.0:
-		return
-	var correction: Vector3 = dir * excess * hard_limit_strength * delta
-	if player_a.has_method("apply_rope_constraint"):
-		player_a.apply_rope_constraint(correction)
-	if player_b.has_method("apply_rope_constraint"):
-		player_b.apply_rope_constraint(-correction)
+	var impulse := dir3d * force * delta
+	player_a.apply_rope_pull(impulse)
+	player_b.apply_rope_pull(-impulse)
 
 
 func _push_from_bodies() -> void:
@@ -322,6 +253,33 @@ func _push_from_bodies() -> void:
 
 	_push_from_player(player_a, 0.1)
 	_push_from_player(player_b, 0.9)
+
+
+func _push_from_ground() -> void:
+	for gnd_node in get_tree().get_nodes_in_group("ground"):
+		var gnd := gnd_node as StaticBody3D
+		if gnd == null or not is_instance_valid(gnd):
+			continue
+		var col_shape: CollisionShape3D = null
+		for child in gnd.get_children():
+			if child is CollisionShape3D:
+				col_shape = child as CollisionShape3D
+				break
+		if col_shape == null or not (col_shape.shape is BoxShape3D):
+			continue
+		var box := col_shape.shape as BoxShape3D
+		var half := box.size * 0.5
+		var center := col_shape.global_position
+		var surface_y := center.y + half.y
+		for i in range(1, segment_count):
+			var p := points[i]
+			if p.x < center.x - half.x or p.x > center.x + half.x:
+				continue
+			if p.z < center.z - half.z or p.z > center.z + half.z:
+				continue
+			if p.y < surface_y:
+				points[i].y = surface_y
+				prev_points[i].y = surface_y
 
 
 func _update_rope_color(a_pos: Vector3, b_pos: Vector3) -> void:

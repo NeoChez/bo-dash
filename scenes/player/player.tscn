@@ -46,8 +46,8 @@ animations = [{
 [sub_resource type="BoxShape3D" id="BoxShape3D_75vfm"]
 size = Vector3(1.0930176, 2.932129, 1)
 
-[node name="Player" type="CharacterBody3D" unique_id=1171899958 groups=["player"]]
-collision_mask = 7
+[node name="Player" type="CharacterBody3D" groups=["player"]]
+collision_mask = 15
 script = ExtResource("1_h6syq")
 
 [node name="Sprite3D" type="Sprite3D" parent="." unique_id=1265831303]

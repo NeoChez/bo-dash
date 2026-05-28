@@ -14,7 +14,7 @@ func _ready() -> void:
 	var push_velocity = conveyor_direction.normalized() * -conveyor_speed
 	constant_linear_velocity = push_velocity
 	_moves_positive_x = push_velocity.x > 0.0
-	_despawn_x_limit = global_position.x + despawn_distance_from_center * (1.0 if _moves_positive_x else -1.0)
+	_despawn_x_limit = 0.0
 
 	
 	

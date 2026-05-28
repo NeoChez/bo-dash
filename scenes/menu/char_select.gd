@@ -67,24 +67,24 @@ func _input(event: InputEvent) -> void:
 		elif event.is_action_pressed("p2_right"):
 			p2_index = (p2_index + 1) % characters.size()
 			_update_p2_ui()
-			
-	# Ready trigger for P2 (W key or p2_up)
-	if event.is_action_pressed("p2_up") or (event is InputEventKey and event.pressed and event.keycode == KEY_W):
+
+	# Ready trigger for P2
+	if event.is_action_pressed("p2_up"):
 		p2_ready = !p2_ready
 		_update_p2_ui()
 		_check_start_countdown()
 
 	# --- PLAYER 1 (RIGHT PLAYER) ---
 	if not p1_ready:
-		if event.is_action_pressed("ui_left"):
+		if event.is_action_pressed("p1_left"):
 			p1_index = (p1_index - 1 + characters.size()) % characters.size()
 			_update_p1_ui()
-		elif event.is_action_pressed("ui_right"):
+		elif event.is_action_pressed("p1_right"):
 			p1_index = (p1_index + 1) % characters.size()
 			_update_p1_ui()
-			
-	# Ready trigger for P1 (Up Arrow or ui_up)
-	if event.is_action_pressed("ui_up"):
+
+	# Ready trigger for P1
+	if event.is_action_pressed("p1_up"):
 		p1_ready = !p1_ready
 		_update_p1_ui()
 		_check_start_countdown()
@@ -154,7 +154,7 @@ func _update_p2_ui() -> void:
 		p2_status_lbl.text = "READY"
 		p2_status_lbl.add_theme_color_override("font_color", Color(0.2, 0.9, 0.4))
 	else:
-		p2_status_lbl.text = "PRESS 'W' TO READY"
+		p2_status_lbl.text = "PRESS W TO READY"
 		p2_status_lbl.add_theme_color_override("font_color", Color(1, 1, 1, 0.7))
 
 func _update_p1_ui() -> void:
@@ -175,7 +175,7 @@ func _update_p1_ui() -> void:
 		p1_status_lbl.text = "READY"
 		p1_status_lbl.add_theme_color_override("font_color", Color(0.2, 0.9, 0.4))
 	else:
-		p1_status_lbl.text = "PRESS 'UP' TO READY"
+		p1_status_lbl.text = "PRESS P TO READY"
 		p1_status_lbl.add_theme_color_override("font_color", Color(1, 1, 1, 0.7))
 
 func _check_start_countdown() -> void:
