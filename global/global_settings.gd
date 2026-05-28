@@ -1,7 +1,7 @@
 extends Node
 
-var player_1_character: String = "rex"
-var player_2_character: String = "rex"
+var player_1_character: String = "male"
+var player_2_character: String = "male"
 
 # ── SKILL REGISTRY ───────────────────────────────────────────────────────────
 # Tambah skill baru cukup dengan menambah entry di sini.
