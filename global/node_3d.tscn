@@ -83,7 +83,7 @@ size = Vector3(100, 1.6403809, 20)
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.28, 0.54, 0.88, 1)
-sky_horizon_color = Color(0.52, 0.76, 1.0, 1)
+sky_horizon_color = Color(0.52, 0.76, 1, 1)
 ground_bottom_color = Color(0.22, 0.32, 0.48, 1)
 ground_horizon_color = Color(0.38, 0.6, 0.85, 1)
 
@@ -442,6 +442,7 @@ action_up = "p1_up"
 action_down = "p1_down"
 respawn_delay = 0.5
 dash_cooldown = 3.0
+player_id = 2
 
 [node name="Player2" parent="." unique_id=1456885410 instance=ExtResource("5_kmy1e")]
 transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, -30, 0.483, 0)
@@ -454,7 +455,6 @@ action_dash = "p2_dash"
 action_skill = "p2_skill"
 respawn_delay = 0.5
 dash_cooldown = 3.0
-player_id = 2
 
 [node name="PlayerRope" type="Node3D" parent="." unique_id=396371567]
 script = ExtResource("8_rope")
