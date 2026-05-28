@@ -21,6 +21,9 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	global_position += move_direction * move_speed * delta
+	if (move_direction.x < 0.0 and global_position.x < 0.0) or \
+	   (move_direction.x > 0.0 and global_position.x > 0.0):
+		queue_free()
 
 
 func _process(delta: float) -> void:

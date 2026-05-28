@@ -1,6 +1,7 @@
 extends Node3D
 
 const MATCH_DURATION: float = 180.0
+const _DEBUG_SKILL_SCENE := preload("res://scenes/powerups/skill_item.tscn")
 
 @onready var _skill_registry: Dictionary = GlobalSettings.skills
 
@@ -36,6 +37,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if Input.is_action_just_pressed("ui_home"):
+		_debug_spawn_skill_items()
 	if not _match_active:
 		return
 
@@ -225,6 +228,17 @@ func _get_left_side_player_id() -> int:
 	if _player_2 == null:
 		return 1
 	return 1 if _player_1.global_position.x <= _player_2.global_position.x else 2
+
+
+func _debug_spawn_skill_items() -> void:
+	for player in [_player_1, _player_2]:
+		if not is_instance_valid(player):
+			continue
+		var item := _DEBUG_SKILL_SCENE.instantiate() as Node3D
+		add_child(item)
+		item.global_position = player.global_position + Vector3(0.0, 1.2, 0.0)
+		if item.has_method("set_movement"):
+			item.set_movement(Vector3.ZERO, 0.0)
 
 
 func _setup_dash_bars() -> void:
