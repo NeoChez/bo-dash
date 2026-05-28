@@ -40,6 +40,18 @@ var _dash_timer: float = 0.0
 var _dash_active_timer: float = 0.0
 var _rope_constraint_pull: Vector3 = Vector3.ZERO
 
+enum PlayerState {
+	RUNNING,
+	JUMPING,
+	FALLING,
+	STANDING_UP,
+	FLOATING
+}
+var current_state: PlayerState = PlayerState.RUNNING
+
+var _current_model_path: String = ""
+var _current_model_node: Node = null
+var _state_timer: float = 0.0
 
 @onready var animated_sprite = $AnimatedSprite3D
 @onready var visuals = $Visuals
@@ -47,7 +59,7 @@ var _rope_constraint_pull: Vector3 = Vector3.ZERO
 # 3D Visuals & Procedural Animations
 @export_group("3D Visuals & Animation")
 @export var model_scale_factor: float = 1.0
-@export var rex_model_scale: Vector3 = Vector3(25.0, 25.0, 25.0)
+@export var rex_model_scale: Vector3 = Vector3(4.0, 4.0, 4.0)
 @export var rex_model_offset: Vector3 = Vector3(0.0, 0.0, 0.0)
 @export var rotation_speed: float = 18.0
 @export var base_y_offset: float = 0.53
@@ -59,6 +71,8 @@ var _squash_timer: float = 0.0
 var _landing_recoil_time: float = 0.0
 var _is_recoil_active: bool = false
 
+const ANIM_FALL_STANDUP_SPEED: float = 3.0
+
 func _ready():
 	spawn_position = global_position
 	
@@ -66,101 +80,74 @@ func _ready():
 	if visuals:
 		visuals.position = Vector3(0.82488, base_y_offset, 0.09399593)
 		
-		# 1. Determine selected character (persistent autoload fallback is Rex)
-		var char_name = "rex"
-		var global_settings = get_node_or_null("/root/GlobalSettings")
-		if global_settings:
-			if player_id == 1:
-				char_name = global_settings.player_1_character
-			else:
-				char_name = global_settings.player_2_character
+		# Clear old placeholder models if any
+		for child in visuals.get_children():
+			child.queue_free()
+			visuals.remove_child(child)
 			
-		# 2. Remove default placeholder model
-		var old_model = visuals.get_node_or_null("RexModel")
-		if old_model:
-			visuals.remove_child(old_model)
-			old_model.queue_free()
-			
-		# 3. Dynamic GLB loading and calibrated dimensions applying
-		var model_scene: PackedScene
-		match char_name:
-			"hamm":
-				model_scene = load("res://assets/player/kingdom_hearts_iii_-_hamm.glb")
-				rex_model_scale = Vector3(20.0, 20.0, 20.0) # Hamm scale calibration
-				rex_model_offset = Vector3(0.0, 0.0, 0.0)
-			"alien":
-				model_scene = load("res://assets/player/kingdom_hearts_iii_-_alienlgm.glb")
-				rex_model_scale = Vector3(22.0, 22.0, 22.0) # Alien uniform scale calibration (fixes flat/gepeng issue)
-				rex_model_offset = Vector3(0.0, 0.0, 0.0)
-			"wheezy":
-				model_scene = load("res://assets/player/wii_-_toy_story_3_-_wheezy.glb")
-				rex_model_scale = Vector3(0.35, 0.35, 0.35) # Wheezy scaled up slightly as requested
-				rex_model_offset = Vector3(0.0, 0.0, 0.0)
-			"slinky":
-				model_scene = load("res://assets/player/wii_-_toy_story_3_-_slinky_dog.glb")
-				rex_model_scale = Vector3(0.22, 0.22, 0.22) # Slinky Dog scaled down to fit nicely on conveyor belt
-				rex_model_offset = Vector3(0.0, 0.0, 0.0)
-			_:
-				model_scene = load("res://assets/player/kingdom_hearts_iii_-_rex.glb")
-				rex_model_scale = Vector3(25.0, 25.0, 25.0) # Rex scale calibration
-				rex_model_offset = Vector3(0.0, 0.0, 0.0)
-			
-		if model_scene:
-			var new_model = model_scene.instantiate()
-			new_model.name = "RexModel" # Keep name to ensure animation lookup works seamlessly
-			visuals.add_child(new_model)
-			new_model.scale = rex_model_scale
-			new_model.position = rex_model_offset
+		# Initialize default state as running!
+		current_state = PlayerState.RUNNING
+		_change_model("res://assets/player/male/running.glb")
 
 func _physics_process(delta: float) -> void:
-	if not match_active or not is_alive or not can_move:
+	if not match_active or not is_alive:
 		return
-	
+
+	# State machine: jangan override state spesial (FALLING/STANDING_UP/FLOATING)
+	if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP and current_state != PlayerState.FLOATING:
+		if is_on_floor():
+			change_state(PlayerState.RUNNING)
+		else:
+			change_state(PlayerState.JUMPING)
+
 	# Terapkan gravitasi
 	if not is_on_floor():
 		velocity.y -= gravity * gravity_scale * delta
-	
-	# Handle jump (Menggunakan variabel action_jump)
-	if Input.is_action_just_pressed(action_jump) and is_on_floor():
-		velocity.y = jump_velocity
 
-	# Handle dash
-	if _dash_timer > 0.0:
-		_dash_timer -= delta
-	_dash_active_timer = maxf(_dash_active_timer - delta, 0.0)
-	if Input.is_action_just_pressed(action_dash) and _dash_timer <= 0.0:
-		_do_dash()
+	# Handle jump, dash, movement inputs
+	if can_move:
+		# Jump: hanya via tombol jump (Right Alt P1 / Left Alt P2), BUKAN tombol gerak W/P
+		if Input.is_action_just_pressed(action_jump) and is_on_floor():
+			velocity.y = jump_velocity
+			change_state(PlayerState.JUMPING)
 
-	# Handle skill use
-	if Input.is_action_just_pressed(action_skill):
-		get_tree().call_group("match_controller", "use_skill", player_id)
+		# Handle dash
+		if _dash_timer > 0.0:
+			_dash_timer -= delta
+		_dash_active_timer = maxf(_dash_active_timer - delta, 0.0)
+		if Input.is_action_just_pressed(action_dash) and _dash_timer <= 0.0:
+			_do_dash()
 
-	# Dapatkan input pergerakan 8 arah menggunakan variabel export
-	var input_dir = Input.get_vector(action_left, action_right, action_up, action_down)
-	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	
-	if input_dir != Vector2.ZERO:
-		# Mainkan animasi walk jika ada input
-		animated_sprite.play("walk")
-		
-		# Flip (balik) sprite berdasarkan arah X
-		if input_dir.x < 0:
-			animated_sprite.flip_h = true  # Menghadap kiri
-		elif input_dir.x > 0:
-			animated_sprite.flip_h = false # Menghadap kanan
+		# Handle skill use
+		if Input.is_action_just_pressed(action_skill):
+			get_tree().call_group("match_controller", "use_skill", player_id)
+
+		# Pergerakan 8 arah: W/A/S/D untuk P2, P/L/;/' untuk P1
+		var input_dir = Input.get_vector(action_left, action_right, action_up, action_down)
+		var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+
+		if input_dir != Vector2.ZERO:
+			animated_sprite.play("walk")
+			if input_dir.x < 0:
+				animated_sprite.flip_h = true
+			elif input_dir.x > 0:
+				animated_sprite.flip_h = false
+		else:
+			animated_sprite.stop()
+
+		var speed_multiplier = _get_speed_multiplier()
+		var target_speed = SPEED * speed_multiplier
+		if _dash_active_timer > 0.0:
+			pass
+		elif direction:
+			velocity.x = move_toward(velocity.x, direction.x * target_speed, target_speed * delta * 10)
+			velocity.z = move_toward(velocity.z, direction.z * target_speed, target_speed * delta * 10)
+		else:
+			velocity.x = move_toward(velocity.x, 0, SPEED * delta * 5)
+			velocity.z = move_toward(velocity.z, 0, SPEED * delta * 5)
 	else:
-		animated_sprite.stop()
-	
-	var speed_multiplier = _get_speed_multiplier()
-	var target_speed = SPEED * speed_multiplier
-	if _dash_active_timer > 0.0:
-		pass  # Lock velocity to dash direction; move_toward would cancel it in ~3 frames
-	elif direction:
-		velocity.x = move_toward(velocity.x, direction.x * target_speed, target_speed * delta * 10)
-		velocity.z = move_toward(velocity.z, direction.z * target_speed, target_speed * delta * 10)
-	else:
-		velocity.x = move_toward(velocity.x, 0, SPEED * delta * 5)
-		velocity.z = move_toward(velocity.z, 0, SPEED * delta * 5)
+		velocity.x = move_toward(velocity.x, 0, SPEED * delta * 10)
+		velocity.z = move_toward(velocity.z, 0, SPEED * delta * 10)
 
 	if rope_pull != Vector3.ZERO:
 		velocity.x += rope_pull.x
@@ -177,7 +164,13 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	var just_landed = is_on_floor() and not was_on_floor_before
 	
-	_update_3d_animations(delta, input_dir, direction, was_on_floor_before, just_landed)
+	var final_input_dir = Vector2.ZERO
+	var final_direction = Vector3.ZERO
+	if can_move:
+		final_input_dir = Input.get_vector(action_left, action_right, action_up, action_down)
+		final_direction = (transform.basis * Vector3(final_input_dir.x, 0, final_input_dir.y)).normalized()
+
+	_update_3d_animations(delta, final_input_dir, final_direction, was_on_floor_before, just_landed)
 	
 	# Cek tabrakan
 	_check_collisions()
@@ -186,19 +179,20 @@ func _update_3d_animations(delta: float, input_dir: Vector2, direction: Vector3,
 	if not visuals:
 		return
 		
-	# Pastikan base scale model benar
-	var base_scale = Vector3(model_scale_factor, model_scale_factor, model_scale_factor)
+	var base_scale = rex_model_scale
 	
 	# 1. Rotasi model ke arah pergerakan (Y-axis)
 	var horiz_vel = Vector2(velocity.x, velocity.z)
 	if horiz_vel.length() > 0.5:
-		# Gunakan atan2(x, z) untuk menghitung arah hadap di plane X-Z
 		var target_angle = atan2(velocity.x, velocity.z)
 		visuals.rotation.y = rotate_toward(visuals.rotation.y, target_angle, delta * rotation_speed)
 	
-	if not enable_procedural_animations:
+	# Bypass procedural animations during Falling, Standing Up, and Floating states to let keyframe animations play cleanly
+	if not enable_procedural_animations or current_state == PlayerState.FALLING or current_state == PlayerState.STANDING_UP or current_state == PlayerState.FLOATING:
 		visuals.scale = base_scale
-		visuals.position.y = base_y_offset
+		visuals.rotation.x = rotate_toward(visuals.rotation.x, 0.0, delta * 12.0)
+		visuals.rotation.z = rotate_toward(visuals.rotation.z, 0.0, delta * 12.0)
+		visuals.position.y = lerp(visuals.position.y, base_y_offset, delta * 10.0)
 		return
 
 	# 2. Trigger landing spring recoil
@@ -295,6 +289,11 @@ func _check_collisions():
 			var collider = collision.get_collider()
 			
 			if collider and collider.is_in_group("obstacle"):
+				# Trigger knockdown state machine
+				if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP:
+					change_state(PlayerState.FALLING)
+					return
+					
 				var push_dir = (global_position - collider.global_position).normalized()
 				push_dir.y = 0 
 				
@@ -386,6 +385,8 @@ func _apply_yank_from(source: Node3D, strength: float, duration: float) -> void:
 	yank_source = source
 	yank_strength = max(yank_strength, strength)
 	yank_end_time = max(yank_end_time, now + duration)
+	if current_state != PlayerState.FLOATING:
+		change_state(PlayerState.FLOATING)
 
 func _apply_yank_force(delta: float) -> void:
 	if yank_source == null:
@@ -394,6 +395,8 @@ func _apply_yank_force(delta: float) -> void:
 	if now > yank_end_time:
 		yank_source = null
 		yank_strength = 0.0
+		if current_state == PlayerState.FLOATING:
+			change_state(PlayerState.RUNNING)
 		return
 
 	var dir = (yank_source.global_position - global_position).normalized()
@@ -472,3 +475,91 @@ func set_match_active(active: bool) -> void:
 
 func _notify_match_player_down() -> void:
 	get_tree().call_group("match_controller", "on_player_down", player_id)
+
+func change_state(new_state: PlayerState) -> void:
+	if current_state == new_state:
+		return
+
+	current_state = new_state
+
+	match current_state:
+		PlayerState.RUNNING:
+			can_move = true
+			_change_model("res://assets/player/male/running.glb")
+
+		PlayerState.JUMPING:
+			can_move = true
+			_change_model("res://assets/player/male/jumping.glb")
+
+		PlayerState.FALLING:
+			can_move = false
+			_change_model("res://assets/player/male/fall.glb", ANIM_FALL_STANDUP_SPEED)
+			_connect_anim_finished_once(func(): change_state(PlayerState.STANDING_UP))
+
+		PlayerState.STANDING_UP:
+			can_move = false
+			_change_model("res://assets/player/male/standup.glb", ANIM_FALL_STANDUP_SPEED)
+			_connect_anim_finished_once(func(): change_state(PlayerState.RUNNING))
+
+		PlayerState.FLOATING:
+			can_move = false
+			_change_model("res://assets/player/male/floating.glb")
+
+func _connect_anim_finished_once(callback: Callable) -> void:
+	var anim_player = _find_animation_player(_current_model_node)
+	if anim_player:
+		anim_player.animation_finished.connect(
+			func(_anim_name: StringName): callback.call(),
+			CONNECT_ONE_SHOT
+		)
+
+func _change_model(path: String, speed: float = 1.0) -> void:
+	if _current_model_path == path:
+		var anim_player = _find_animation_player(_current_model_node)
+		if anim_player:
+			anim_player.speed_scale = speed
+		return
+		
+	var model_scene = load(path) as PackedScene
+	if not model_scene:
+		push_error("Gagal meload model scene di: " + path)
+		return
+		
+	if _current_model_node and is_instance_valid(_current_model_node):
+		_current_model_node.queue_free()
+		visuals.remove_child(_current_model_node)
+		
+	_current_model_path = path
+	_current_model_node = model_scene.instantiate()
+	visuals.add_child(_current_model_node)
+	
+	_current_model_node.position = Vector3.ZERO
+	_current_model_node.scale = rex_model_scale
+	_current_model_node.rotation = Vector3.ZERO
+	
+	_play_first_animation(_current_model_node, speed)
+
+func _play_first_animation(model: Node, speed: float = 1.0) -> void:
+	var anim_player = _find_animation_player(model)
+	if anim_player:
+		anim_player.speed_scale = speed
+		var anim_list = anim_player.get_animation_list()
+		if anim_list.size() > 0:
+			var anim_name = anim_list[0]
+			var anim = anim_player.get_animation(anim_name)
+			if anim:
+				var path_lower = _current_model_path.to_lower()
+				if "running" in path_lower or "jumping" in path_lower or "floating" in path_lower or "idle" in path_lower:
+					anim.loop_mode = Animation.LOOP_LINEAR
+				else:
+					anim.loop_mode = Animation.LOOP_NONE
+			anim_player.play(anim_name)
+
+func _find_animation_player(node: Node) -> AnimationPlayer:
+	if node is AnimationPlayer:
+		return node
+	for child in node.get_children():
+		var found = _find_animation_player(child)
+		if found:
+			return found
+	return null

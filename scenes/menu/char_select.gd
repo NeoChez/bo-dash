@@ -12,33 +12,14 @@ extends Control
 
 @onready var countdown_lbl = $CountdownLabel
 
-var characters = ["rex", "hamm", "alien", "wheezy", "slinky"]
+var characters = ["male"]
 
 var char_config = {
-	"rex": {
-		"scene": "res://assets/player/kingdom_hearts_iii_-_rex.glb",
-		"scale": Vector3(11.0, 11.0, 11.0),
-		"offset": Vector3(0.0, -0.5, 0.0)
-	},
-	"hamm": {
-		"scene": "res://assets/player/kingdom_hearts_iii_-_hamm.glb",
-		"scale": Vector3(18.0, 18.0, 18.0),
-		"offset": Vector3(0.0, -0.2, 0.0)
-	},
-	"alien": {
-		"scene": "res://assets/player/kingdom_hearts_iii_-_alienlgm.glb",
-		"scale": Vector3(20.0, 20.0, 20.0),
-		"offset": Vector3(0.0, -0.1, 0.0)
-	},
-	"wheezy": {
-		"scene": "res://assets/player/wii_-_toy_story_3_-_wheezy.glb",
-		"scale": Vector3(0.32, 0.32, 0.32),
-		"offset": Vector3(0.0, -0.2, 0.0)
-	},
-	"slinky": {
-		"scene": "res://assets/player/wii_-_toy_story_3_-_slinky_dog.glb",
-		"scale": Vector3(0.18, 0.18, 0.18),
-		"offset": Vector3(0.0, -0.1, 0.0)
+	"male": {
+		"scene": "res://assets/player/male/idle.glb",
+		"scale": Vector3(8.5, 8.5, 8.5),
+		"offset": Vector3(0.0, -2.0, 0.0),
+		"rotation": Vector3(0.0, 0.0, 0.0)
 	}
 }
 var p2_index = 0
@@ -50,8 +31,17 @@ var p1_ready = false
 var countdown_active = false
 var countdown_timer = 1.0
 
+var p2_pulse_tween: Tween = null
+var p1_pulse_tween: Tween = null
+
 func _ready() -> void:
 	countdown_lbl.visible = false
+	
+	# Set up pivots and automatic center tracking on resizing
+	for card in [p2_card, p1_card]:
+		card.pivot_offset = card.size / 2.0
+		card.resized.connect(func(): card.pivot_offset = card.size / 2.0)
+		
 	_update_p2_ui()
 	_update_p1_ui()
 
@@ -64,9 +54,11 @@ func _input(event: InputEvent) -> void:
 		if event.is_action_pressed("p2_left"):
 			p2_index = (p2_index - 1 + characters.size()) % characters.size()
 			_update_p2_ui()
+			_bounce_card(p2_card)
 		elif event.is_action_pressed("p2_right"):
 			p2_index = (p2_index + 1) % characters.size()
 			_update_p2_ui()
+			_bounce_card(p2_card)
 
 	# Ready trigger for P2
 	if event.is_action_pressed("p2_up"):
@@ -79,9 +71,11 @@ func _input(event: InputEvent) -> void:
 		if event.is_action_pressed("p1_left"):
 			p1_index = (p1_index - 1 + characters.size()) % characters.size()
 			_update_p1_ui()
+			_bounce_card(p1_card)
 		elif event.is_action_pressed("p1_right"):
 			p1_index = (p1_index + 1) % characters.size()
 			_update_p1_ui()
+			_bounce_card(p1_card)
 
 	# Ready trigger for P1
 	if event.is_action_pressed("p1_up"):
@@ -90,12 +84,6 @@ func _input(event: InputEvent) -> void:
 		_check_start_countdown()
 
 func _process(delta: float) -> void:
-	# Rotate the preview models gently
-	if p2_pivot and p2_pivot.get_child_count() > 0:
-		p2_pivot.rotate_y(delta * 1.2)
-	if p1_pivot and p1_pivot.get_child_count() > 0:
-		p1_pivot.rotate_y(delta * 1.2)
-		
 	if countdown_active:
 		countdown_timer -= delta
 		countdown_lbl.text = "STARTING IN: %d..." % ceil(countdown_timer)
@@ -103,33 +91,11 @@ func _process(delta: float) -> void:
 			countdown_active = false
 			_start_game()
 
+# Candy-colored dynamic card configurations (Stumble Guys vibe)
 func _get_char_style(char_name: String) -> Dictionary:
-	var bg_color = Color(0.1, 0.22, 0.2, 0.95)
-	var border_color = Color(0.38, 0.95, 0.75)
-	var font_color = Color(0.38, 0.95, 0.75)
-	
-	match char_name:
-		"rex":
-			bg_color = Color(0.08, 0.20, 0.18, 0.95)
-			border_color = Color(0.38, 0.95, 0.75)
-			font_color = Color(0.38, 0.95, 0.75)
-		"hamm":
-			bg_color = Color(0.24, 0.14, 0.16, 0.95)
-			border_color = Color(1.0, 0.58, 0.62)
-			font_color = Color(1.0, 0.58, 0.62)
-		"alien":
-			bg_color = Color(0.12, 0.20, 0.12, 0.95)
-			border_color = Color(0.5, 0.95, 0.3)
-			font_color = Color(0.5, 0.95, 0.3)
-		"wheezy":
-			bg_color = Color(0.08, 0.12, 0.24, 0.95)
-			border_color = Color(0.4, 0.75, 1.0)
-			font_color = Color(0.4, 0.75, 1.0)
-		"slinky":
-			bg_color = Color(0.22, 0.15, 0.08, 0.95)
-			border_color = Color(0.95, 0.65, 0.3)
-			font_color = Color(0.95, 0.65, 0.3)
-			
+	var bg_color = Color(0.95, 0.56, 0.1)        # Warm Candy Orange
+	var border_color = Color(0.72, 0.36, 0.02)
+	var font_color = Color(1.0, 0.93, 0.8)
 	return {
 		"bg_color": bg_color,
 		"border_color": border_color,
@@ -152,10 +118,27 @@ func _update_p2_ui() -> void:
 	# Status Ready
 	if p2_ready:
 		p2_status_lbl.text = "READY"
-		p2_status_lbl.add_theme_color_override("font_color", Color(0.2, 0.9, 0.4))
+		p2_status_lbl.add_theme_color_override("font_color", Color(0.2, 0.95, 0.45))
+		p2_status_lbl.add_theme_color_override("font_outline_color", Color(0.02, 0.35, 0.12))
+		p2_status_lbl.add_theme_constant_override("outline_size", 12)
+		
+		# Pulsating breathing animation
+		if p2_pulse_tween:
+			p2_pulse_tween.kill()
+		p2_pulse_tween = create_tween().set_loops()
+		p2_pulse_tween.tween_property(p2_card, "scale", Vector2(1.06, 1.06), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		p2_pulse_tween.tween_property(p2_card, "scale", Vector2(1.01, 1.01), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	else:
 		p2_status_lbl.text = "PRESS W TO READY"
-		p2_status_lbl.add_theme_color_override("font_color", Color(1, 1, 1, 0.7))
+		p2_status_lbl.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+		p2_status_lbl.add_theme_color_override("font_outline_color", Color(0.04, 0.08, 0.18))
+		p2_status_lbl.add_theme_constant_override("outline_size", 10)
+		
+		# Stop pulse and reset scale
+		if p2_pulse_tween:
+			p2_pulse_tween.kill()
+			p2_pulse_tween = null
+		create_tween().tween_property(p2_card, "scale", Vector2(1.0, 1.0), 0.15).set_trans(Tween.TRANS_SINE)
 
 func _update_p1_ui() -> void:
 	var raw_name = characters[p1_index]
@@ -173,21 +156,62 @@ func _update_p1_ui() -> void:
 	# Status Ready
 	if p1_ready:
 		p1_status_lbl.text = "READY"
-		p1_status_lbl.add_theme_color_override("font_color", Color(0.2, 0.9, 0.4))
+		p1_status_lbl.add_theme_color_override("font_color", Color(0.2, 0.95, 0.45))
+		p1_status_lbl.add_theme_color_override("font_outline_color", Color(0.02, 0.35, 0.12))
+		p1_status_lbl.add_theme_constant_override("outline_size", 12)
+		
+		# Pulsating breathing animation
+		if p1_pulse_tween:
+			p1_pulse_tween.kill()
+		p1_pulse_tween = create_tween().set_loops()
+		p1_pulse_tween.tween_property(p1_card, "scale", Vector2(1.06, 1.06), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		p1_pulse_tween.tween_property(p1_card, "scale", Vector2(1.01, 1.01), 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	else:
 		p1_status_lbl.text = "PRESS P TO READY"
-		p1_status_lbl.add_theme_color_override("font_color", Color(1, 1, 1, 0.7))
+		p1_status_lbl.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+		p1_status_lbl.add_theme_color_override("font_outline_color", Color(0.04, 0.08, 0.18))
+		p1_status_lbl.add_theme_constant_override("outline_size", 10)
+		
+		# Stop pulse and reset scale
+		if p1_pulse_tween:
+			p1_pulse_tween.kill()
+			p1_pulse_tween = null
+		create_tween().tween_property(p1_card, "scale", Vector2(1.0, 1.0), 0.15).set_trans(Tween.TRANS_SINE)
+
+# Juicy bouncy squash-and-stretch animation for card swaps
+func _bounce_card(card: Control) -> void:
+	if not card:
+		return
+	card.pivot_offset = card.size / 2.0
+	
+	# Scale punch and wiggle using Tween
+	var tween = create_tween()
+	tween.tween_property(card, "scale", Vector2(0.88, 0.88), 0.05).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(card, "scale", Vector2(1.14, 1.14), 0.14).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(card, "scale", Vector2(1.0, 1.0), 0.12).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 func _check_start_countdown() -> void:
 	if p1_ready and p2_ready:
 		countdown_active = true
 		countdown_timer = 2.0 # 2-second epic countdown
 		countdown_lbl.visible = true
+		
+		# Add a fun scale pop to the countdown label
+		countdown_lbl.pivot_offset = countdown_lbl.size / 2.0
+		var tween = create_tween()
+		tween.tween_property(countdown_lbl, "scale", Vector2(1.3, 1.3), 0.15).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+		tween.tween_property(countdown_lbl, "scale", Vector2(1.0, 1.0), 0.15).set_trans(Tween.TRANS_SINE)
 	else:
 		countdown_active = false
 		countdown_lbl.visible = false
 
 func _start_game() -> void:
+	# Clean up active Tweens to prevent memory leaks
+	if p2_pulse_tween:
+		p2_pulse_tween.kill()
+	if p1_pulse_tween:
+		p1_pulse_tween.kill()
+		
 	# Save selections to the autoload GlobalSettings
 	var global_settings = get_node_or_null("/root/GlobalSettings")
 	if global_settings:
@@ -215,3 +239,30 @@ func _spawn_preview_model(pivot: Node3D, char_name: String) -> void:
 		pivot.add_child(new_model)
 		new_model.scale = config["scale"]
 		new_model.position = config["offset"]
+		if config.has("rotation"):
+			pivot.rotation = config["rotation"]
+		else:
+			pivot.rotation = Vector3.ZERO
+		
+		# Play idletofight loop animation
+		_play_first_animation(new_model)
+
+func _find_animation_player(node: Node) -> AnimationPlayer:
+	if node is AnimationPlayer:
+		return node
+	for child in node.get_children():
+		var found = _find_animation_player(child)
+		if found:
+			return found
+	return null
+
+func _play_first_animation(model: Node) -> void:
+	var anim_player = _find_animation_player(model)
+	if anim_player:
+		var anim_list = anim_player.get_animation_list()
+		if anim_list.size() > 0:
+			var anim_name = anim_list[0]
+			var anim = anim_player.get_animation(anim_name)
+			if anim:
+				anim.loop_mode = Animation.LOOP_LINEAR
+			anim_player.play(anim_name)
