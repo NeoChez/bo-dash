@@ -1,14 +1,16 @@
-[gd_scene load_steps=5 format=3 uid="uid://b3cii5cqgg5d4"]
+[gd_scene load_steps=7 format=3 uid="uid://b3cii5cqgg5d4"]
 
 [ext_resource type="PackedScene" uid="uid://bwukl5i34r130" path="res://scenes/skills/popcorn_ball_meteor.glb" id="1_whtt8"]
+[ext_resource type="PackedScene" uid="uid://fm4k3a22v2n3" path="res://scenes/skills/star_wars_-_halcon_milenario.glb" id="2_hkynd"]
 [ext_resource type="Script" uid="uid://bt2mjaetacjmn" path="res://scenes/skills/meteor.gd" id="2_meteor"]
+[ext_resource type="PackedScene" uid="uid://cgxdt6xkvmtne" path="res://scenes/skills/lo_poly_metroid__meteor.glb" id="3_vcabl"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aoe"]
 transparency = 1
 cull_mode = 2
-albedo_color = Color(0.68888474, 0.08178789, 0.27150667, 1)
+albedo_color = Color(0.9, 0.05, 0.05, 1)
 emission_enabled = true
-emission = Color(1, 0.35, 0.05, 1)
+emission = Color(1, 0, 0, 1)
 emission_energy_multiplier = 2.0
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_aoe"]
@@ -20,8 +22,16 @@ radial_segments = 48
 [node name="Meteor_tscn" type="Node3D"]
 script = ExtResource("2_meteor")
 
+[node name="Sketchfab_Scene2" parent="." instance=ExtResource("2_hkynd")]
+transform = Transform3D(0.05, 0, 0, 0, 0.05, 0, 0, 0, 0.05, 0, 46.78845, 0)
+visible = false
+
+[node name="Sketchfab_Scene3" parent="." instance=ExtResource("3_vcabl")]
+transform = Transform3D(5, 0, 0, 0, 5, 0, 0, 0, 5, -2.4860697, 7.9946537, 0)
+
 [node name="Sketchfab_Scene" parent="." instance=ExtResource("1_whtt8")]
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 1.3441496, 0)
+visible = false
 
 [node name="AOE" type="Node3D" parent="."]
 top_level = true

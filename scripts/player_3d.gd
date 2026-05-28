@@ -1,6 +1,7 @@
 extends CharacterBody3D
 
 const _SHIELD_SCENE := preload("res://scenes/skills/bubble_shield.tscn")
+const _METEOR_SCENE := preload("res://scenes/skills/meteor.tscn")
 
 @export_category("Player Controls")
 @export var action_left: String = "ui_left"
@@ -615,17 +616,10 @@ func _apply_meteor_strike(strength: float) -> void:
 	var other := _get_other_player()
 	if other == null:
 		return
-	const METEOR_SCENE_PATH := "res://scenes/skills/meteor.tscn"
-	if ResourceLoader.exists(METEOR_SCENE_PATH):
-		var meteor_packed := load(METEOR_SCENE_PATH) as PackedScene
-		if meteor_packed:
-			var meteor := meteor_packed.instantiate()
-			get_tree().current_scene.add_child(meteor)
-			if meteor.has_method("setup"):
-				meteor.call("setup", other.global_position, strength)
-			return
-	if other.has_method("_apply_meteor_from"):
-		other._apply_meteor_from(Vector3.ZERO, strength)
+	var meteor := _METEOR_SCENE.instantiate()
+	get_tree().current_scene.add_child(meteor)
+	if meteor.has_method("setup"):
+		meteor.call("setup", other.global_position, strength)
 
 
 func _apply_anchor_and_balloon() -> void:
