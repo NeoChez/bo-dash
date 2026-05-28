@@ -1,5 +1,6 @@
 extends CharacterBody3D
 
+const _SHIELD_SCENE := preload("res://scenes/skills/bubble_shield.tscn")
 
 @export_category("Player Controls")
 @export var action_left: String = "ui_left"
@@ -39,6 +40,17 @@ var yank_source: Node3D = null
 var _dash_timer: float = 0.0
 var _dash_active_timer: float = 0.0
 var _rope_constraint_pull: Vector3 = Vector3.ZERO
+var _knockback_timer: float = 0.0
+var shield_active: bool = false
+var _shield_visual: Node3D = null
+var anchor_resist: float = 0.0
+var slingshot_active: bool = false
+var slingshot_end_time: float = 0.0
+var slingshot_dir: Vector3 = Vector3.ZERO
+var slingshot_strength: float = 0.0
+var anchor_end_time: float = 0.0
+var balloon_curse_bonus: float = 0.0
+var balloon_curse_end_time: float = 0.0
 
 
 @onready var animated_sprite = $AnimatedSprite3D
@@ -61,7 +73,8 @@ var _is_recoil_active: bool = false
 
 func _ready():
 	spawn_position = global_position
-	
+	_build_shield_visual()
+
 	# Aligns Visuals container with the base center of the CapsuleShape3D
 	if visuals:
 		visuals.position = Vector3(0.82488, base_y_offset, 0.09399593)
@@ -117,7 +130,9 @@ func _physics_process(delta: float) -> void:
 		return
 	
 	# Terapkan gravitasi
-	if not is_on_floor():
+	if slingshot_active:
+		_apply_slingshot_physics(delta)
+	elif not is_on_floor():
 		velocity.y -= gravity * gravity_scale * delta
 	
 	# Handle jump (Menggunakan variabel action_jump)
@@ -153,7 +168,9 @@ func _physics_process(delta: float) -> void:
 	
 	var speed_multiplier = _get_speed_multiplier()
 	var target_speed = SPEED * speed_multiplier
-	if _dash_active_timer > 0.0:
+	if _knockback_timer > 0.0:
+		_knockback_timer -= delta
+	elif _dash_active_timer > 0.0:
 		pass  # Lock velocity to dash direction; move_toward would cancel it in ~3 frames
 	elif direction:
 		velocity.x = move_toward(velocity.x, direction.x * target_speed, target_speed * delta * 10)
@@ -175,6 +192,8 @@ func _physics_process(delta: float) -> void:
 	
 	var was_on_floor_before = is_on_floor()
 	move_and_slide()
+	_apply_anchor_and_balloon()
+	_clamp_to_conveyor_side()
 	var just_landed = is_on_floor() and not was_on_floor_before
 	
 	_update_3d_animations(delta, input_dir, direction, was_on_floor_before, just_landed)
@@ -356,6 +375,18 @@ func apply_powerup(powerup_type: String, duration: float, magnitude: float) -> v
 			_apply_slow_opponent(magnitude, duration)
 		"yank_opponent":
 			_apply_yank_opponent(magnitude, duration)
+		"bubble_shield":
+			_apply_bubble_shield()
+		"dash_recharge":
+			_apply_dash_recharge()
+		"iron_anchor":
+			_apply_iron_anchor(magnitude, duration)
+		"balloon_curse":
+			_apply_balloon_curse_opponent(magnitude, duration)
+		"slingshot_rocket":
+			_apply_slingshot_rocket(magnitude, duration)
+		"meteor_strike":
+			_apply_meteor_strike(magnitude)
 
 func _apply_speed_boost(multiplier: float, duration: float) -> void:
 	var now = Time.get_ticks_msec() / 1000.0
@@ -363,6 +394,8 @@ func _apply_speed_boost(multiplier: float, duration: float) -> void:
 	boost_end_time = max(boost_end_time, now + duration)
 
 func _apply_slow(multiplier: float, duration: float) -> void:
+	if _check_and_consume_shield():
+		return
 	var now = Time.get_ticks_msec() / 1000.0
 	slow_multiplier = min(slow_multiplier, multiplier)
 	slow_end_time = max(slow_end_time, now + duration)
@@ -381,6 +414,8 @@ func _apply_yank_opponent(strength: float, duration: float) -> void:
 
 func _apply_yank_from(source: Node3D, strength: float, duration: float) -> void:
 	if source == null:
+		return
+	if _check_and_consume_shield():
 		return
 	var now = Time.get_ticks_msec() / 1000.0
 	yank_source = source
@@ -415,8 +450,8 @@ func _get_speed_multiplier() -> float:
 		slow_multiplier = 1.0
 	return boost * slow
 
-func _get_other_player():
-	var fallback = null
+func _get_other_player() -> Node3D:
+	var fallback: Node3D = null
 	for node in get_tree().get_nodes_in_group("player"):
 		if node == self:
 			continue
@@ -461,6 +496,21 @@ func respawn():
 	is_alive = true
 	can_move = true
 	visible = true
+	shield_active = false
+	if _shield_visual:
+		_shield_visual.visible = false
+	slingshot_active = false
+	boost_multiplier = 1.0
+	boost_end_time = 0.0
+	slow_multiplier = 1.0
+	slow_end_time = 0.0
+	yank_source = null
+	yank_strength = 0.0
+	yank_end_time = 0.0
+	anchor_resist = 0.0
+	anchor_end_time = 0.0
+	balloon_curse_bonus = 0.0
+	balloon_curse_end_time = 0.0
 	print("Player respawn!")
 
 func set_match_active(active: bool) -> void:
@@ -468,6 +518,133 @@ func set_match_active(active: bool) -> void:
 	can_move = active and is_alive
 	if not active:
 		velocity = Vector3.ZERO
+
+
+func _build_shield_visual() -> void:
+	_shield_visual = _SHIELD_SCENE.instantiate()
+	_shield_visual.position = Vector3(0.0, 1.0, 0.0)
+	_shield_visual.visible = false
+	add_child(_shield_visual)
+
+
+func _check_and_consume_shield() -> bool:
+	if shield_active:
+		shield_active = false
+		if _shield_visual:
+			_shield_visual.visible = false
+		return true
+	return false
+
+
+func _apply_bubble_shield() -> void:
+	shield_active = true
+	if _shield_visual:
+		_shield_visual.visible = true
+
+
+func _apply_dash_recharge() -> void:
+	_dash_timer = 0.0
+
+
+func _apply_iron_anchor(resist: float, duration: float) -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	anchor_resist = max(anchor_resist, resist)
+	anchor_end_time = max(anchor_end_time, now + duration)
+
+
+func _apply_balloon_curse(bonus: float, duration: float) -> void:
+	if _check_and_consume_shield():
+		return
+	var now := Time.get_ticks_msec() / 1000.0
+	balloon_curse_bonus = max(balloon_curse_bonus, bonus)
+	balloon_curse_end_time = max(balloon_curse_end_time, now + duration)
+
+
+func _apply_balloon_curse_opponent(bonus: float, duration: float) -> void:
+	var other := _get_other_player()
+	if other and other.has_method("_apply_balloon_curse"):
+		other._apply_balloon_curse(bonus, duration)
+
+
+func _apply_slingshot_rocket(strength: float, duration: float) -> void:
+	var horiz_vel := Vector3(velocity.x, 0.0, velocity.z)
+	if horiz_vel.length() > 0.5:
+		slingshot_dir = horiz_vel.normalized()
+	else:
+		slingshot_dir = Vector3(-signf(global_position.x), 0.0, 0.0)
+	slingshot_strength = strength
+	slingshot_active = true
+	slingshot_end_time = Time.get_ticks_msec() / 1000.0 + duration
+	velocity.y = 40.0  # initial lift-off
+
+
+func _apply_slingshot_physics(delta: float) -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	if now > slingshot_end_time:
+		slingshot_active = false
+		return
+	# Melayang — tahan Y di ketinggian kecil, tidak ada gravitasi
+	velocity.y = lerpf(velocity.y, 1.5, delta * 6.0)
+	# Dorong terus ke arah hadap
+	velocity.x = slingshot_dir.x * slingshot_strength
+	velocity.z = slingshot_dir.z * slingshot_strength
+
+
+func _apply_meteor_from(impact_center: Vector3, strength: float) -> void:
+	if _check_and_consume_shield():
+		return
+	var dir := global_position - impact_center
+	if dir.length_squared() < 0.01:
+		dir = Vector3(randf_range(-1.0, 1.0), 1.0, randf_range(-1.0, 1.0))
+	dir = dir.normalized()
+	dir.y = maxf(dir.y, 0.35)
+	dir = dir.normalized()
+	velocity = dir * strength * 2.8
+	_knockback_timer = 0.4
+
+
+func _apply_meteor_strike(strength: float) -> void:
+	var other := _get_other_player()
+	if other == null:
+		return
+	const METEOR_SCENE_PATH := "res://scenes/skills/meteor.tscn"
+	if ResourceLoader.exists(METEOR_SCENE_PATH):
+		var meteor_packed := load(METEOR_SCENE_PATH) as PackedScene
+		if meteor_packed:
+			var meteor := meteor_packed.instantiate()
+			get_tree().current_scene.add_child(meteor)
+			if meteor.has_method("setup"):
+				meteor.call("setup", other.global_position, strength)
+			return
+	if other.has_method("_apply_meteor_from"):
+		other._apply_meteor_from(Vector3.ZERO, strength)
+
+
+func _apply_anchor_and_balloon() -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	var pv := get_platform_velocity()
+	var flat_platform := Vector3(pv.x, 0.0, pv.z)
+	if flat_platform.length_squared() < 0.01:
+		return
+	if now <= anchor_end_time:
+		velocity.x -= flat_platform.x * anchor_resist
+		velocity.z -= flat_platform.z * anchor_resist
+	else:
+		anchor_resist = 0.0
+	if now <= balloon_curse_end_time:
+		velocity.x += flat_platform.x * balloon_curse_bonus
+		velocity.z += flat_platform.z * balloon_curse_bonus
+	else:
+		balloon_curse_bonus = 0.0
+
+
+func _clamp_to_conveyor_side() -> void:
+	if spawn_position.x > 0.0 and global_position.x < 0.0:
+		global_position.x = 0.0
+		velocity.x = maxf(velocity.x, 0.0)
+	elif spawn_position.x < 0.0 and global_position.x > 0.0:
+		global_position.x = 0.0
+		velocity.x = minf(velocity.x, 0.0)
 
 
 func _notify_match_player_down() -> void:

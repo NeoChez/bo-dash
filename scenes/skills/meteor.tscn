@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3 uid="uid://b3cii5cqgg5d4"]
+
+[ext_resource type="PackedScene" uid="uid://bwukl5i34r130" path="res://scenes/skills/popcorn_ball_meteor.glb" id="1_whtt8"]
+[ext_resource type="Script" uid="uid://bt2mjaetacjmn" path="res://scenes/skills/meteor.gd" id="2_meteor"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aoe"]
+transparency = 1
+cull_mode = 2
+albedo_color = Color(0.68888474, 0.08178789, 0.27150667, 1)
+emission_enabled = true
+emission = Color(1, 0.35, 0.05, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_aoe"]
+top_radius = 7.0
+bottom_radius = 7.0
+height = 0.07
+radial_segments = 48
+
+[node name="Meteor_tscn" type="Node3D"]
+script = ExtResource("2_meteor")
+
+[node name="Sketchfab_Scene" parent="." instance=ExtResource("1_whtt8")]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 1.3441496, 0)
+
+[node name="AOE" type="Node3D" parent="."]
+top_level = true
+
+[node name="Mesh" type="MeshInstance3D" parent="AOE"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.29605472, 0)
+material_override = SubResource("StandardMaterial3D_aoe")
+mesh = SubResource("CylinderMesh_aoe")

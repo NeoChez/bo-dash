@@ -14,39 +14,68 @@ var player_2_character: String = "rex"
 # "scene_path" : (opsional) path ke scene/CanvasLayer untuk visual custom
 var skills: Dictionary = {
 	0: {
-		"name": "BASIC",
+		"name": "Bubble Shield",
+		"tier": "basic",
+		"color": Color(0.4, 0.85, 1.0, 0.75),
+		"key": "bubble_shield",
+		"magnitude": 1.0,
+		"duration": 0.0,   # permanent until consumed by one hit
+		"scene_path": "",
+	},
+	1: {
+		"name": "Iron Anchor",
+		"tier": "basic",
+		"color": Color(0.55, 0.6, 0.7, 0.75),
+		"key": "iron_anchor",
+		"magnitude": 0.9,  # fraction of conveyor velocity cancelled each frame
+		"duration": 5.0,
+		"scene_path": "",
+	},
+	2: {
+		"name": "Balloon Curse",
+		"tier": "annoying",
+		"color": Color(1.0, 0.5, 0.82, 0.75),
+		"key": "balloon_curse",
+		"magnitude": 0.8,  # fraction of conveyor velocity added as extra push
+		"duration": 3.0,
+		"scene_path": "",
+	},
+	3: {
+		"name": "Slingshot Rocket",
+		"tier": "annoying",
+		"color": Color(1.0, 0.28, 0.18, 0.75),
+		"key": "slingshot_rocket",
+		"magnitude": 55.0,
+		"duration": 0.5,
+		"scene_path": "",
+	},
+	4: {
+		"name": "Meteor Strike",
+		"tier": "annoying",
+		"color": Color(0.95, 0.5, 0.1, 0.75),
+		"key": "meteor_strike",
+		"magnitude": 40.0,
+		"duration": 0.0,
+		"scene_path": "res://scenes/skills/meteor.tscn",
+	},
+	5: {
+		"name": "Speed Boost",
 		"tier": "basic",
 		"color": Color(0.2, 0.9, 0.4, 0.75),
 		"key": "speed_boost",
 		"magnitude": 1.5,
 		"duration": 4.0,
-		"scene_path": "",  # isi nanti, misal "res://scenes/skills/speed_boost_hud.tscn"
-	},
-	1: {
-		"name": "ANNOYING",
-		"tier": "annoying",
-		"color": Color(1.0, 0.45, 0.2, 0.75),
-		"key": "slow_opponent",
-		"magnitude": 0.5,
-		"duration": 4.0,
 		"scene_path": "",
 	},
-	2: {
-		"name": "ANNOYING",
-		"tier": "annoying",
-		"color": Color(0.2, 0.6, 1.0, 0.75),
-		"key": "yank_opponent",
-		"magnitude": 18.0,
-		"duration": 4.0,
+	6: {
+		"name": "Dash Recharge",
+		"tier": "basic",
+		"color": Color(0.9, 0.85, 0.2, 0.75),
+		"key": "dash_recharge",
+		"magnitude": 1.0,
+		"duration": 0.0,
 		"scene_path": "",
 	},
-	# Contoh menambah skill baru nanti:
-	# 3: {
-	#   "name": "SHIELD", "tier": "basic",
-	#   "color": Color(0.9, 0.9, 0.2, 0.75),
-	#   "key": "shield", "magnitude": 1.0, "duration": 3.0,
-	#   "scene_path": "res://scenes/skills/shield_hud.tscn",
-	# },
 }
 
 # device ID yang terikat ke tiap player (-1 = tidak ada controller)

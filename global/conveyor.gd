@@ -35,7 +35,10 @@ func _cleanup_obstacles() -> void:
 		if not is_instance_valid(obs):
 			active_obstacles.remove_at(i)
 		elif _should_despawn(obs):
-			obs.queue_free()
+			if obs.has_method("start_fall"):
+				obs.start_fall()
+			else:
+				obs.queue_free()
 			active_obstacles.remove_at(i)
 
 

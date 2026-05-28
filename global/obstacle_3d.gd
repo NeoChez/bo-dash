@@ -38,7 +38,7 @@ func _physics_process(delta: float) -> void:
 	if col != null and col.get_normal().y > 0.5:
 		_vel_y = 0.0
 
-	if global_position.y < -4.0:
+	if global_position.y < -15.0:
 		_die()
 		return
 
@@ -58,6 +58,13 @@ func _die() -> void:
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	await tween.finished
 	queue_free()
+
+
+func start_fall() -> void:
+	if _dying:
+		return
+	move_direction = Vector3.ZERO
+	move_speed = 0.0
 
 
 func get_current_velocity() -> Vector3:
