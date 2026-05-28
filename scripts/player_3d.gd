@@ -6,16 +6,18 @@ extends CharacterBody3D
 @export var action_right: String = "ui_right"
 @export var action_up: String = "ui_up"
 @export var action_down: String = "ui_down"
-@export var action_jump: String = "ui_accept"
+@export var action_jump: String = "p1_jump"
 @export var action_dash: String = "p1_dash"
 @export var action_skill: String = "p1_skill"
 @export var jump_velocity: float = 16.0
 @export var gravity_scale: float = 3.2
+@export var respawn_delay: float = 1.5
 
 const SPEED = 15
 const KNOCKBACK_FORCE = 0
-const DASH_SPEED: float = 22.0
-const DASH_COOLDOWN: float = 0.7
+@export var dash_speed: float = 38.0
+@export var dash_cooldown: float = 0.7
+@export var dash_active_duration: float = 0.1
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var is_alive = true
@@ -23,7 +25,7 @@ var can_move = true
 var match_active = true
 var spawn_position: Vector3
 var rope_pull: Vector3 = Vector3.ZERO
-@export_range(0.0, 1.0) var rope_resist_factor: float = 0.65
+@export_range(0.0, 1.0) var rope_resist_factor: float = 0.45
 
 @export var player_id: int = 1
 
@@ -35,6 +37,7 @@ var yank_end_time: float = 0.0
 var yank_strength: float = 0.0
 var yank_source: Node3D = null
 var _dash_timer: float = 0.0
+var _dash_active_timer: float = 0.0
 var _rope_constraint_pull: Vector3 = Vector3.ZERO
 
 
@@ -58,9 +61,6 @@ var _is_recoil_active: bool = false
 
 func _ready():
 	spawn_position = global_position
-	
-	# Map action_jump to action_up (W for Player 2, Up Arrow for Player 1)
-	action_jump = action_up
 	
 	# Aligns Visuals container with the base center of the CapsuleShape3D
 	if visuals:
@@ -127,6 +127,7 @@ func _physics_process(delta: float) -> void:
 	# Handle dash
 	if _dash_timer > 0.0:
 		_dash_timer -= delta
+	_dash_active_timer = maxf(_dash_active_timer - delta, 0.0)
 	if Input.is_action_just_pressed(action_dash) and _dash_timer <= 0.0:
 		_do_dash()
 
@@ -152,7 +153,9 @@ func _physics_process(delta: float) -> void:
 	
 	var speed_multiplier = _get_speed_multiplier()
 	var target_speed = SPEED * speed_multiplier
-	if direction:
+	if _dash_active_timer > 0.0:
+		pass  # Lock velocity to dash direction; move_toward would cancel it in ~3 frames
+	elif direction:
 		velocity.x = move_toward(velocity.x, direction.x * target_speed, target_speed * delta * 10)
 		velocity.z = move_toward(velocity.z, direction.z * target_speed, target_speed * delta * 10)
 	else:
@@ -307,11 +310,15 @@ func _do_dash() -> void:
 		var facing := -1.0 if animated_sprite.flip_h else 1.0
 		dir = (transform.basis * Vector3(facing, 0, 0)).normalized()
 	dir.y = 0.0
-	velocity.x = dir.x * DASH_SPEED
-	velocity.z = dir.z * DASH_SPEED
-	_dash_timer = DASH_COOLDOWN
+	velocity.x = dir.x * dash_speed
+	velocity.z = dir.z * dash_speed
+	_dash_timer = dash_cooldown
+	_dash_active_timer = dash_active_duration
 
 func apply_rope_pull(pull: Vector3) -> void:
+	if _dash_active_timer > 0.0:
+		rope_pull += pull * 0.2  # Partial pullback during dash — limits unbounded stretch while keeping momentum
+		return
 	if is_on_floor():
 		var flat_pull := Vector3(pull.x, 0.0, pull.z)
 		if flat_pull.length_squared() > 0.0001:
@@ -325,6 +332,14 @@ func apply_rope_pull(pull: Vector3) -> void:
 
 func apply_rope_constraint(pull: Vector3) -> void:
 	_rope_constraint_pull += pull
+
+func is_dashing() -> bool:
+	return _dash_active_timer > 0.0
+
+func get_dash_cooldown_ratio() -> float:
+	if dash_cooldown <= 0.0:
+		return 1.0
+	return 1.0 - clamp(_dash_timer / dash_cooldown, 0.0, 1.0)
 
 func get_move_intent_world() -> Vector3:
 	var input_dir := Input.get_vector(action_left, action_right, action_up, action_down)
@@ -422,7 +437,7 @@ func fall_to_death():
 	visible = false
 	velocity = Vector3.ZERO
 	
-	await get_tree().create_timer(3.0).timeout
+	await get_tree().create_timer(respawn_delay).timeout
 	if match_active:
 		respawn()
 
@@ -436,7 +451,7 @@ func die():
 	visible = false
 	velocity = Vector3.ZERO
 	
-	await get_tree().create_timer(3.0).timeout
+	await get_tree().create_timer(respawn_delay).timeout
 	if match_active:
 		respawn()
 

@@ -16,6 +16,8 @@ var _match_time_left: float = MATCH_DURATION
 var _match_active: bool = true
 var _scores := {1: 0, 2: 0}
 var _skills := {1: -1, 2: -1}
+var _dash_bar_left: ProgressBar = null
+var _dash_bar_right: ProgressBar = null
 
 @onready var _player_1: CharacterBody3D = $Player
 @onready var _player_2: CharacterBody3D = $Player2
@@ -35,6 +37,7 @@ var _skills := {1: -1, 2: -1}
 
 func _ready() -> void:
 	add_to_group("match_controller")
+	_setup_dash_bars()
 	_update_hud()
 	_update_skill_slots()
 
@@ -47,6 +50,7 @@ func _process(delta: float) -> void:
 	_update_match_progress()
 	_update_timer_label()
 	_update_speed_labels()
+	_update_dash_bars()
 	if _match_time_left <= 0.0:
 		_finish_match()
 
@@ -191,3 +195,81 @@ func _get_left_side_player_id() -> int:
 	if _player_2 == null:
 		return 1
 	return 1 if _player_1.global_position.x <= _player_2.global_position.x else 2
+
+
+func _setup_dash_bars() -> void:
+	var hud: CanvasLayer = $HUD
+
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.06, 0.08, 0.13, 0.88)
+	for c in range(4):
+		bg.set_corner_radius(c, 5)
+
+	# Left card: x 30–330, extended bottom at y=148 → bar sits at y 110–142
+	_dash_bar_left = _make_dash_bar(
+		hud, false,
+		38.0, 110.0, 322.0, 142.0,
+		Color(0.25, 0.95, 0.78, 1.0), bg
+	)
+	# Right card: anchored to right edge, mirror of left
+	_dash_bar_right = _make_dash_bar(
+		hud, true,
+		-322.0, 110.0, -38.0, 142.0,
+		Color(1.0, 0.48, 0.5, 1.0), bg
+	)
+
+
+func _make_dash_bar(hud: CanvasLayer, anchor_to_right: bool,
+		ol: float, ot: float, or_: float, ob: float,
+		color: Color, bg: StyleBoxFlat) -> ProgressBar:
+	var bar := ProgressBar.new()
+	bar.max_value = 1.0
+	bar.value = 1.0
+	bar.show_percentage = false
+	if anchor_to_right:
+		bar.anchor_left = 1.0
+		bar.anchor_right = 1.0
+		bar.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	bar.offset_left = ol
+	bar.offset_top = ot
+	bar.offset_right = or_
+	bar.offset_bottom = ob
+
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = color
+	for c in range(4):
+		fill.set_corner_radius(c, 5)
+	bar.add_theme_stylebox_override("fill", fill)
+	bar.add_theme_stylebox_override("background", bg.duplicate())
+
+	# "DASH" label overlaid on the bar
+	var lbl := Label.new()
+	lbl.text = "DASH"
+	lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 15)
+	lbl.add_theme_color_override("font_color", Color(1, 1, 1, 0.85))
+	bar.add_child(lbl)
+
+	hud.add_child(bar)
+	return bar
+
+
+func _update_dash_bars() -> void:
+	var left_id := _get_left_side_player_id()
+	var left_p: CharacterBody3D = _player_1 if left_id == 1 else _player_2
+	var right_p: CharacterBody3D = _player_2 if left_id == 1 else _player_1
+	if _dash_bar_left and is_instance_valid(left_p) and left_p.has_method("get_dash_cooldown_ratio"):
+		var ratio: float = left_p.get_dash_cooldown_ratio()
+		_dash_bar_left.value = ratio
+		# Dim fill color while charging; bright when ready
+		var fill := _dash_bar_left.get_theme_stylebox("fill") as StyleBoxFlat
+		if fill:
+			fill.bg_color.a = lerpf(0.45, 1.0, ratio)
+	if _dash_bar_right and is_instance_valid(right_p) and right_p.has_method("get_dash_cooldown_ratio"):
+		var ratio: float = right_p.get_dash_cooldown_ratio()
+		_dash_bar_right.value = ratio
+		var fill := _dash_bar_right.get_theme_stylebox("fill") as StyleBoxFlat
+		if fill:
+			fill.bg_color.a = lerpf(0.45, 1.0, ratio)
