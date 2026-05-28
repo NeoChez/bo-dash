@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://cw8yk6kn6nmgo" path="res://scripts/match_controller.gd" id="9_match"]
 [ext_resource type="PackedScene" uid="uid://c3uqkeu4wa7kp" path="res://global/conveyor3d_right.tscn" id="9_yw17d"]
 [ext_resource type="Script" uid="uid://ctko058g4f6r0" path="res://scripts/pause_menu.gd" id="10_pause"]
+[ext_resource type="AudioStream" uid="uid://cbnd1xeye8ks6" path="res://assets/audio/soundtrack/MainSounds.mp3" id="10_s8d85"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_left"]
 bg_color = Color(0.11, 0.18, 0.2, 0.92)
@@ -503,3 +504,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57.212036, 0, 0)
 
 [node name="Conveyor Right" parent="." unique_id=657350804 instance=ExtResource("9_yw17d")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 57.219734, 0, 0)
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=546582301]
+stream = ExtResource("10_s8d85")
+autoplay = true

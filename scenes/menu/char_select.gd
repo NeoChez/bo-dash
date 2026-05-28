@@ -232,6 +232,8 @@ func _start_game() -> void:
 		# Right panel (P1Panel) uses L/' and is now Player 2
 		global_settings.player_2_character = characters[p1_index]
 	
+	MenuMusic.stop()
+	
 	# Load standard game scene
 	get_tree().change_scene_to_file("res://global/node_3d.tscn")
 

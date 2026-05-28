@@ -6,6 +6,9 @@ extends Control
 @onready var title = $TitleLabel
 
 func _ready() -> void:
+	if not MenuMusic.playing:
+		MenuMusic.play()
+	
 	# Connect button clicks
 	play_btn.pressed.connect(_on_play_pressed)
 	settings_btn.pressed.connect(_on_settings_pressed)
