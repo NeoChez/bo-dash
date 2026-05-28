@@ -32,6 +32,8 @@ extends Node3D
 @export var player_a_offset: Vector3 = Vector3(0, 1.2, 0)
 @export var player_b_offset: Vector3 = Vector3(0, 1.2, 0)
 
+@onready var tension_sfx = $TensionSFX
+var _was_tense: bool = false
 var player_a: CharacterBody3D
 var player_b: CharacterBody3D
 var points: PackedVector3Array
@@ -191,6 +193,11 @@ func _apply_player_tension(a_pos: Vector3, b_pos: Vector3, delta: float) -> void
 	var dist := diff_flat.length()
 
 	if dist <= rope_max_length or dist < 0.001:
+		_was_tense = false
+		if not _was_tense:
+			_was_tense = true
+			if tension_sfx:
+				tension_sfx.play()
 		return
 
 	var dir_flat := diff_flat / dist

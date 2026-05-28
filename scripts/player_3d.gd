@@ -1,6 +1,7 @@
 extends CharacterBody3D
 
 const _SHIELD_SCENE := preload("res://scenes/skills/bubble_shield.tscn")
+const _METEOR_SCENE := preload("res://scenes/skills/meteor.tscn")
 
 @export_category("Player Controls")
 @export var action_left: String = "ui_left"
@@ -68,6 +69,8 @@ var _state_timer: float = 0.0
 
 @onready var animated_sprite = $AnimatedSprite3D
 @onready var visuals = $Visuals
+@onready var jump_sfx = $JumpSFX
+@onready var dash_sfx = $DashSFX
 
 # 3D Visuals & Procedural Animations
 @export_group("3D Visuals & Animation")
@@ -131,6 +134,8 @@ func _physics_process(delta: float) -> void:
 		# Jump: hanya via tombol jump (Right Alt P1 / Left Alt P2), BUKAN tombol gerak W/P
 		if Input.is_action_just_pressed(action_jump) and is_on_floor():
 			velocity.y = jump_velocity
+			if jump_sfx:
+				jump_sfx.play()
 			change_state(PlayerState.JUMPING)
 
 		# Handle dash
@@ -139,6 +144,8 @@ func _physics_process(delta: float) -> void:
 		_dash_active_timer = maxf(_dash_active_timer - delta, 0.0)
 		if Input.is_action_just_pressed(action_dash) and _dash_timer <= 0.0:
 			_do_dash()
+			if dash_sfx:
+				dash_sfx.play()
 
 		# Handle skill use
 		if Input.is_action_just_pressed(action_skill):
@@ -625,17 +632,10 @@ func _apply_meteor_strike(strength: float) -> void:
 	var other := _get_other_player()
 	if other == null:
 		return
-	const METEOR_SCENE_PATH := "res://scenes/skills/meteor.tscn"
-	if ResourceLoader.exists(METEOR_SCENE_PATH):
-		var meteor_packed := load(METEOR_SCENE_PATH) as PackedScene
-		if meteor_packed:
-			var meteor := meteor_packed.instantiate()
-			get_tree().current_scene.add_child(meteor)
-			if meteor.has_method("setup"):
-				meteor.call("setup", other.global_position, strength)
-			return
-	if other.has_method("_apply_meteor_from"):
-		other._apply_meteor_from(Vector3.ZERO, strength)
+	var meteor := _METEOR_SCENE.instantiate()
+	get_tree().current_scene.add_child(meteor)
+	if meteor.has_method("setup"):
+		meteor.call("setup", other.global_position, strength)
 
 
 func _apply_anchor_and_balloon() -> void:

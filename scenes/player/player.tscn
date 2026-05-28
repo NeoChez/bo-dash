@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://clbs4ut175fn5"]
+[gd_scene format=3 uid="uid://clbs4ut175fn5"]
 
 [ext_resource type="Script" uid="uid://bbqkd0vwvd3ih" path="res://scripts/player_3d.gd" id="1_h6syq"]
 [ext_resource type="Texture2D" uid="uid://c1dftshldf4w3" path="res://assets/player/1.PNG" id="2_v2miy"]
@@ -6,6 +6,8 @@
 [ext_resource type="Texture2D" uid="uid://b4bnuofbtxiat" path="res://assets/player/3.PNG" id="4_toylo"]
 [ext_resource type="Texture2D" uid="uid://djat880cmtnka" path="res://assets/player/4.PNG" id="5_tb4ck"]
 [ext_resource type="PackedScene" uid="uid://dggg4ombyv4f5" path="res://assets/player/kingdom_hearts_iii_-_rex.glb" id="6_rex"]
+[ext_resource type="AudioStream" uid="uid://cwhi8brmw41v5" path="res://assets/audio/sfx/jump.mp3" id="7_0owmy"]
+[ext_resource type="AudioStream" uid="uid://dq0hd2rklpo7c" path="res://assets/audio/sfx/dash.mp3" id="8_qek5x"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ouxva"]
 radius = 0.5288086
@@ -50,33 +52,41 @@ animations = [{
 [sub_resource type="SphereShape3D" id="SphereShape3D_p47bc"]
 radius = 0.4542067
 
-[node name="Player" type="CharacterBody3D" groups=["player"]]
+[node name="Player" type="CharacterBody3D" unique_id=106382026 groups=["player"]]
 collision_mask = 15
 script = ExtResource("1_h6syq")
 
-[node name="Sprite3D" type="Sprite3D" parent="."]
+[node name="Sprite3D" type="Sprite3D" parent="." unique_id=207101457]
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 0.9, 0)
 visible = false
 billboard = 1
 texture = ExtResource("2_v2miy")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=118478203]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.82488, 1.8614215, 0.09399593)
 shape = SubResource("CapsuleShape3D_ouxva")
 
-[node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="."]
+[node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="." unique_id=1850748052]
 transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0, 2.1472855, 0)
 visible = false
 sprite_frames = SubResource("SpriteFrames_vlpqo")
 animation = &"walk"
 frame_progress = 0.23945878
 
-[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="." unique_id=391091192]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.537221, 3.44632, 0)
 shape = SubResource("SphereShape3D_p47bc")
 
-[node name="Visuals" type="Node3D" parent="."]
+[node name="Visuals" type="Node3D" parent="." unique_id=1693523831]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.82488, 0.53, 0.09399593)
 
-[node name="RexModel" parent="Visuals" instance=ExtResource("6_rex")]
+[node name="RexModel" parent="Visuals" unique_id=397746339 instance=ExtResource("6_rex")]
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, 0)
+
+[node name="JumpSFX" type="AudioStreamPlayer" parent="." unique_id=1659029442]
+stream = ExtResource("7_0owmy")
+volume_db = -15.0
+
+[node name="DashSFX" type="AudioStreamPlayer" parent="." unique_id=763848243]
+stream = ExtResource("8_qek5x")
+volume_db = -10.0
