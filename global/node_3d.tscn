@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://bo1t80jofmdre"]
 
-[ext_resource type="Script" uid="uid://0nia4bme67b6" path="res://global/conveyor.gd" id="1_kmy1e"]
 [ext_resource type="Script" uid="uid://cpwactebxbw3v" path="res://scripts/spawner_3d.gd" id="2_spawner"]
 [ext_resource type="PackedScene" uid="uid://clbs4ut175fn5" path="res://scenes/player/player.tscn" id="5_kmy1e"]
 [ext_resource type="Script" uid="uid://cdswhror157d0" path="res://global/death_area.gd" id="7_gj00n"]
@@ -78,9 +77,6 @@ corner_radius_bottom_right = 24
 corner_radius_bottom_left = 24
 shadow_color = Color(0, 0, 0, 0.35)
 shadow_size = 10
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(100, 1.6403809, 20)
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.28, 0.54, 0.88, 1)
@@ -377,16 +373,6 @@ offset_right = 285.0
 offset_bottom = 256.0
 text = "Quit Game"
 
-[node name="Ground" type="StaticBody3D" parent="." unique_id=1305268822 groups=["ground"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57, -0.5, 0)
-collision_layer = 4
-collision_mask = 3
-script = ExtResource("1_kmy1e")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=1367947540]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32019043, 0)
-shape = SubResource("BoxShape3D_ground")
-
 [node name="Camera3D" type="Camera3D" parent="." unique_id=714273533]
 transform = Transform3D(1, 0, 0, 0, 0.85054505, 0.52590233, 0, -0.52590233, 0.85054505, 0, 21.13499, 14.905491)
 fov = 118.3
@@ -407,7 +393,7 @@ script = ExtResource("2_spawner")
 spawn_interval = 3.5
 spawn_interval_jitter = 0.5
 move_speed = 20.0
-ground_node = NodePath("../Ground")
+ground_node = NodePath("")
 
 [node name="Lane1" type="Marker3D" parent="Spawner_Ground1" unique_id=26834894]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -5.345)
