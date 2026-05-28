@@ -72,6 +72,8 @@ var _landing_recoil_time: float = 0.0
 var _is_recoil_active: bool = false
 
 const ANIM_FALL_STANDUP_SPEED: float = 3.0
+const FALL_IMMUNITY_DURATION: float = 0.4
+var _fall_immunity_timer: float = 0.0
 
 func _ready():
 	spawn_position = global_position
@@ -92,6 +94,8 @@ func _ready():
 func _physics_process(delta: float) -> void:
 	if not match_active or not is_alive:
 		return
+
+	_fall_immunity_timer = maxf(_fall_immunity_timer - delta, 0.0)
 
 	# State machine: jangan override state spesial (FALLING/STANDING_UP/FLOATING)
 	if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP and current_state != PlayerState.FLOATING:
@@ -287,18 +291,16 @@ func _check_collisions():
 		var collision = get_slide_collision(i)
 		if collision:
 			var collider = collision.get_collider()
-			
+
 			if collider and collider.is_in_group("obstacle"):
-				# Trigger knockdown state machine
-				if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP:
+				if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP and _fall_immunity_timer <= 0.0:
+					# Dorong menjauh dari obstacle agar tidak nyangkut
+					var push_dir = (global_position - collider.global_position).normalized()
+					push_dir.y = 0.0
+					velocity.x += push_dir.x * 8.0
+					velocity.z += push_dir.z * 8.0
 					change_state(PlayerState.FALLING)
 					return
-					
-				var push_dir = (global_position - collider.global_position).normalized()
-				push_dir.y = 0 
-				
-				velocity.x += push_dir.x * KNOCKBACK_FORCE
-				velocity.z += push_dir.z * KNOCKBACK_FORCE
 
 func _do_dash() -> void:
 	var input_dir := Input.get_vector(action_left, action_right, action_up, action_down)
@@ -493,13 +495,18 @@ func change_state(new_state: PlayerState) -> void:
 
 		PlayerState.FALLING:
 			can_move = false
+			yank_source = null
+			yank_strength = 0.0
 			_change_model("res://assets/player/male/fall.glb", ANIM_FALL_STANDUP_SPEED)
 			_connect_anim_finished_once(func(): change_state(PlayerState.STANDING_UP))
 
 		PlayerState.STANDING_UP:
 			can_move = false
 			_change_model("res://assets/player/male/standup.glb", ANIM_FALL_STANDUP_SPEED)
-			_connect_anim_finished_once(func(): change_state(PlayerState.RUNNING))
+			_connect_anim_finished_once(func():
+				_fall_immunity_timer = FALL_IMMUNITY_DURATION
+				change_state(PlayerState.RUNNING)
+			)
 
 		PlayerState.FLOATING:
 			can_move = false
