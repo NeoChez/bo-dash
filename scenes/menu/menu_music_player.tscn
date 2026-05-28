@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://cifvbme6rriyr"]
+[gd_scene load_steps=0 format=3 uid="uid://cifvbme6rriyr"]
 
 [ext_resource type="AudioStream" uid="uid://b4ixgjsk6tt38" path="res://assets/audio/soundtrack/MainMenuMusic.mp3" id="1_56gfu"]
 

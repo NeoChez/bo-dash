@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3 uid="uid://w67osygtrya2"]
+
+[ext_resource type="Script" uid="uid://dqwn6o10oj21w" path="res://global/obstacle_3d.gd" id="1_obstacle"]
+
+[sub_resource type="StandardMaterial3D" id="mat_wall"]
+albedo_color = Color(0.5, 0.5, 0.5, 1)
+roughness = 0.85
+
+[sub_resource type="BoxMesh" id="mesh_wall"]
+material = SubResource("mat_wall")
+size = Vector3(1.5, 3.5, 20)
+
+[sub_resource type="BoxShape3D" id="shape_wall"]
+size = Vector3(1.5, 3.5, 20)
+
+[node name="obstacle_wall" type="AnimatableBody3D" groups=["item", "obstacle"]]
+collision_layer = 2
+collision_mask = 5
+sync_to_physics = false
+script = ExtResource("1_obstacle")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+mesh = SubResource("mesh_wall")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+shape = SubResource("shape_wall")

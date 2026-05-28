@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://bslwpfqqigx31"]
+[gd_scene load_steps=0 format=3 uid="uid://bslwpfqqigx31"]
 
 [ext_resource type="Script" uid="uid://dg0eiuw6g5tsj" path="res://scripts/obstacle/obstacle_box.gd" id="1_1dk53"]
 [ext_resource type="PackedScene" uid="uid://dppvkldgqvrc4" path="res://assets/obstacle/obstacle2.glb" id="1_2lv2r"]
