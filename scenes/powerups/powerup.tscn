@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://ckct83pnfufhw"]
+[gd_scene format=3 uid="uid://ckct83pnfufhw"]
 
 [ext_resource type="PackedScene" uid="uid://c0776u0s1ed8f" path="res://assets/item/mario_kart_item_box.glb" id="2_wb3hp"]
 
