@@ -10,6 +10,8 @@ size = Vector3(11.815592, 4.9553757, 1.8248138)
 size = Vector3(1.9597778, 4.9294806, 1.8436394)
 
 [node name="obstacle_chalwall" type="AnimatableBody3D" unique_id=1557638011 groups=["item", "obstacle"]]
+collision_layer = 2
+collision_mask = 1
 sync_to_physics = false
 script = ExtResource("1_4odgk")
 

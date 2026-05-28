@@ -1,6 +1,7 @@
 extends CharacterBody3D
 
 const _SHIELD_SCENE := preload("res://scenes/skills/bubble_shield.tscn")
+const _METEOR_SCENE := preload("res://scenes/skills/meteor.tscn")
 
 @export_category("Player Controls")
 @export var action_left: String = "ui_left"
@@ -103,7 +104,8 @@ func _ready():
 			
 		# Initialize default state as running!
 		current_state = PlayerState.RUNNING
-		_change_model("res://assets/player/male/running.glb")
+		_change_model("res://assets/player/" + _get_character_name() + "/running.glb")
+
 
 func _physics_process(delta: float) -> void:
 	if not match_active or not is_alive:
@@ -469,6 +471,15 @@ func _get_other_player() -> Node3D:
 			fallback = node
 	return fallback
 
+func _get_character_name() -> String:
+	var global_settings = get_node_or_null("/root/GlobalSettings")
+	if global_settings:
+		if player_id == 1:
+			return global_settings.player_1_character
+		else:
+			return global_settings.player_2_character
+	return "male"
+
 func fall_to_death():
 	if not is_alive:
 		return
@@ -615,17 +626,10 @@ func _apply_meteor_strike(strength: float) -> void:
 	var other := _get_other_player()
 	if other == null:
 		return
-	const METEOR_SCENE_PATH := "res://scenes/skills/meteor.tscn"
-	if ResourceLoader.exists(METEOR_SCENE_PATH):
-		var meteor_packed := load(METEOR_SCENE_PATH) as PackedScene
-		if meteor_packed:
-			var meteor := meteor_packed.instantiate()
-			get_tree().current_scene.add_child(meteor)
-			if meteor.has_method("setup"):
-				meteor.call("setup", other.global_position, strength)
-			return
-	if other.has_method("_apply_meteor_from"):
-		other._apply_meteor_from(Vector3.ZERO, strength)
+	var meteor := _METEOR_SCENE.instantiate()
+	get_tree().current_scene.add_child(meteor)
+	if meteor.has_method("setup"):
+		meteor.call("setup", other.global_position, strength)
 
 
 func _apply_anchor_and_balloon() -> void:
@@ -666,22 +670,22 @@ func change_state(new_state: PlayerState) -> void:
 	match current_state:
 		PlayerState.RUNNING:
 			can_move = true
-			_change_model("res://assets/player/male/running.glb")
+			_change_model("res://assets/player/" + _get_character_name() + "/running.glb")
 
 		PlayerState.JUMPING:
 			can_move = true
-			_change_model("res://assets/player/male/jumping.glb")
+			_change_model("res://assets/player/" + _get_character_name() + "/jumping.glb")
 
 		PlayerState.FALLING:
 			can_move = false
 			yank_source = null
 			yank_strength = 0.0
-			_change_model("res://assets/player/male/fall.glb", ANIM_FALL_STANDUP_SPEED)
+			_change_model("res://assets/player/" + _get_character_name() + "/fall.glb", ANIM_FALL_STANDUP_SPEED)
 			_connect_anim_finished_once(func(): change_state(PlayerState.STANDING_UP))
 
 		PlayerState.STANDING_UP:
 			can_move = false
-			_change_model("res://assets/player/male/standup.glb", ANIM_FALL_STANDUP_SPEED)
+			_change_model("res://assets/player/" + _get_character_name() + "/standup.glb", ANIM_FALL_STANDUP_SPEED)
 			_connect_anim_finished_once(func():
 				_fall_immunity_timer = FALL_IMMUNITY_DURATION
 				change_state(PlayerState.RUNNING)
@@ -689,7 +693,7 @@ func change_state(new_state: PlayerState) -> void:
 
 		PlayerState.FLOATING:
 			can_move = false
-			_change_model("res://assets/player/male/floating.glb")
+			_change_model("res://assets/player/" + _get_character_name() + "/floating.glb")
 
 func _connect_anim_finished_once(callback: Callable) -> void:
 	var anim_player = _find_animation_player(_current_model_node)

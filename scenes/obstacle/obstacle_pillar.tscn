@@ -11,7 +11,7 @@ size = Vector3(1.7695313, 3.3719482, 1.6259155)
 [node name="obstacle_chalwall" type="AnimatableBody3D" unique_id=1557638011 groups=["item", "obstacle"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5532911, 0, 0)
 collision_layer = 2
-collision_mask = 5
+collision_mask = 1
 sync_to_physics = false
 
 [node name="emptywall" parent="." unique_id=1978803830 instance=ExtResource("1_ja72x")]

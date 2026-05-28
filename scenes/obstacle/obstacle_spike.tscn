@@ -11,6 +11,8 @@ size = Vector3(2.8359375, 4.699951, 2.8161926)
 
 [node name="obstacle_spike" type="AnimatableBody3D" unique_id=1268452587 groups=["item", "obstacle"]]
 transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
+collision_layer = 2
+collision_mask = 1
 sync_to_physics = false
 script = ExtResource("1_rt4eq")
 knockback_force = 100.0
@@ -27,6 +29,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.09451914, 2.0911055, 2.9534
 shape = SubResource("BoxShape3D_54qds")
 
 [node name="Area3D" type="Area3D" parent="." unique_id=854503621]
+collision_layer = 2
+collision_mask = 1
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1302043236]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.02724433, 2.5076215, -3.5092802)

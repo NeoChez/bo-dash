@@ -12,11 +12,17 @@ extends Control
 
 @onready var countdown_lbl = $CountdownLabel
 
-var characters = ["male"]
+var characters = ["male", "female"]
 
 var char_config = {
 	"male": {
 		"scene": "res://assets/player/male/idle.glb",
+		"scale": Vector3(8.5, 8.5, 8.5),
+		"offset": Vector3(0.0, -2.0, 0.0),
+		"rotation": Vector3(0.0, 0.0, 0.0)
+	},
+	"female": {
+		"scene": "res://assets/player/female/idle.glb",
 		"scale": Vector3(8.5, 8.5, 8.5),
 		"offset": Vector3(0.0, -2.0, 0.0),
 		"rotation": Vector3(0.0, 0.0, 0.0)
@@ -49,36 +55,34 @@ func _input(event: InputEvent) -> void:
 	if countdown_active:
 		return
 		
-	# --- PLAYER 2 (LEFT PLAYER) ---
+	# --- PLAYER 1 (LEFT PLAYER, p1_* = WASD) ---
 	if not p2_ready:
-		if event.is_action_pressed("p2_left"):
+		if event.is_action_pressed("p1_left"):
 			p2_index = (p2_index - 1 + characters.size()) % characters.size()
 			_update_p2_ui()
 			_bounce_card(p2_card)
-		elif event.is_action_pressed("p2_right"):
+		elif event.is_action_pressed("p1_right"):
 			p2_index = (p2_index + 1) % characters.size()
 			_update_p2_ui()
 			_bounce_card(p2_card)
 
-	# Ready trigger for P2
-	if event.is_action_pressed("p2_up"):
+	if event.is_action_pressed("p1_up"):
 		p2_ready = !p2_ready
 		_update_p2_ui()
 		_check_start_countdown()
 
-	# --- PLAYER 1 (RIGHT PLAYER) ---
+	# --- PLAYER 2 (RIGHT PLAYER, p2_* = L/P/;/') ---
 	if not p1_ready:
-		if event.is_action_pressed("p1_left"):
+		if event.is_action_pressed("p2_left"):
 			p1_index = (p1_index - 1 + characters.size()) % characters.size()
 			_update_p1_ui()
 			_bounce_card(p1_card)
-		elif event.is_action_pressed("p1_right"):
+		elif event.is_action_pressed("p2_right"):
 			p1_index = (p1_index + 1) % characters.size()
 			_update_p1_ui()
 			_bounce_card(p1_card)
 
-	# Ready trigger for P1
-	if event.is_action_pressed("p1_up"):
+	if event.is_action_pressed("p2_up"):
 		p1_ready = !p1_ready
 		_update_p1_ui()
 		_check_start_countdown()
@@ -104,7 +108,10 @@ func _get_char_style(char_name: String) -> Dictionary:
 
 func _update_p2_ui() -> void:
 	var raw_name = characters[p2_index]
-	p2_char_lbl.text = raw_name.to_upper()
+	if characters.size() > 1:
+		p2_char_lbl.text = "< " + raw_name.to_upper() + " >"
+	else:
+		p2_char_lbl.text = raw_name.to_upper()
 	
 	_spawn_preview_model(p2_pivot, raw_name)
 	
@@ -142,7 +149,10 @@ func _update_p2_ui() -> void:
 
 func _update_p1_ui() -> void:
 	var raw_name = characters[p1_index]
-	p1_char_lbl.text = raw_name.to_upper()
+	if characters.size() > 1:
+		p1_char_lbl.text = "< " + raw_name.to_upper() + " >"
+	else:
+		p1_char_lbl.text = raw_name.to_upper()
 	
 	_spawn_preview_model(p1_pivot, raw_name)
 	
@@ -215,8 +225,12 @@ func _start_game() -> void:
 	# Save selections to the autoload GlobalSettings
 	var global_settings = get_node_or_null("/root/GlobalSettings")
 	if global_settings:
-		global_settings.player_1_character = characters[p1_index]
-		global_settings.player_2_character = characters[p2_index]
+		# Left panel (P2Panel) uses A/D and is now Player 1
+		global_settings.player_1_character = characters[p2_index]
+		# Right panel (P1Panel) uses L/' and is now Player 2
+		global_settings.player_2_character = characters[p1_index]
+	
+	MenuMusic.stop()
 	
 	# Load standard game scene
 	get_tree().change_scene_to_file("res://global/node_3d.tscn")

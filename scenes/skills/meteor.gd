@@ -10,16 +10,22 @@ var _impact_strength: float = 30.0
 var _travel_dir: Vector3
 var _travel_speed: float
 var _falling: bool = false
+var _bank_side: float = 1.0
+var _flight_time: float = 0.0
 
 
 func setup(target_position: Vector3, strength: float) -> void:
 	_target_pos = target_position
 	_impact_strength = strength
-	# Spawn jauh di atas + menyamping — di luar layar kamera
-	var offset := Vector3(randf_range(-14.0, 14.0), 30.0, randf_range(-5.0, 5.0))
+	# Spawn dari sisi yang sama dengan target player, di luar layar
+	var side := 1.0 if target_position.x >= 0.0 else -1.0
+	var offset := Vector3(side * randf_range(55.0, 70.0), 18.0, randf_range(-4.0, 4.0))
 	global_position = _target_pos + offset
 	_travel_dir = (_target_pos - global_position).normalized()
 	_travel_speed = global_position.distance_to(_target_pos) / FALL_DELAY
+	# Flip horizontal saat spawn dari kiri
+	if side < 0.0:
+		scale.x = -1.0
 	_setup_aoe()
 	_falling = true
 
@@ -37,8 +43,6 @@ func _process(delta: float) -> void:
 	if not _falling:
 		return
 	global_position += _travel_dir * _travel_speed * delta
-	rotation.z += delta * 4.0
-	# Deteksi lewat target pakai dot product — tidak ada melambat di ujung
 	if (_target_pos - global_position).dot(_travel_dir) <= 0.0:
 		global_position = _target_pos
 		_on_impact()

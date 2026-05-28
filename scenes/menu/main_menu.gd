@@ -6,6 +6,9 @@ extends Control
 @onready var title = $TitleLabel
 
 func _ready() -> void:
+	if not MenuMusic.playing:
+		MenuMusic.play()
+	
 	# Connect button clicks
 	play_btn.pressed.connect(_on_play_pressed)
 	settings_btn.pressed.connect(_on_settings_pressed)
@@ -86,11 +89,7 @@ func _on_play_pressed() -> void:
 
 func _on_settings_pressed() -> void:
 	_play_press_anim(settings_btn, func():
-		var dialog = AcceptDialog.new()
-		dialog.title = "Settings"
-		dialog.dialog_text = "Controls:\nPlayer Left (P2): WASD to move, W to jump.\nPlayer Right (P1): Arrow Keys to move, Up Arrow to jump."
-		add_child(dialog)
-		dialog.popup_centered(Vector2i(350, 150))
+		get_tree().change_scene_to_file("res://scenes/menu/settings_menu.tscn")
 	)
 
 func _on_exit_pressed() -> void:

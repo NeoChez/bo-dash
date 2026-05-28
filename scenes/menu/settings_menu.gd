@@ -1,0 +1,316 @@
+extends Control
+
+const ACTIONS_P1 := ["p1_left", "p1_right", "p1_up", "p1_down", "p1_jump", "p1_dash", "p1_skill"]
+const ACTIONS_P2 := ["p2_left", "p2_right", "p2_up", "p2_down", "p2_jump", "p2_dash", "p2_skill"]
+const ACTION_LABELS := ["Left", "Right", "Up", "Down", "Jump", "Dash", "Skill"]
+
+var _listening_action: String = ""
+var _listening_btn: Button = null
+var _bind_btns: Dictionary = {}
+var _bgm_slider: HSlider
+var _sfx_slider: HSlider
+
+const FONT_PATH := "res://assets/fonts/Wonder_Boys.ttf"
+
+
+func _ready() -> void:
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_build_ui()
+
+
+func _build_ui() -> void:
+	var font: Font = load(FONT_PATH) if ResourceLoader.exists(FONT_PATH) else null
+
+	# Dark overlay background
+	var bg := ColorRect.new()
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0.06, 0.08, 0.12, 0.97)
+	add_child(bg)
+
+	# Scroll container for all content
+	var scroll := ScrollContainer.new()
+	scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	scroll.offset_top = 0
+	add_child(scroll)
+
+	var vbox := VBoxContainer.new()
+	vbox.set_h_size_flags(Control.SIZE_EXPAND_FILL)
+	vbox.add_theme_constant_override("separation", 16)
+	vbox.offset_left = 0
+	scroll.add_child(vbox)
+
+	var inner := MarginContainer.new()
+	inner.set_h_size_flags(Control.SIZE_EXPAND_FILL)
+	inner.add_theme_constant_override("margin_left", 60)
+	inner.add_theme_constant_override("margin_right", 60)
+	inner.add_theme_constant_override("margin_top", 40)
+	inner.add_theme_constant_override("margin_bottom", 40)
+	vbox.add_child(inner)
+
+	var content := VBoxContainer.new()
+	content.add_theme_constant_override("separation", 24)
+	inner.add_child(content)
+
+	# ── Title
+	var title := Label.new()
+	title.text = "SETTINGS"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 42)
+	if font: title.add_theme_font_override("font", font)
+	title.add_theme_color_override("font_color", Color(1, 0.92, 0.05, 1))
+	title.add_theme_color_override("font_outline_color", Color(0.04, 0.08, 0.18, 1))
+	title.add_theme_constant_override("outline_size", 12)
+	content.add_child(title)
+
+	_add_separator(content)
+
+	# ── AUDIO SECTION
+	_add_section_label(content, "AUDIO", font)
+
+	var audio_grid := GridContainer.new()
+	audio_grid.columns = 3
+	audio_grid.add_theme_constant_override("h_separation", 16)
+	audio_grid.add_theme_constant_override("v_separation", 12)
+	content.add_child(audio_grid)
+
+	# BGM
+	_add_label(audio_grid, "BGM Music", font)
+	_bgm_slider = _make_slider(GlobalSettings.bgm_volume)
+	_bgm_slider.value_changed.connect(_on_bgm_changed)
+	audio_grid.add_child(_bgm_slider)
+	var bgm_pct := _make_pct_label(int(GlobalSettings.bgm_volume * 100))
+	audio_grid.add_child(bgm_pct)
+	_bgm_slider.value_changed.connect(func(v): bgm_pct.text = "%d%%" % int(v * 100))
+
+	# SFX
+	_add_label(audio_grid, "SFX", font)
+	_sfx_slider = _make_slider(GlobalSettings.sfx_volume)
+	_sfx_slider.value_changed.connect(_on_sfx_changed)
+	audio_grid.add_child(_sfx_slider)
+	var sfx_pct := _make_pct_label(int(GlobalSettings.sfx_volume * 100))
+	audio_grid.add_child(sfx_pct)
+	_sfx_slider.value_changed.connect(func(v): sfx_pct.text = "%d%%" % int(v * 100))
+
+	_add_separator(content)
+
+	# ── KEY BINDINGS SECTION
+	_add_section_label(content, "KEY BINDINGS", font)
+
+	var hint := Label.new()
+	hint.text = "Click a button then press a key to remap. Press Esc to cancel."
+	hint.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9, 0.8))
+	hint.add_theme_font_size_override("font_size", 14)
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	content.add_child(hint)
+
+	# Two-column layout: P1 | P2
+	var columns := HBoxContainer.new()
+	columns.add_theme_constant_override("separation", 40)
+	content.add_child(columns)
+
+	_build_player_bindings(columns, "PLAYER 1 (Left)", ACTIONS_P1, font)
+	var divider := VSeparator.new()
+	divider.custom_minimum_size = Vector2(2, 0)
+	columns.add_child(divider)
+	_build_player_bindings(columns, "PLAYER 2 (Right)", ACTIONS_P2, font)
+
+	_add_separator(content)
+
+	# ── Back button
+	var back_btn := _make_button("BACK", font)
+	back_btn.custom_minimum_size = Vector2(200, 52)
+	back_btn.pressed.connect(_on_back_pressed)
+	var back_center := CenterContainer.new()
+	back_center.add_child(back_btn)
+	content.add_child(back_center)
+
+
+func _build_player_bindings(parent: Control, title: String, actions: Array, font: Font) -> void:
+	var col := VBoxContainer.new()
+	col.set_h_size_flags(Control.SIZE_EXPAND_FILL)
+	col.add_theme_constant_override("separation", 8)
+	parent.add_child(col)
+
+	var lbl := Label.new()
+	lbl.text = title
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 18)
+	if font: lbl.add_theme_font_override("font", font)
+	lbl.add_theme_color_override("font_color", Color(0.85, 0.95, 1.0, 1))
+	col.add_child(lbl)
+
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 8)
+	col.add_child(grid)
+
+	for i in range(actions.size()):
+		var action: String = actions[i]
+		var row_lbl := Label.new()
+		row_lbl.text = ACTION_LABELS[i]
+		row_lbl.add_theme_font_size_override("font_size", 15)
+		row_lbl.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9, 1))
+		row_lbl.custom_minimum_size = Vector2(80, 0)
+		grid.add_child(row_lbl)
+
+		var btn := _make_key_button(_get_key_label(action), font)
+		btn.pressed.connect(_start_listening.bind(action, btn))
+		grid.add_child(btn)
+		_bind_btns[action] = btn
+
+
+func _make_slider(value: float) -> HSlider:
+	var s := HSlider.new()
+	s.min_value = 0.0
+	s.max_value = 1.0
+	s.step = 0.01
+	s.value = value
+	s.custom_minimum_size = Vector2(260, 28)
+	s.set_h_size_flags(Control.SIZE_EXPAND_FILL)
+	return s
+
+
+func _make_pct_label(pct: int) -> Label:
+	var l := Label.new()
+	l.text = "%d%%" % pct
+	l.add_theme_font_size_override("font_size", 15)
+	l.add_theme_color_override("font_color", Color(1, 1, 1, 0.8))
+	l.custom_minimum_size = Vector2(48, 0)
+	return l
+
+
+func _make_button(text: String, font: Font) -> Button:
+	var btn := Button.new()
+	btn.text = text
+	btn.add_theme_font_size_override("font_size", 20)
+	if font: btn.add_theme_font_override("font", font)
+	btn.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	btn.add_theme_color_override("font_outline_color", Color(0.04, 0.08, 0.18, 1))
+	btn.add_theme_constant_override("outline_size", 8)
+	return btn
+
+
+func _make_key_button(label: String, font: Font) -> Button:
+	var btn := Button.new()
+	btn.text = label
+	btn.custom_minimum_size = Vector2(120, 34)
+	btn.add_theme_font_size_override("font_size", 14)
+	if font: btn.add_theme_font_override("font", font)
+	btn.add_theme_color_override("font_color", Color(1, 1, 0.8, 1))
+	btn.add_theme_color_override("font_outline_color", Color(0.04, 0.08, 0.18, 1))
+	btn.add_theme_constant_override("outline_size", 4)
+	return btn
+
+
+func _add_label(parent: Control, text: String, font: Font) -> void:
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_size_override("font_size", 16)
+	l.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9, 1))
+	l.custom_minimum_size = Vector2(140, 0)
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	parent.add_child(l)
+
+
+func _add_section_label(parent: Control, text: String, font: Font) -> void:
+	var l := Label.new()
+	l.text = text
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.add_theme_font_size_override("font_size", 22)
+	if font: l.add_theme_font_override("font", font)
+	l.add_theme_color_override("font_color", Color(0.4, 0.88, 1.0, 1))
+	l.add_theme_color_override("font_outline_color", Color(0.04, 0.08, 0.18, 1))
+	l.add_theme_constant_override("outline_size", 6)
+	parent.add_child(l)
+
+
+func _add_separator(parent: Control) -> void:
+	var sep := HSeparator.new()
+	parent.add_child(sep)
+
+
+const SYMBOL_MAP := {
+	KEY_SEMICOLON: ";",
+	KEY_APOSTROPHE: "'",
+	KEY_QUOTELEFT: "`",
+	KEY_BRACKETLEFT: "[",
+	KEY_BRACKETRIGHT: "]",
+	KEY_BACKSLASH: "\\",
+	KEY_SLASH: "/",
+	KEY_COMMA: ",",
+	KEY_PERIOD: ".",
+	KEY_MINUS: "-",
+	KEY_EQUAL: "=",
+	KEY_PLUS: "+",
+	KEY_ASTERISK: "*",
+}
+
+
+func _get_key_label(action: String) -> String:
+	for ev in InputMap.action_get_events(action):
+		if ev is InputEventKey:
+			var kc: int = ev.physical_keycode if ev.physical_keycode != 0 else ev.keycode
+			if SYMBOL_MAP.has(kc):
+				return SYMBOL_MAP[kc]
+			return OS.get_keycode_string(kc)
+	return "---"
+
+
+func _start_listening(action: String, btn: Button) -> void:
+	if _listening_action != "":
+		if _listening_btn:
+			_listening_btn.text = _get_key_label(_listening_action)
+	_listening_action = action
+	_listening_btn = btn
+	btn.text = "[ Press... ]"
+
+
+func _cancel_listening() -> void:
+	_listening_action = ""
+	_listening_btn = null
+
+
+func _input(event: InputEvent) -> void:
+	if _listening_action == "":
+		return
+	if not (event is InputEventKey and event.pressed and not event.echo):
+		return
+
+	if event.physical_keycode == KEY_ESCAPE:
+		if _listening_btn:
+			_listening_btn.text = _get_key_label(_listening_action)
+		_cancel_listening()
+		get_viewport().set_input_as_handled()
+		return
+
+	# Remap: remove old keyboard event, add new
+	for ev in InputMap.action_get_events(_listening_action).duplicate():
+		if ev is InputEventKey:
+			InputMap.action_erase_event(_listening_action, ev)
+
+	var new_ev := InputEventKey.new()
+	new_ev.physical_keycode = event.physical_keycode if event.physical_keycode != 0 else event.keycode
+	InputMap.action_add_event(_listening_action, new_ev)
+
+	if _listening_btn:
+		_listening_btn.text = _get_key_label(_listening_action)
+	_cancel_listening()
+	GlobalSettings.save_settings()
+	get_viewport().set_input_as_handled()
+
+
+func _on_bgm_changed(value: float) -> void:
+	GlobalSettings.bgm_volume = value
+	GlobalSettings.apply_audio()
+	GlobalSettings.save_settings()
+
+
+func _on_sfx_changed(value: float) -> void:
+	GlobalSettings.sfx_volume = value
+	GlobalSettings.apply_audio()
+	GlobalSettings.save_settings()
+
+
+func _on_back_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")

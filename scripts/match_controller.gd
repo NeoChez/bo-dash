@@ -13,8 +13,8 @@ var _carousel_active := {1: false, 2: false}
 var _dash_bar_left: ProgressBar = null
 var _dash_bar_right: ProgressBar = null
 
-@onready var _player_1: CharacterBody3D = $Player
-@onready var _player_2: CharacterBody3D = $Player2
+@onready var _player_1: CharacterBody3D = $Player2
+@onready var _player_2: CharacterBody3D = $Player
 @onready var _spawner_1: Node = $Spawner_Ground1
 @onready var _spawner_2: Node = $Spawner_Ground2
 @onready var _timer_label: Label = $HUD/TimerLabel
@@ -34,6 +34,9 @@ func _ready() -> void:
 	_setup_dash_bars()
 	_update_hud()
 	_update_skill_slots()
+	var bgm := get_node_or_null("AudioStreamPlayer")
+	if bgm is AudioStreamPlayer:
+		bgm.bus = "Music"
 
 
 func _process(delta: float) -> void:
@@ -67,8 +70,8 @@ func on_skill_picked_up(player_id: int, skill_type: int) -> void:
 	if not _skills.has(player_id):
 		return
 	_skills[player_id] = skill_type
-	var color_rect: ColorRect = _skill_left_color if player_id == 2 else _skill_right_color
-	var label: Label = _skill_left_label if player_id == 2 else _skill_right_label
+	var color_rect: ColorRect = _skill_left_color if player_id == 1 else _skill_right_color
+	var label: Label = _skill_left_label if player_id == 1 else _skill_right_label
 	_spin_carousel(color_rect, label, skill_type, player_id)
 
 
@@ -132,8 +135,8 @@ func _show_result() -> void:
 
 
 func _update_skill_slots() -> void:
-	_refresh_slot(_skill_left_color, _skill_left_label, _skills.get(2, -1))
-	_refresh_slot(_skill_right_color, _skill_right_label, _skills.get(1, -1))
+	_refresh_slot(_skill_left_color, _skill_left_label, _skills.get(1, -1))
+	_refresh_slot(_skill_right_color, _skill_right_label, _skills.get(2, -1))
 
 
 func _refresh_slot(color_rect: ColorRect, label: Label, skill: int) -> void:
@@ -205,8 +208,8 @@ func _update_timer_label() -> void:
 func _update_score_labels() -> void:
 	var left_player_id: int = _get_left_side_player_id()
 	var right_player_id: int = 2 if left_player_id == 1 else 1
-	_score_left_label.text = "P%d Star %d" % [left_player_id, int(_scores[left_player_id])]
-	_score_right_label.text = "P%d Star %d" % [right_player_id, int(_scores[right_player_id])]
+	_score_left_label.text = "Star: %d" % int(_scores[left_player_id])
+	_score_right_label.text = "Star: %d" % int(_scores[right_player_id])
 
 
 func _update_speed_labels() -> void:
@@ -216,10 +219,10 @@ func _update_speed_labels() -> void:
 	var right_player: CharacterBody3D = _player_2 if left_player_id == 1 else _player_1
 	if left_player != null:
 		var left_speed: float = Vector2(left_player.velocity.x, left_player.velocity.z).length()
-		_speed_left_label.text = "P%d Speed %.2f" % [left_player_id, left_speed]
+		_speed_left_label.text = "Speed: %.2f" % left_speed
 	if right_player != null:
 		var right_speed: float = Vector2(right_player.velocity.x, right_player.velocity.z).length()
-		_speed_right_label.text = "P%d Speed %.2f" % [right_player_id, right_speed]
+		_speed_right_label.text = "Speed: %.2f" % right_speed
 
 
 func _get_left_side_player_id() -> int:
@@ -243,29 +246,31 @@ func _debug_spawn_skill_items() -> void:
 
 func _setup_dash_bars() -> void:
 	var hud: CanvasLayer = $HUD
+	var font = load("res://assets/fonts/Wonder_Boys.ttf")
 
-	var bg := StyleBoxFlat.new()
-	bg.bg_color = Color(0.06, 0.08, 0.13, 0.88)
-	for c in range(4):
-		bg.set_corner_radius(c, 5)
+	var bg_left := StyleBoxFlat.new()
+	bg_left.bg_color = Color(0.0, 0.25, 0.5, 0.9)
+	for c in range(4): bg_left.set_corner_radius(c, 8)
 
-	# Left card: x 30–330, extended bottom at y=148 → bar sits at y 110–142
+	var bg_right := StyleBoxFlat.new()
+	bg_right.bg_color = Color(0.48, 0.2, 0.0, 0.9)
+	for c in range(4): bg_right.set_corner_radius(c, 8)
+
 	_dash_bar_left = _make_dash_bar(
 		hud, false,
-		38.0, 110.0, 322.0, 142.0,
-		Color(0.25, 0.95, 0.78, 1.0), bg
+		38.0, 118.0, 322.0, 158.0,
+		Color(0.25, 0.95, 0.78, 1.0), bg_left, font
 	)
-	# Right card: anchored to right edge, mirror of left
 	_dash_bar_right = _make_dash_bar(
 		hud, true,
-		-322.0, 110.0, -38.0, 142.0,
-		Color(1.0, 0.48, 0.5, 1.0), bg
+		-322.0, 118.0, -38.0, 158.0,
+		Color(1.0, 0.72, 0.15, 1.0), bg_right, font
 	)
 
 
 func _make_dash_bar(hud: CanvasLayer, anchor_to_right: bool,
 		ol: float, ot: float, or_: float, ob: float,
-		color: Color, bg: StyleBoxFlat) -> ProgressBar:
+		color: Color, bg: StyleBoxFlat, font: Font = null) -> ProgressBar:
 	var bar := ProgressBar.new()
 	bar.max_value = 1.0
 	bar.value = 1.0
@@ -286,14 +291,17 @@ func _make_dash_bar(hud: CanvasLayer, anchor_to_right: bool,
 	bar.add_theme_stylebox_override("fill", fill)
 	bar.add_theme_stylebox_override("background", bg.duplicate())
 
-	# "DASH" label overlaid on the bar
 	var lbl := Label.new()
 	lbl.text = "DASH"
 	lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	lbl.add_theme_font_size_override("font_size", 15)
-	lbl.add_theme_color_override("font_color", Color(1, 1, 1, 0.85))
+	lbl.add_theme_font_size_override("font_size", 14)
+	lbl.add_theme_color_override("font_color", Color(1, 1, 1, 1.0))
+	lbl.add_theme_color_override("font_outline_color", Color(0.04, 0.08, 0.18, 1))
+	lbl.add_theme_constant_override("outline_size", 5)
+	if font:
+		lbl.add_theme_font_override("font", font)
 	bar.add_child(lbl)
 
 	hud.add_child(bar)

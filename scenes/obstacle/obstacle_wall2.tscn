@@ -14,6 +14,8 @@ size = Vector3(1.7785645, 3.7253418, 3.3597717)
 
 [node name="obstacle_wall2" type="AnimatableBody3D" unique_id=1921241591 groups=["item", "obstacle"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.323, -13.2)
+collision_layer = 2
+collision_mask = 1
 sync_to_physics = false
 script = ExtResource("1_1mggd")
 

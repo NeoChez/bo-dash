@@ -1,68 +1,72 @@
 [gd_scene format=3 uid="uid://bo1t80jofmdre"]
 
-[ext_resource type="Script" uid="uid://0nia4bme67b6" path="res://global/conveyor.gd" id="1_kmy1e"]
 [ext_resource type="Script" uid="uid://cpwactebxbw3v" path="res://scripts/spawner_3d.gd" id="2_spawner"]
 [ext_resource type="PackedScene" uid="uid://clbs4ut175fn5" path="res://scenes/player/player.tscn" id="5_kmy1e"]
-[ext_resource type="PackedScene" uid="uid://dqw1lht300uu3" path="res://assets/conveyor.glb" id="5_yw17d"]
 [ext_resource type="Script" uid="uid://cdswhror157d0" path="res://global/death_area.gd" id="7_gj00n"]
+[ext_resource type="PackedScene" uid="uid://2uwdpea6iavo" path="res://global/conveyor3d_left.tscn" id="8_l633n"]
 [ext_resource type="Script" uid="uid://c4qmujd6nywag" path="res://scripts/player_rope_3d.gd" id="8_rope"]
 [ext_resource type="Script" uid="uid://cw8yk6kn6nmgo" path="res://scripts/match_controller.gd" id="9_match"]
 [ext_resource type="Script" uid="uid://b268wyxqn0oxc" path="res://scripts/stage/conveyor_divider.gd" id="9_s8d85"]
+[ext_resource type="PackedScene" uid="uid://c3uqkeu4wa7kp" path="res://global/conveyor3d_right.tscn" id="9_yw17d"]
 [ext_resource type="Script" uid="uid://ctko058g4f6r0" path="res://scripts/pause_menu.gd" id="10_pause"]
+[ext_resource type="AudioStream" uid="uid://cbnd1xeye8ks6" path="res://assets/audio/soundtrack/MainSounds.mp3" id="10_s8d85"]
+[ext_resource type="FontFile" uid="uid://e3l61vub5yqc" path="res://assets/fonts/Wonder_Boys.ttf" id="11_font"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_left"]
-bg_color = Color(0.11, 0.18, 0.2, 0.92)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.38, 0.95, 0.75, 0.8)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+bg_color = Color(0, 0.45, 0.78, 0.92)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 7
+border_color = Color(0.25, 0.82, 1, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
 shadow_color = Color(0, 0, 0, 0.35)
 shadow_size = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_right"]
-bg_color = Color(0.18, 0.12, 0.18, 0.92)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.55, 0.42, 0.82)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+bg_color = Color(0.78, 0.38, 0, 0.92)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 7
+border_color = Color(1, 0.72, 0.15, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
 shadow_color = Color(0, 0, 0, 0.35)
 shadow_size = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_timer"]
-bg_color = Color(0.12, 0.1, 0.05, 0.92)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.98, 0.8, 0.35, 0.95)
-corner_radius_top_left = 24
-corner_radius_top_right = 24
-corner_radius_bottom_right = 24
-corner_radius_bottom_left = 24
+bg_color = Color(0.12, 0.1, 0.04, 0.92)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 7
+border_color = Color(1, 0.88, 0.18, 1)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
 shadow_color = Color(0, 0, 0, 0.35)
 shadow_size = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_skill_slot_left"]
-bg_color = Color(0.08, 0.16, 0.18, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.4, 0.95, 0.82, 0.78)
-corner_radius_top_left = 25
-corner_radius_top_right = 25
-corner_radius_bottom_right = 25
-corner_radius_bottom_left = 25
+bg_color = Color(0.04, 0.1, 0.16, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 7
+border_color = Color(0.3, 0.88, 1, 0.9)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pause_panel"]
 bg_color = Color(0.05, 0.08, 0.11, 0.95)
@@ -78,11 +82,104 @@ corner_radius_bottom_left = 24
 shadow_color = Color(0, 0, 0, 0.35)
 shadow_size = 10
 
-[sub_resource type="BoxMesh" id="BoxMesh_ground"]
-size = Vector3(100, 2, 20)
+[sub_resource type="StyleBoxFlat" id="pause_resume_normal"]
+content_margin_top = 10.0
+content_margin_bottom = 18.0
+bg_color = Color(1, 0.56, 0, 1)
+border_width_bottom = 8
+border_color = Color(0.78, 0.37, 0, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(88.92154, 1.6403809, 20)
+[sub_resource type="StyleBoxFlat" id="pause_resume_pressed"]
+content_margin_top = 16.0
+content_margin_bottom = 10.0
+bg_color = Color(0.9, 0.49, 0, 1)
+border_width_bottom = 2
+border_color = Color(0.68, 0.31, 0, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[sub_resource type="StyleBoxFlat" id="pause_resume_hover"]
+content_margin_top = 8.0
+content_margin_bottom = 18.0
+bg_color = Color(1, 0.63, 0.05, 1)
+border_width_bottom = 10
+border_color = Color(0.85, 0.44, 0, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[sub_resource type="StyleBoxFlat" id="pause_restart_normal"]
+content_margin_top = 10.0
+content_margin_bottom = 18.0
+bg_color = Color(0, 0.69, 1, 1)
+border_width_bottom = 8
+border_color = Color(0, 0.48, 0.69, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[sub_resource type="StyleBoxFlat" id="pause_restart_pressed"]
+content_margin_top = 16.0
+content_margin_bottom = 10.0
+bg_color = Color(0, 0.57, 0.92, 1)
+border_width_bottom = 2
+border_color = Color(0, 0.36, 0.56, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[sub_resource type="StyleBoxFlat" id="pause_restart_hover"]
+content_margin_top = 8.0
+content_margin_bottom = 18.0
+bg_color = Color(0.25, 0.77, 1, 1)
+border_width_bottom = 10
+border_color = Color(0, 0.55, 0.79, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[sub_resource type="StyleBoxFlat" id="pause_quit_normal"]
+content_margin_top = 10.0
+content_margin_bottom = 18.0
+bg_color = Color(1, 0.09, 0.27, 1)
+border_width_bottom = 8
+border_color = Color(0.69, 0.06, 0.18, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[sub_resource type="StyleBoxFlat" id="pause_quit_pressed"]
+content_margin_top = 16.0
+content_margin_bottom = 10.0
+bg_color = Color(0.84, 0, 0, 1)
+border_width_bottom = 2
+border_color = Color(0.55, 0, 0, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+
+[sub_resource type="StyleBoxFlat" id="pause_quit_hover"]
+content_margin_top = 8.0
+content_margin_bottom = 18.0
+bg_color = Color(1, 0.32, 0.32, 1)
+border_width_bottom = 10
+border_color = Color(0.84, 0.08, 0.23, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.28, 0.54, 0.88, 1)
@@ -100,7 +197,7 @@ tonemap_mode = 2
 glow_enabled = true
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_divider"]
-size = Vector3(0.25976563, 19, 20)
+size = Vector3(2.170044, 19, 20)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_l633n"]
 size = Vector3(1002.99713, 657.43964, 10.902756)
@@ -108,26 +205,67 @@ size = Vector3(1002.99713, 657.43964, 10.902756)
 [sub_resource type="BoxShape3D" id="BoxShape3D_s8d85"]
 size = Vector3(1, 9.580627, 20.002106)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_rgk4m"]
+size = Vector3(1, 17.366913, 28.854675)
+
 [node name="world_3d" type="Node3D" unique_id=704629094]
 script = ExtResource("9_match")
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=661153201]
 
+[node name="LeftPlayerLabel" type="Label" parent="HUD" unique_id=300203347]
+offset_left = 30.0
+offset_top = 6.0
+offset_right = 330.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.4)
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 3
+theme_override_constants/outline_size = 10
+theme_override_fonts/font = ExtResource("11_font")
+theme_override_font_sizes/font_size = 26
+text = "PLAYER 1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RightPlayerLabel" type="Label" parent="HUD" unique_id=1135723308]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -330.0
+offset_top = 6.0
+offset_right = -30.0
+offset_bottom = 40.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.4)
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 3
+theme_override_constants/outline_size = 10
+theme_override_fonts/font = ExtResource("11_font")
+theme_override_font_sizes/font_size = 26
+text = "PLAYER 2"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="LeftCard" type="Panel" parent="HUD" unique_id=241237274]
 offset_left = 30.0
-offset_top = 30.0
+offset_top = 42.0
 offset_right = 330.0
-offset_bottom = 148.0
+offset_bottom = 172.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_hud_left")
 
 [node name="RightCard" type="Panel" parent="HUD" unique_id=1124752568]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -331.0
-offset_top = 30.0
-offset_right = -31.0
-offset_bottom = 148.0
+offset_left = -330.0
+offset_top = 42.0
+offset_right = -30.0
+offset_bottom = 172.0
 grow_horizontal = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_hud_right")
 
@@ -151,60 +289,68 @@ offset_top = 34.0
 offset_right = 132.0
 offset_bottom = 86.0
 grow_horizontal = 2
-theme_override_colors/font_color = Color(1, 0.95, 0.78, 1)
+theme_override_colors/font_color = Color(1, 0.92, 0.05, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.45)
-theme_override_constants/shadow_offset_x = 1
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
+theme_override_constants/shadow_offset_x = 0
 theme_override_constants/shadow_offset_y = 2
+theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 32
 text = "Time 03:00"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ScoreLeftLabel" type="Label" parent="HUD" unique_id=973100158]
-offset_left = 52.0
-offset_top = 38.0
-offset_right = 310.0
-offset_bottom = 72.0
-theme_override_colors/font_color = Color(0.83, 1, 0.96, 1)
-theme_override_font_sizes/font_size = 26
-text = "P1 Star 0"
+offset_left = 38.0
+offset_top = 50.0
+offset_right = 322.0
+offset_bottom = 84.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 22
+text = "Star: 0"
+horizontal_alignment = 1
 
 [node name="ScoreRightLabel" type="Label" parent="HUD" unique_id=1521663873]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -311.0
-offset_top = 38.0
-offset_right = -53.0
-offset_bottom = 72.0
+offset_left = -322.0
+offset_top = 50.0
+offset_right = -38.0
+offset_bottom = 84.0
 grow_horizontal = 0
-theme_override_colors/font_color = Color(1, 0.9, 0.88, 1)
-theme_override_font_sizes/font_size = 26
-text = "P2 Star 0"
-horizontal_alignment = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 22
+text = "Star: 0"
+horizontal_alignment = 1
 
 [node name="SpeedLeftLabel" type="Label" parent="HUD" unique_id=1958348696]
-offset_left = 52.0
-offset_top = 69.0
-offset_right = 309.0
-offset_bottom = 99.0
-theme_override_colors/font_color = Color(0.62, 0.82, 0.87, 1)
-theme_override_font_sizes/font_size = 18
-text = "P1 Speed 0.00"
+offset_left = 38.0
+offset_top = 86.0
+offset_right = 322.0
+offset_bottom = 110.0
+theme_override_colors/font_color = Color(0.85, 0.95, 1, 0.85)
+theme_override_font_sizes/font_size = 16
+text = "Speed: 0.00"
+horizontal_alignment = 1
 
 [node name="SpeedRightLabel" type="Label" parent="HUD" unique_id=787194752]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -309.0
-offset_top = 69.0
-offset_right = -52.0
-offset_bottom = 99.0
+offset_left = -322.0
+offset_top = 86.0
+offset_right = -38.0
+offset_bottom = 110.0
 grow_horizontal = 0
-theme_override_colors/font_color = Color(0.9, 0.76, 0.76, 1)
-theme_override_font_sizes/font_size = 18
-text = "P2 Speed 0.00"
-horizontal_alignment = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.78, 0.85)
+theme_override_font_sizes/font_size = 16
+text = "Speed: 0.00"
+horizontal_alignment = 1
 
 [node name="LeftSkillSlotA" type="Panel" parent="HUD" unique_id=1824828115]
 anchors_preset = 2
@@ -234,9 +380,12 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.6)
-theme_override_constants/shadow_offset_x = 1
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
+theme_override_constants/shadow_offset_x = 0
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("11_font")
+theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -271,9 +420,12 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.6)
-theme_override_constants/shadow_offset_x = 1
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
+theme_override_constants/shadow_offset_x = 0
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 11
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("11_font")
+theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -325,91 +477,93 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -170.0
-offset_top = -140.0
-offset_right = 170.0
-offset_bottom = 140.0
+offset_left = -210.0
+offset_top = -160.0
+offset_right = 210.0
+offset_bottom = 160.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_pause_panel")
 
 [node name="TitleLabel" type="Label" parent="PauseMenu/Panel" unique_id=346442656]
 layout_mode = 0
-offset_left = 54.0
-offset_top = 24.0
-offset_right = 286.0
-offset_bottom = 60.0
-theme_override_colors/font_color = Color(1, 0.95, 0.8, 1)
-theme_override_font_sizes/font_size = 30
+offset_left = 10.0
+offset_top = 20.0
+offset_right = 410.0
+offset_bottom = 68.0
+theme_override_colors/font_color = Color(1, 0.92, 0.05, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
+theme_override_constants/outline_size = 14
+theme_override_fonts/font = ExtResource("11_font")
+theme_override_font_sizes/font_size = 36
 text = "PAUSED"
 horizontal_alignment = 1
 
 [node name="HintLabel" type="Label" parent="PauseMenu/Panel" unique_id=1543255956]
 layout_mode = 0
-offset_left = 34.0
-offset_top = 62.0
-offset_right = 306.0
-offset_bottom = 90.0
-theme_override_colors/font_color = Color(0.82, 0.88, 0.92, 0.9)
-theme_override_font_sizes/font_size = 16
+offset_left = 10.0
+offset_top = 70.0
+offset_right = 410.0
+offset_bottom = 92.0
+theme_override_colors/font_color = Color(0.82, 0.88, 0.92, 0.75)
+theme_override_font_sizes/font_size = 14
 text = "Press Esc to resume"
 horizontal_alignment = 1
 
 [node name="ResumeButton" type="Button" parent="PauseMenu/Panel" unique_id=98040847]
 layout_mode = 0
-offset_left = 55.0
-offset_top = 108.0
-offset_right = 285.0
-offset_bottom = 148.0
-text = "Resume"
+offset_left = 20.0
+offset_top = 100.0
+offset_right = 400.0
+offset_bottom = 156.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
+theme_override_constants/outline_size = 12
+theme_override_fonts/font = ExtResource("11_font")
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("pause_resume_normal")
+theme_override_styles/pressed = SubResource("pause_resume_pressed")
+theme_override_styles/hover = SubResource("pause_resume_hover")
+theme_override_styles/focus = SubResource("pause_resume_hover")
+text = "RESUME"
 
 [node name="RestartButton" type="Button" parent="PauseMenu/Panel" unique_id=1866254083]
 layout_mode = 0
-offset_left = 55.0
-offset_top = 162.0
-offset_right = 285.0
-offset_bottom = 202.0
-text = "Restart Match"
+offset_left = 20.0
+offset_top = 170.0
+offset_right = 400.0
+offset_bottom = 226.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
+theme_override_constants/outline_size = 12
+theme_override_fonts/font = ExtResource("11_font")
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("pause_restart_normal")
+theme_override_styles/pressed = SubResource("pause_restart_pressed")
+theme_override_styles/hover = SubResource("pause_restart_hover")
+theme_override_styles/focus = SubResource("pause_restart_hover")
+text = "RESTART"
 
 [node name="QuitButton" type="Button" parent="PauseMenu/Panel" unique_id=498955862]
 layout_mode = 0
-offset_left = 55.0
-offset_top = 216.0
-offset_right = 285.0
-offset_bottom = 256.0
-text = "Quit Game"
+offset_left = 20.0
+offset_top = 240.0
+offset_right = 400.0
+offset_bottom = 296.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
+theme_override_constants/outline_size = 12
+theme_override_fonts/font = ExtResource("11_font")
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("pause_quit_normal")
+theme_override_styles/pressed = SubResource("pause_quit_pressed")
+theme_override_styles/hover = SubResource("pause_quit_hover")
+theme_override_styles/focus = SubResource("pause_quit_hover")
+text = "QUIT"
 
-[node name="Ground" type="StaticBody3D" parent="." unique_id=994531226 groups=["ground"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-collision_layer = 5
-script = ExtResource("1_kmy1e")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=468187450]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 73.97828, 0, 0)
-mesh = SubResource("BoxMesh_ground")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=755013178]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 68.64354, 0.43911457, 0)
-shape = SubResource("BoxShape3D_ground")
-
-[node name="Ground2" type="StaticBody3D" parent="." unique_id=130164960 groups=["ground"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, -0.5, 0)
-collision_layer = 5
-
-[node name="conveyor" parent="Ground2" unique_id=239295526 instance=ExtResource("5_yw17d")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, -16.553692)
-visible = false
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground2" unique_id=931950376]
-mesh = SubResource("BoxMesh_ground")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground2" unique_id=836916938]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2212372, 0.32019043, 0)
-shape = SubResource("BoxShape3D_ground")
-
-[node name="Camera3D" type="Camera3D" parent="." unique_id=1805312066]
-transform = Transform3D(1, 0, 0, 0, 0.85054505, 0.52590233, 0, -0.52590233, 0.85054505, 0, 21.13499, 14.905491)
-fov = 147.5
+[node name="Camera3D" type="Camera3D" parent="." unique_id=714273533]
+transform = Transform3D(1, 0, 0, 0, 0.7813571, 0.62408423, 0, -0.62408423, 0.7813571, 0, 34.19021, 19.437012)
+fov = 105.5
 size = 15.0
 near = 0.001
 
@@ -421,44 +575,45 @@ shadow_bias = 0.05
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=676440190]
 environment = SubResource("Environment_world")
 
-[node name="Spawner_Ground1" type="Node3D" parent="." unique_id=539279075 node_paths=PackedStringArray("ground_node") groups=["spawner"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102.85442, 1.602, 0)
+[node name="Spawner_Ground1" type="Node3D" parent="." unique_id=539279075 groups=["spawner"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102.854, 0.9, 0)
 script = ExtResource("2_spawner")
 offset_obstacle3 = Vector3(0, 0, -1)
 offset_obstacle5 = Vector3(0, 2, -2.5)
 offset_obstacle6 = Vector3(0, 2, 2.5)
 move_speed = 10.0
-ground_node = NodePath("../Ground")
 
-[node name="Lane" type="Marker3D" parent="Spawner_Ground1" unique_id=912310591]
+[node name="Lane" type="Marker3D" parent="Spawner_Ground1" unique_id=2001000001]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15951538, 0.03716135, 0)
 
-[node name="Spawner_Ground2" type="Node3D" parent="." unique_id=269807295 node_paths=PackedStringArray("ground_node") groups=["spawner"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -101.0187, 0.12945175, 0)
+[node name="LaneLeft" type="Marker3D" parent="Spawner_Ground1" unique_id=912310591]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15951538, 0.03716135, -4.5)
+
+[node name="LaneRight" type="Marker3D" parent="Spawner_Ground1" unique_id=2001000002]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15951538, 0.03716135, 4.5)
+
+[node name="Spawner_Ground2" type="Node3D" parent="." unique_id=269807295 groups=["spawner"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -101.019, 0.9, 0)
 script = ExtResource("2_spawner")
-offset_obstacle1 = Vector3(0, 10, 0)
 offset_obstacle3 = Vector3(0, 0, -1.5)
 offset_obstacle5 = Vector3(0, 2, -2.5)
 offset_obstacle6 = Vector3(0, 2, 2.5)
 move_speed = 10.0
 spawn_interval = 6.0
 arah_x = 1
-ground_node = NodePath("../Ground2")
 
-[node name="Lane" type="Marker3D" parent="Spawner_Ground2" unique_id=1440972763]
+[node name="Lane" type="Marker3D" parent="Spawner_Ground2" unique_id=2001000003]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15951538, 0.03716135, 0)
 
-[node name="Player" parent="." unique_id=1529347432 instance=ExtResource("5_kmy1e")]
-transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 30, 1.5, 0)
-action_left = "p1_left"
-action_right = "p1_right"
-action_up = "p1_up"
-action_down = "p1_down"
-respawn_delay = 0.5
-dash_cooldown = 3.0
+[node name="LaneLeft" type="Marker3D" parent="Spawner_Ground2" unique_id=1440972763]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15951538, 0.03716135, -4.5)
 
-[node name="Player2" parent="." unique_id=1456885410 instance=ExtResource("5_kmy1e")]
-transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, -30, 0.483, 0)
+[node name="LaneRight" type="Marker3D" parent="Spawner_Ground2" unique_id=2001000004]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15951538, 0.03716135, 4.5)
+
+[node name="Player" parent="." unique_id=1529347432 instance=ExtResource("5_kmy1e")]
+transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 30, 0.483, 0)
+collision_mask = 47
 action_left = "p2_left"
 action_right = "p2_right"
 action_up = "p2_up"
@@ -466,28 +621,38 @@ action_down = "p2_down"
 action_jump = "p2_jump"
 action_dash = "p2_dash"
 action_skill = "p2_skill"
-jump_velocity = 17.0
 respawn_delay = 0.5
 dash_cooldown = 3.0
 player_id = 2
+
+[node name="Player2" parent="." unique_id=1456885410 instance=ExtResource("5_kmy1e")]
+transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, -30, 0.483, 0)
+collision_mask = 31
+action_left = "p1_left"
+action_right = "p1_right"
+action_up = "p1_up"
+action_down = "p1_down"
+jump_velocity = 17.0
+respawn_delay = 0.5
+dash_cooldown = 3.0
 
 [node name="PlayerRope" type="Node3D" parent="." unique_id=396371567]
 script = ExtResource("8_rope")
 player_a_path = NodePath("../Player")
 player_b_path = NodePath("../Player2")
-rope_max_length = 70.0
+rope_max_length = 60.0
 spring_strength = 60.0
 dash_yank_multiplier = 4.0
 segment_count = 50
 rope_radius = 0.1
 
 [node name="ConveyorDivider" type="Area3D" parent="." unique_id=1069330317]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -59.4602, 3, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
 collision_layer = 4
+collision_mask = 2
 script = ExtResource("9_s8d85")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ConveyorDivider" unique_id=260788730]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 66.06508, 0, 0)
 shape = SubResource("BoxShape3D_divider")
 
 [node name="Death_Area" type="Area3D" parent="." unique_id=361745512]
@@ -497,22 +662,51 @@ script = ExtResource("7_gj00n")
 transform = Transform3D(1, 0, 0, 0, -4.3711385e-08, -0.99999994, 0, 0.99999994, -4.3711385e-08, 0.7228699, -31.815214, -76.538864)
 shape = SubResource("BoxShape3D_l633n")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1329067168]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.046761, 4.010404, 0)
-collision_layer = 2
-collision_mask = 2
+[node name="P1WallRight" type="StaticBody3D" parent="." unique_id=1329067168]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 4.01, 0)
+collision_layer = 16
+collision_mask = 0
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=916670900]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="P1WallRight" unique_id=916670900]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7819023, 2.2332458, 0.052383423)
 shape = SubResource("BoxShape3D_s8d85")
 
-[node name="StaticBody3D2" type="StaticBody3D" parent="." unique_id=1352399603]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.50157166, 4.010404, 0)
-collision_layer = 4
-collision_mask = 4
+[node name="P2WallLeft" type="StaticBody3D" parent="." unique_id=1352399603]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 4.01, 0)
+collision_layer = 32
+collision_mask = 0
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D2" unique_id=1183684235]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="P2WallLeft" unique_id=1183684235]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2332458, 0.052383423)
 shape = SubResource("BoxShape3D_s8d85")
+
+[node name="Conveyor Left" parent="." unique_id=1062403875 instance=ExtResource("8_l633n")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 0, 0)
+
+[node name="Conveyor Right" parent="." unique_id=657350804 instance=ExtResource("9_yw17d")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 57, 0, 0)
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=546582301]
+stream = ExtResource("10_s8d85")
+volume_db = -10.0
+autoplay = true
+
+[node name="WallRight" type="StaticBody3D" parent="." unique_id=1131363099]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 67, 3, 0)
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WallRight" unique_id=1950820582]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.573593, -0.17434692)
+shape = SubResource("BoxShape3D_rgk4m")
+
+[node name="WallLeft" type="StaticBody3D" parent="." unique_id=1964672881]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -67, 3, 0)
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WallLeft" unique_id=972712819]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.573593, -0.17434692)
+shape = SubResource("BoxShape3D_rgk4m")
 
 [connection signal="body_entered" from="ConveyorDivider" to="ConveyorDivider" method="_on_body_entered"]

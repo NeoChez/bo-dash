@@ -1,7 +1,13 @@
 extends Node
 
+const CONFIG_PATH := "user://settings.cfg"
+
 var player_1_character: String = "male"
 var player_2_character: String = "male"
+
+# ── AUDIO ─────────────────────────────────────────────────────────────────────
+var bgm_volume: float = 1.0
+var sfx_volume: float = 1.0
 
 # ── SKILL REGISTRY ───────────────────────────────────────────────────────────
 # Tambah skill baru cukup dengan menambah entry di sini.
@@ -100,10 +106,76 @@ const _BINDINGS: Dictionary = {
 
 
 func _ready() -> void:
+	_setup_audio_buses()
+	load_settings()
+	apply_audio()
+	call_deferred("_assign_menu_music_bus")
 	_build_ui()
 	Input.joy_connection_changed.connect(_on_joy_connection_changed)
 	for device in Input.get_connected_joypads():
 		_on_joy_connection_changed(device, true)
+
+
+func _setup_audio_buses() -> void:
+	if AudioServer.get_bus_index("Music") < 0:
+		AudioServer.add_bus()
+		var idx := AudioServer.bus_count - 1
+		AudioServer.set_bus_name(idx, "Music")
+		AudioServer.set_bus_send(idx, "Master")
+	if AudioServer.get_bus_index("SFX") < 0:
+		AudioServer.add_bus()
+		var idx := AudioServer.bus_count - 1
+		AudioServer.set_bus_name(idx, "SFX")
+		AudioServer.set_bus_send(idx, "Master")
+
+
+func _assign_menu_music_bus() -> void:
+	var mm := get_node_or_null("/root/MenuMusic")
+	if mm is AudioStreamPlayer:
+		mm.bus = "Music"
+
+
+func apply_audio() -> void:
+	var music_idx := AudioServer.get_bus_index("Music")
+	var sfx_idx := AudioServer.get_bus_index("SFX")
+	if music_idx >= 0:
+		AudioServer.set_bus_volume_db(music_idx, linear_to_db(bgm_volume))
+	if sfx_idx >= 0:
+		AudioServer.set_bus_volume_db(sfx_idx, linear_to_db(sfx_volume))
+
+
+func save_settings() -> void:
+	var cfg := ConfigFile.new()
+	cfg.set_value("audio", "bgm_volume", bgm_volume)
+	cfg.set_value("audio", "sfx_volume", sfx_volume)
+	for action in InputMap.get_actions():
+		if not (action.begins_with("p1_") or action.begins_with("p2_")):
+			continue
+		for ev in InputMap.action_get_events(action):
+			if ev is InputEventKey:
+				cfg.set_value("keybindings", action, ev.physical_keycode if ev.physical_keycode != 0 else ev.keycode)
+				break
+	cfg.save(CONFIG_PATH)
+
+
+func load_settings() -> void:
+	var cfg := ConfigFile.new()
+	if cfg.load(CONFIG_PATH) != OK:
+		return
+	bgm_volume = cfg.get_value("audio", "bgm_volume", 1.0)
+	sfx_volume = cfg.get_value("audio", "sfx_volume", 1.0)
+	for action in InputMap.get_actions():
+		if not (action.begins_with("p1_") or action.begins_with("p2_")):
+			continue
+		var keycode: int = cfg.get_value("keybindings", action, 0)
+		if keycode == 0:
+			continue
+		for ev in InputMap.action_get_events(action).duplicate():
+			if ev is InputEventKey:
+				InputMap.action_erase_event(action, ev)
+		var new_ev := InputEventKey.new()
+		new_ev.physical_keycode = keycode
+		InputMap.action_add_event(action, new_ev)
 
 
 func _on_joy_connection_changed(device: int, connected: bool) -> void:
