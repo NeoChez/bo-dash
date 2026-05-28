@@ -42,6 +42,15 @@ func _physics_process(delta: float) -> void:
 	_apply_rope_tension(a_pos, b_pos, delta)
 
 func _apply_rope_tension(a_pos: Vector3, b_pos: Vector3, delta: float) -> void:
+	var a_alive = player_a.get("is_alive")
+	var b_alive = player_b.get("is_alive")
+	if a_alive == false or b_alive == false:
+		return
+	var a_grace = player_a.get("rope_grace_timer")
+	var b_grace = player_b.get("rope_grace_timer")
+	if (a_grace != null and a_grace > 0.0) or (b_grace != null and b_grace > 0.0):
+		return
+
 	var delta_vec = b_pos - a_pos
 	var distance = delta_vec.length()
 	if distance <= rest_length:

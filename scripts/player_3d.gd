@@ -51,6 +51,7 @@ var slingshot_strength: float = 0.0
 var anchor_end_time: float = 0.0
 var balloon_curse_bonus: float = 0.0
 var balloon_curse_end_time: float = 0.0
+var rope_grace_timer: float = 0.0
 
 enum PlayerState {
 	RUNNING,
@@ -109,6 +110,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_fall_immunity_timer = maxf(_fall_immunity_timer - delta, 0.0)
+	rope_grace_timer = maxf(rope_grace_timer - delta, 0.0)
 
 	# State machine: jangan override state spesial (FALLING/STANDING_UP/FLOATING)
 	if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP and current_state != PlayerState.FLOATING:
@@ -157,8 +159,8 @@ func _physics_process(delta: float) -> void:
 		var speed_multiplier = _get_speed_multiplier()
 		var target_speed = SPEED * speed_multiplier
 		if _knockback_timer > 0.0:
-		_knockback_timer -= delta
-	elif _dash_active_timer > 0.0:
+			_knockback_timer -= delta
+		elif _dash_active_timer > 0.0:
 			pass
 		elif direction:
 			velocity.x = move_toward(velocity.x, direction.x * target_speed, target_speed * delta * 10)
@@ -501,6 +503,7 @@ func respawn():
 	is_alive = true
 	can_move = true
 	visible = true
+	rope_grace_timer = 2.0
 	shield_active = false
 	if _shield_visual:
 		_shield_visual.visible = false
