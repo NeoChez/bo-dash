@@ -16,14 +16,13 @@ func _ready() -> void:
 	_moves_positive_x = push_velocity.x > 0.0
 	_despawn_x_limit = 0.0
 
-	
 	# Timer untuk cleanup obstacle yang sudah lewat
 	var cleanup_timer = Timer.new()
 	cleanup_timer.wait_time = 0.5
 	cleanup_timer.autostart = true
 	cleanup_timer.timeout.connect(_cleanup_obstacles)
 	add_child(cleanup_timer)
-
+	
 # Fungsi ini akan dipanggil oleh Spawner untuk mendaftarkan obstacle baru
 func register_obstacle(obs: Node3D) -> void:
 	active_obstacles.append(obs)
@@ -37,7 +36,6 @@ func _cleanup_obstacles() -> void:
 		elif _should_despawn(obs):
 			obs.queue_free()
 			active_obstacles.remove_at(i)
-
 
 func _should_despawn(obs: Node3D) -> bool:
 	if obs.global_position.y < despawn_y_limit:

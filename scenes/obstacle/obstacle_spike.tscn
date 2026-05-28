@@ -7,9 +7,10 @@
 size = Vector3(2.0349426, 4.115162, 1.8193359)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_4ng7f"]
-size = Vector3(2.5029297, 5.2109375, 3.2286377)
+size = Vector3(2.8359375, 4.699951, 2.8161926)
 
 [node name="obstacle_spike" type="AnimatableBody3D" unique_id=1268452587 groups=["item", "obstacle"]]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
 sync_to_physics = false
 script = ExtResource("1_rt4eq")
 knockback_force = 100.0
@@ -28,11 +29,11 @@ shape = SubResource("BoxShape3D_54qds")
 [node name="Area3D" type="Area3D" parent="." unique_id=854503621]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1302043236]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.104599714, 2.5076215, -3.5092802)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.02724433, 2.5076215, -3.5092802)
 shape = SubResource("BoxShape3D_4ng7f")
 
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="Area3D" unique_id=1366736571]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.08579326, 2.359812, 2.837201)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.039406538, 2.33845, 2.8424654)
 shape = SubResource("BoxShape3D_4ng7f")
 
 [connection signal="body_entered" from="Area3D" to="." method="_on_area_3d_body_entered"]

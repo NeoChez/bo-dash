@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://dww24hc5rlqdt"]
+
+[ext_resource type="PackedScene" uid="uid://bnb0hrsecpd1k" path="res://assets/obstacle/emptywall2.glb" id="1_pceut"]
+[ext_resource type="Script" uid="uid://cgmcs6pw7j7ww" path="res://scripts/obstacle/obstacle_chalwall.gd" id="1_xke7a"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pceut"]
+size = Vector3(17.719147, 4.9298096, 2.8306274)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_rt4eq"]
+size = Vector3(2.6846924, 5.186737, 2.654006)
+
+[node name="obstacle_chalwall2" type="AnimatableBody3D" unique_id=1268452587 groups=["item", "obstacle"]]
+sync_to_physics = false
+script = ExtResource("1_xke7a")
+
+[node name="emptywall2" parent="." unique_id=1773920993 instance=ExtResource("1_pceut")]
+transform = Transform3D(-2.6226834e-08, 0, 0.6, 0, 0.6, 0, -0.6, 0, -2.6226834e-08, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=893877028]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, 2.6889267)
+shape = SubResource("BoxShape3D_pceut")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="." unique_id=1376008676]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, -17.717525)
+shape = SubResource("BoxShape3D_rt4eq")
