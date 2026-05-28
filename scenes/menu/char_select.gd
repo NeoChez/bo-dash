@@ -61,10 +61,10 @@ func _input(event: InputEvent) -> void:
 		
 	# --- PLAYER 2 (LEFT PLAYER) ---
 	if not p2_ready:
-		if event.is_action_pressed("p2_left") or event.is_action_pressed("ui_left_alternative_a"):
+		if event.is_action_pressed("p2_left"):
 			p2_index = (p2_index - 1 + characters.size()) % characters.size()
 			_update_p2_ui()
-		elif event.is_action_pressed("p2_right") or event.is_action_pressed("ui_right_alternative_d"):
+		elif event.is_action_pressed("p2_right"):
 			p2_index = (p2_index + 1) % characters.size()
 			_update_p2_ui()
 			

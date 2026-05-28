@@ -19,6 +19,10 @@ run/main_scene="res://scenes/menu/main_menu.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+GlobalSettings="*res://global/global_settings.gd"
+
 [display]
 
 window/size/mode=3
@@ -92,7 +96,3 @@ p2_skill={
 
 textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
-
-[autoload]
-
-GlobalSettings="*res://global/global_settings.gd"

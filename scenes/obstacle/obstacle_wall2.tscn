@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://bwcmk32mfyxd3"]
+
+[ext_resource type="Script" uid="uid://dnbkgng5t4uyu" path="res://scripts/obstacle/obstacle_wall2.gd" id="1_1mggd"]
+[ext_resource type="PackedScene" uid="uid://dfwligictfvt6" path="res://assets/obstacle/obstacle-wallS2.glb" id="2_4x6cf"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4x6cf"]
+size = Vector3(1.7310181, 3.8374825, 20.08654)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pnbl0"]
+size = Vector3(1, 3.695572, 5.0707397)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gy45q"]
+size = Vector3(1.7785645, 3.7253418, 3.3597717)
+
+[node name="obstacle_wall2" type="AnimatableBody3D" unique_id=1921241591 groups=["item", "obstacle"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.323, -13.2)
+sync_to_physics = false
+script = ExtResource("1_1mggd")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1034563031]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.02296257, 2.2773042, 0.7337837)
+shape = SubResource("BoxShape3D_4x6cf")
+
+[node name="obstacle-wallS2" parent="." unique_id=408267408 instance=ExtResource("2_4x6cf")]
+transform = Transform3D(-1.7484556e-08, 0, 0.4, 0, 0.45, 0, -0.4, 0, -1.7484556e-08, 2.4964218, 3.4631534, -0.040118694)
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="." unique_id=1184984114]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.42872858, 6.109372, -0.07260132)
+shape = SubResource("BoxShape3D_pnbl0")
+
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="." unique_id=718963468]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.022583008, 6.131098, -7.6532335)
+shape = SubResource("BoxShape3D_gy45q")
+
+[node name="CollisionShape3D4" type="CollisionShape3D" parent="." unique_id=1794849442]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.022583008, 6.003207, 9.116969)
+shape = SubResource("BoxShape3D_gy45q")

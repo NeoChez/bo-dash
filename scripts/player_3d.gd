@@ -454,6 +454,8 @@ func set_match_active(active: bool) -> void:
 	if not active:
 		velocity = Vector3.ZERO
 
-
 func _notify_match_player_down() -> void:
 	get_tree().call_group("match_controller", "on_player_down", player_id)
+
+func apply_knockback(force: Vector3) -> void:
+	velocity += force

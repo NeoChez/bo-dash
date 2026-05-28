@@ -1,13 +1,15 @@
-[gd_scene load_steps=22 format=3 uid="uid://bo1t80jofmdre"]
+[gd_scene format=3 uid="uid://bo1t80jofmdre"]
 
 [ext_resource type="Script" uid="uid://0nia4bme67b6" path="res://global/conveyor.gd" id="1_kmy1e"]
 [ext_resource type="Script" uid="uid://cou74w876q57y" path="res://global/ground_2.gd" id="2_kmy1e"]
 [ext_resource type="Script" uid="uid://cpwactebxbw3v" path="res://scripts/spawner_3d.gd" id="2_spawner"]
 [ext_resource type="PackedScene" uid="uid://clbs4ut175fn5" path="res://scenes/player/player.tscn" id="5_kmy1e"]
+[ext_resource type="PackedScene" uid="uid://dqw1lht300uu3" path="res://assets/conveyor.glb" id="5_yw17d"]
 [ext_resource type="Script" uid="uid://cdswhror157d0" path="res://global/death_area.gd" id="7_gj00n"]
 [ext_resource type="Script" uid="uid://c4qmujd6nywag" path="res://scripts/player_rope_3d.gd" id="8_rope"]
 [ext_resource type="Script" uid="uid://cw8yk6kn6nmgo" path="res://scripts/match_controller.gd" id="9_match"]
-[ext_resource type="Script" path="res://scripts/pause_menu.gd" id="10_pause"]
+[ext_resource type="Script" uid="uid://b268wyxqn0oxc" path="res://scripts/stage/conveyor_divider.gd" id="9_s8d85"]
+[ext_resource type="Script" uid="uid://ctko058g4f6r0" path="res://scripts/pause_menu.gd" id="10_pause"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_left"]
 bg_color = Color(0.11, 0.18, 0.2, 0.92)
@@ -63,6 +65,20 @@ corner_radius_top_right = 25
 corner_radius_bottom_right = 25
 corner_radius_bottom_left = 25
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pause_panel"]
+bg_color = Color(0.05, 0.08, 0.11, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.9, 0.78, 0.46, 0.9)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 10
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
 albedo_color = Color(0.25, 0.25, 0.3, 1)
 
@@ -71,7 +87,7 @@ material = SubResource("StandardMaterial3D_ground")
 size = Vector3(100, 2, 20)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(100, 1.6403809, 20)
+size = Vector3(93.32959, 1.6403809, 20)
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.5, 0.7, 0.9, 1)
@@ -89,38 +105,27 @@ tonemap_mode = 2
 glow_enabled = true
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_divider"]
-size = Vector3(1, 19, 20)
+size = Vector3(0.25976563, 19, 20)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_l633n"]
 size = Vector3(1002.99713, 657.43964, 5.53891)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pause_panel"]
-bg_color = Color(0.05, 0.08, 0.11, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.9, 0.78, 0.46, 0.9)
-corner_radius_top_left = 24
-corner_radius_top_right = 24
-corner_radius_bottom_right = 24
-corner_radius_bottom_left = 24
-shadow_color = Color(0, 0, 0, 0.35)
-shadow_size = 10
+[sub_resource type="BoxShape3D" id="BoxShape3D_s8d85"]
+size = Vector3(1, 9.580627, 20.002106)
 
-[node name="world_3d" type="Node3D"]
+[node name="world_3d" type="Node3D" unique_id=1623774251]
 script = ExtResource("9_match")
 
-[node name="HUD" type="CanvasLayer" parent="."]
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1582534038]
 
-[node name="LeftCard" type="Panel" parent="HUD"]
+[node name="LeftCard" type="Panel" parent="HUD" unique_id=1793537566]
 offset_left = 30.0
 offset_top = 30.0
 offset_right = 330.0
 offset_bottom = 106.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_hud_left")
 
-[node name="RightCard" type="Panel" parent="HUD"]
+[node name="RightCard" type="Panel" parent="HUD" unique_id=518569099]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -131,7 +136,7 @@ offset_bottom = 106.0
 grow_horizontal = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_hud_right")
 
-[node name="TimerCard" type="Panel" parent="HUD"]
+[node name="TimerCard" type="Panel" parent="HUD" unique_id=2143746903]
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
@@ -142,7 +147,7 @@ offset_bottom = 98.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_hud_timer")
 
-[node name="TimerLabel" type="Label" parent="HUD"]
+[node name="TimerLabel" type="Label" parent="HUD" unique_id=1511475334]
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
@@ -160,7 +165,7 @@ text = "Time 03:00"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ScoreLeftLabel" type="Label" parent="HUD"]
+[node name="ScoreLeftLabel" type="Label" parent="HUD" unique_id=437333018]
 offset_left = 52.0
 offset_top = 38.0
 offset_right = 310.0
@@ -169,7 +174,7 @@ theme_override_colors/font_color = Color(0.83, 1, 0.96, 1)
 theme_override_font_sizes/font_size = 26
 text = "P1 Star 0"
 
-[node name="ScoreRightLabel" type="Label" parent="HUD"]
+[node name="ScoreRightLabel" type="Label" parent="HUD" unique_id=1367924388]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -183,7 +188,7 @@ theme_override_font_sizes/font_size = 26
 text = "P2 Star 0"
 horizontal_alignment = 2
 
-[node name="SpeedLeftLabel" type="Label" parent="HUD"]
+[node name="SpeedLeftLabel" type="Label" parent="HUD" unique_id=1252496704]
 offset_left = 52.0
 offset_top = 69.0
 offset_right = 309.0
@@ -192,7 +197,7 @@ theme_override_colors/font_color = Color(0.62, 0.82, 0.87, 1)
 theme_override_font_sizes/font_size = 18
 text = "P1 Speed 0.00"
 
-[node name="SpeedRightLabel" type="Label" parent="HUD"]
+[node name="SpeedRightLabel" type="Label" parent="HUD" unique_id=942314362]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -206,7 +211,7 @@ theme_override_font_sizes/font_size = 18
 text = "P2 Speed 0.00"
 horizontal_alignment = 2
 
-[node name="LeftSkillSlotA" type="Panel" parent="HUD"]
+[node name="LeftSkillSlotA" type="Panel" parent="HUD" unique_id=737915566]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -217,17 +222,17 @@ offset_bottom = -72.0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_skill_slot_left")
 
-[node name="SkillColor" type="ColorRect" parent="HUD/LeftSkillSlotA"]
-anchors_preset = 15
+[node name="SkillColor" type="ColorRect" parent="HUD/LeftSkillSlotA" unique_id=140934460]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0)
 mouse_filter = 2
+color = Color(0, 0, 0, 0)
 
-[node name="SkillLabel" type="Label" parent="HUD/LeftSkillSlotA"]
-anchors_preset = 15
+[node name="SkillLabel" type="Label" parent="HUD/LeftSkillSlotA" unique_id=626360364]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -237,12 +242,10 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.6)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 11
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
-mouse_filter = 2
 
-[node name="RightSkillSlotA" type="Panel" parent="HUD"]
+[node name="RightSkillSlotA" type="Panel" parent="HUD" unique_id=1383528793]
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
@@ -256,17 +259,17 @@ grow_horizontal = 0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_skill_slot_left")
 
-[node name="SkillColor" type="ColorRect" parent="HUD/RightSkillSlotA"]
-anchors_preset = 15
+[node name="SkillColor" type="ColorRect" parent="HUD/RightSkillSlotA" unique_id=328977046]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0)
 mouse_filter = 2
+color = Color(0, 0, 0, 0)
 
-[node name="SkillLabel" type="Label" parent="HUD/RightSkillSlotA"]
-anchors_preset = 15
+[node name="SkillLabel" type="Label" parent="HUD/RightSkillSlotA" unique_id=1010483576]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -276,12 +279,10 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.6)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 11
-text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
-mouse_filter = 2
 
-[node name="ResultLabel" type="Label" parent="HUD"]
+[node name="ResultLabel" type="Label" parent="HUD" unique_id=1217539660]
 visible = false
 anchors_preset = 8
 anchor_left = 0.5
@@ -303,7 +304,7 @@ text = "Waktu habis - Seri!"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="HUD"]
+[node name="MarginContainer" type="MarginContainer" parent="HUD" unique_id=1314204238]
 visible = false
 anchors_preset = 15
 anchor_right = 1.0
@@ -311,10 +312,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="PauseMenu" type="CanvasLayer" parent="."]
+[node name="PauseMenu" type="CanvasLayer" parent="." unique_id=910469774]
 script = ExtResource("10_pause")
 
-[node name="Overlay" type="ColorRect" parent="PauseMenu"]
+[node name="Overlay" type="ColorRect" parent="PauseMenu" unique_id=127309807]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -323,7 +324,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0.5)
 
-[node name="Panel" type="Panel" parent="PauseMenu"]
+[node name="Panel" type="Panel" parent="PauseMenu" unique_id=1819394075]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -337,7 +338,8 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_pause_panel")
 
-[node name="TitleLabel" type="Label" parent="PauseMenu/Panel"]
+[node name="TitleLabel" type="Label" parent="PauseMenu/Panel" unique_id=283178297]
+layout_mode = 0
 offset_left = 54.0
 offset_top = 24.0
 offset_right = 286.0
@@ -347,7 +349,8 @@ theme_override_font_sizes/font_size = 30
 text = "PAUSED"
 horizontal_alignment = 1
 
-[node name="HintLabel" type="Label" parent="PauseMenu/Panel"]
+[node name="HintLabel" type="Label" parent="PauseMenu/Panel" unique_id=838367597]
+layout_mode = 0
 offset_left = 34.0
 offset_top = 62.0
 offset_right = 306.0
@@ -357,105 +360,100 @@ theme_override_font_sizes/font_size = 16
 text = "Press Esc to resume"
 horizontal_alignment = 1
 
-[node name="ResumeButton" type="Button" parent="PauseMenu/Panel"]
+[node name="ResumeButton" type="Button" parent="PauseMenu/Panel" unique_id=781918422]
+layout_mode = 0
 offset_left = 55.0
 offset_top = 108.0
 offset_right = 285.0
 offset_bottom = 148.0
 text = "Resume"
 
-[node name="RestartButton" type="Button" parent="PauseMenu/Panel"]
+[node name="RestartButton" type="Button" parent="PauseMenu/Panel" unique_id=227976647]
+layout_mode = 0
 offset_left = 55.0
 offset_top = 162.0
 offset_right = 285.0
 offset_bottom = 202.0
 text = "Restart Match"
 
-[node name="QuitButton" type="Button" parent="PauseMenu/Panel"]
+[node name="QuitButton" type="Button" parent="PauseMenu/Panel" unique_id=290268068]
+layout_mode = 0
 offset_left = 55.0
 offset_top = 216.0
 offset_right = 285.0
 offset_bottom = 256.0
 text = "Quit Game"
 
-[node name="Ground" type="StaticBody3D" parent="." groups=["ground"]]
+[node name="Ground" type="StaticBody3D" parent="." unique_id=994531226 groups=["ground"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-collision_layer = 4
-collision_mask = 3
 script = ExtResource("1_kmy1e")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=468187450]
 mesh = SubResource("BoxMesh_ground")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32019043, 0)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=755013178]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.2963982, 0.022863388, 0)
 shape = SubResource("BoxShape3D_ground")
 
-[node name="Ground2" type="StaticBody3D" parent="." groups=["ground"]]
+[node name="Ground2" type="StaticBody3D" parent="." unique_id=1911649785 groups=["ground"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -114.582, -0.5, 0)
-collision_layer = 4
 collision_mask = 3
 script = ExtResource("2_kmy1e")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground2"]
+[node name="conveyor" parent="Ground2" unique_id=239295526 instance=ExtResource("5_yw17d")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, -16.553692)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground2" unique_id=931950376]
+visible = false
 mesh = SubResource("BoxMesh_ground")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32019043, 0)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground2" unique_id=836916938]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.706543, 0.32019043, 0)
 shape = SubResource("BoxShape3D_ground")
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1221791970]
 transform = Transform3D(1, 0, 0, 0, 0.85054517, 0.5259024, 0, -0.5259024, 0.85054517, -58.750214, 16.46942, 18.303902)
-fov = 124.1
+fov = 115.9
 size = 15.0
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=254145090]
 transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 10, 15, 10)
 shadow_enabled = true
 shadow_bias = 0.05
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1648942731]
 environment = SubResource("Environment_world")
 
-[node name="Spawner_Ground1" type="Node3D" parent="." node_paths=PackedStringArray("ground_node") groups=["spawner"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -52, 0, 0)
+[node name="Spawner_Ground1" type="Node3D" parent="." unique_id=539279075 node_paths=PackedStringArray("ground_node") groups=["spawner"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.324, 1.602, 0)
 script = ExtResource("2_spawner")
-spawn_interval = 3.5
-spawn_interval_jitter = 0.5
-move_speed = 20.0
+move_speed = 10.0
+spawn_interval = 6.0
+obstacle2_delay = 1.0
 ground_node = NodePath("../Ground")
 
-[node name="Lane1" type="Marker3D" parent="Spawner_Ground1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 1.5, -5.3451395)
+[node name="Lane" type="Marker3D" parent="Spawner_Ground1" unique_id=912310591]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15951538, 0.03716135, 0)
 
-[node name="Lane2" type="Marker3D" parent="Spawner_Ground1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 1.5, 0)
-
-[node name="Lane3" type="Marker3D" parent="Spawner_Ground1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 1.5, 4.768554)
-
-[node name="Spawner_Ground2" type="Node3D" parent="." node_paths=PackedStringArray("conveyor_wrap_node") groups=["spawner"]]
+[node name="Spawner_Ground2" type="Node3D" parent="." unique_id=109366986 node_paths=PackedStringArray("ground_node") groups=["spawner"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -157.32016, 1.6018701, 0)
 script = ExtResource("2_spawner")
-spawn_interval = 3.5
-spawn_interval_jitter = 0.5
-move_speed = 20.0
+move_speed = 10.0
+spawn_interval = 6.0
+obstacle2_delay = 1.0
 arah_x = 1
-conveyor_wrap_node = NodePath("../Ground2")
+ground_node = NodePath("../Ground2")
 
-[node name="Lane1" type="Marker3D" parent="Spawner_Ground2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -112.36488, 1.5, -7.142069)
+[node name="Lane" type="Marker3D" parent="Spawner_Ground2" unique_id=1440972763]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15951538, 0.03716135, 0)
 
-[node name="Lane2" type="Marker3D" parent="Spawner_Ground2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -112.36488, 1.5, 0)
-
-[node name="Lane3" type="Marker3D" parent="Spawner_Ground2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -112.36488, 1.5, 7.0033)
-
-[node name="Player" parent="." instance=ExtResource("5_kmy1e")]
+[node name="Player" parent="." unique_id=175080091 instance=ExtResource("5_kmy1e")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 1.5, 0)
+collision_mask = 5
 
-[node name="Player2" parent="." instance=ExtResource("5_kmy1e")]
+[node name="Player2" parent="." unique_id=2104858904 instance=ExtResource("5_kmy1e")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -80, 0.48254776, 0)
+collision_mask = 3
 action_left = "p2_left"
 action_right = "p2_right"
 action_up = "p2_up"
@@ -465,21 +463,43 @@ action_dash = "p2_dash"
 action_skill = "p2_skill"
 player_id = 2
 
-[node name="PlayerRope" type="Node3D" parent="."]
+[node name="PlayerRope" type="Node3D" parent="." unique_id=784901965]
 script = ExtResource("8_rope")
 player_a_path = NodePath("../Player")
 player_b_path = NodePath("../Player2")
 
-[node name="ConveyorDivider" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57.291, 3, 0)
+[node name="ConveyorDivider" type="Area3D" parent="." unique_id=1069330317]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -59.4602, 3, 0)
 collision_layer = 4
+script = ExtResource("9_s8d85")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="ConveyorDivider"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ConveyorDivider" unique_id=260788730]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3701172, 0, 0)
 shape = SubResource("BoxShape3D_divider")
 
-[node name="Death_Area" type="Area3D" parent="."]
+[node name="Death_Area" type="Area3D" parent="." unique_id=361745512]
 script = ExtResource("7_gj00n")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Death_Area"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Death_Area" unique_id=1503029430]
 transform = Transform3D(1, 0, 0, 0, -4.3711385e-08, -0.99999994, 0, 0.99999994, -4.3711385e-08, 0.7228699, -31.815214, -76.538864)
 shape = SubResource("BoxShape3D_l633n")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=1329067168]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -55.041557, 4.010404, 0)
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=916670900]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7819023, 2.2332458, 0.052383423)
+shape = SubResource("BoxShape3D_s8d85")
+
+[node name="StaticBody3D2" type="StaticBody3D" parent="." unique_id=1352399603]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -67.58989, 4.010404, 0)
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D2" unique_id=1183684235]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2332458, 0.052383423)
+shape = SubResource("BoxShape3D_s8d85")
+
+[connection signal="body_entered" from="ConveyorDivider" to="ConveyorDivider" method="_on_body_entered"]

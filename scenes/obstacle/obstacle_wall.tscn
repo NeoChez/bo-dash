@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://d36k13n1dpt1x"]
+
+[ext_resource type="Script" uid="uid://oaqowpciif2p" path="res://global/obstacle_3d.gd" id="1_x7vhc"]
+[ext_resource type="PackedScene" uid="uid://cw3re3cuqq821" path="res://assets/obstacle/obstacle1.glb" id="2_36jc2"]
+
+[sub_resource type="BoxShape3D" id="shape_wall"]
+size = Vector3(3.3923035, 5.3992043, 20.29657)
+
+[node name="obstacle_wall" type="AnimatableBody3D" unique_id=1741062986 groups=["item", "obstacle"]]
+sync_to_physics = false
+script = ExtResource("1_x7vhc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=967071279]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.026492119, 2.7881618, -0.051213026)
+shape = SubResource("shape_wall")
+debug_color = Color(0.9941284, 0, 0.22093713, 1)
+
+[node name="obstacle1" parent="." unique_id=1332958192 instance=ExtResource("2_36jc2")]
+transform = Transform3D(-1.7484556e-08, 0, 0.4, 0, 0.65, 0, -0.4, 0, -1.7484556e-08, 1.3166895, 2.4959173, -0.045627594)

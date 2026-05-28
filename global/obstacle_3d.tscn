@@ -8,25 +8,21 @@ roughness = 0.85
 
 [sub_resource type="BoxMesh" id="mesh_slab"]
 material = SubResource("mat_slab")
-size = Vector3(5.0, 2.0, 3.5)
+size = Vector3(5, 2, 3.5)
 
 [sub_resource type="BoxShape3D" id="shape_slab"]
-size = Vector3(5.0, 2.0, 3.5)
+size = Vector3(5, 2, 3.5)
 
 [node name="obstacle_3d" type="AnimatableBody3D" unique_id=725112794 groups=["item", "obstacle"]]
 collision_layer = 2
 collision_mask = 5
 sync_to_physics = false
 script = ExtResource("1_obstacle")
-rope_push_half_x = 2.6
-rope_push_half_y = 1.0
-rope_push_half_z = 1.85
-rope_push_y_offset = 1.0
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=286773244]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 mesh = SubResource("mesh_slab")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=468326888]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("shape_slab")
