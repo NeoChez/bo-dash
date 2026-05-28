@@ -56,19 +56,22 @@ func _on_body_entered(body: Node) -> void:
 
 
 func _resolve_skill_type() -> int:
-	var dist: float = absf(global_position.x)
-	var r := randf()
-	if dist < danger_zone_threshold:
-		# Bahaya (dekat inner edge): item powerful/annoying untuk fight back
-		if r < 0.60:
-			return 1  # Slow Enemy
-		elif r < 0.90:
-			return 2  # Pull Enemy
-		else:
-			return 0  # Speed Boost
-	else:
-		# Aman (jauh dari edge, menang): hanya BASIC, tidak annoying
-		return 0  # Speed Boost only
+	var in_danger := absf(global_position.x) < danger_zone_threshold
+	var target_tier := "annoying" if in_danger else "basic"
+
+	var gs := get_node_or_null("/root/GlobalSettings")
+	if gs == null:
+		return 0
+
+	var candidates: Array = []
+	for id in gs.skills:
+		if gs.skills[id].get("tier", "") == target_tier:
+			candidates.append(id)
+
+	if candidates.is_empty():
+		var all_ids: Array = gs.skills.keys()
+		return all_ids[randi() % all_ids.size()] if not all_ids.is_empty() else 0
+	return candidates[randi() % candidates.size()]
 
 
 func _apply_visual() -> void:

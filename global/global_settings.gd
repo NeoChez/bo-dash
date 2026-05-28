@@ -3,6 +3,52 @@ extends Node
 var player_1_character: String = "rex"
 var player_2_character: String = "rex"
 
+# ── SKILL REGISTRY ───────────────────────────────────────────────────────────
+# Tambah skill baru cukup dengan menambah entry di sini.
+# "tier"       : "basic" (aman) atau "annoying" (bahaya)
+# "name"       : teks yang tampil di HUD (sementara sampai asset jadi)
+# "color"      : warna slot HUD
+# "key"        : string yang dikirim ke player.apply_powerup()
+# "magnitude"  : kekuatan efek
+# "duration"   : durasi efek (detik)
+# "scene_path" : (opsional) path ke scene/CanvasLayer untuk visual custom
+var skills: Dictionary = {
+	0: {
+		"name": "BASIC",
+		"tier": "basic",
+		"color": Color(0.2, 0.9, 0.4, 0.75),
+		"key": "speed_boost",
+		"magnitude": 1.5,
+		"duration": 4.0,
+		"scene_path": "",  # isi nanti, misal "res://scenes/skills/speed_boost_hud.tscn"
+	},
+	1: {
+		"name": "ANNOYING",
+		"tier": "annoying",
+		"color": Color(1.0, 0.45, 0.2, 0.75),
+		"key": "slow_opponent",
+		"magnitude": 0.5,
+		"duration": 4.0,
+		"scene_path": "",
+	},
+	2: {
+		"name": "ANNOYING",
+		"tier": "annoying",
+		"color": Color(0.2, 0.6, 1.0, 0.75),
+		"key": "yank_opponent",
+		"magnitude": 18.0,
+		"duration": 4.0,
+		"scene_path": "",
+	},
+	# Contoh menambah skill baru nanti:
+	# 3: {
+	#   "name": "SHIELD", "tier": "basic",
+	#   "color": Color(0.9, 0.9, 0.2, 0.75),
+	#   "key": "shield", "magnitude": 1.0, "duration": 3.0,
+	#   "scene_path": "res://scenes/skills/shield_hud.tscn",
+	# },
+}
+
 # device ID yang terikat ke tiap player (-1 = tidak ada controller)
 var controller_p1: int = -1
 var controller_p2: int = -1

@@ -2,20 +2,7 @@ extends Node3D
 
 const MATCH_DURATION: float = 180.0
 
-# Ganti label di sini ketika asset sudah siap. Key = skill_type int.
-const _SKILL_NAMES: Dictionary = {
-	0: "BASIC",    # Speed Boost — ganti ke nama/ikon sesuai asset nanti
-	1: "ANNOYING", # Slow Enemy  — ganti ke nama/ikon sesuai asset nanti
-	2: "ANNOYING", # Pull Enemy  — ganti ke nama/ikon sesuai asset nanti
-}
-const _SKILL_COLORS: Array[Color] = [
-	Color(0.2, 0.9, 0.4, 0.75),
-	Color(1.0, 0.45, 0.2, 0.75),
-	Color(0.2, 0.6, 1.0, 0.75),
-]
-const _SKILL_KEYS: Array[String] = ["speed_boost", "slow_opponent", "yank_opponent"]
-const _SKILL_MAGNITUDES: Array[float] = [1.5, 0.5, 18.0]
-const _SKILL_DURATION: float = 4.0
+@onready var _skill_registry: Dictionary = GlobalSettings.skills
 
 var _match_time_left: float = MATCH_DURATION
 var _match_active: bool = true
@@ -89,8 +76,9 @@ func use_skill(player_id: int) -> void:
 	if skill < 0:
 		return
 	var player: CharacterBody3D = _player_1 if player_id == 1 else _player_2
-	if player != null and player.has_method("apply_powerup"):
-		player.apply_powerup(_SKILL_KEYS[skill], _SKILL_DURATION, _SKILL_MAGNITUDES[skill])
+	var sdata: Dictionary = _skill_registry.get(skill, {})
+	if player != null and player.has_method("apply_powerup") and not sdata.is_empty():
+		player.apply_powerup(sdata["key"], sdata["duration"], sdata["magnitude"])
 	_skills[player_id] = -1
 	_update_skill_slots()
 
@@ -152,8 +140,9 @@ func _refresh_slot(color_rect: ColorRect, label: Label, skill: int) -> void:
 		color_rect.color = Color(0, 0, 0, 0)
 		label.text = ""
 	else:
-		color_rect.color = _SKILL_COLORS[skill]
-		label.text = _SKILL_NAMES[skill]
+		var sdata: Dictionary = _skill_registry.get(skill, {})
+		color_rect.color = sdata.get("color", Color(0.5, 0.5, 0.5, 0.75))
+		label.text = sdata.get("name", "???")
 
 
 func _spin_carousel(color_rect: ColorRect, label: Label, final_skill: int, player_id: int) -> void:
@@ -162,7 +151,11 @@ func _spin_carousel(color_rect: ColorRect, label: Label, final_skill: int, playe
 	_carousel_active[player_id] = true
 
 	const SPIN_STEPS: int = 14
-	var current_idx: int = randi() % _SKILL_NAMES.size()
+	var skill_ids: Array = _skill_registry.keys()
+	if skill_ids.is_empty():
+		_carousel_active[player_id] = false
+		return
+	var current_pos: int = randi() % skill_ids.size()
 
 	for i in range(SPIN_STEPS):
 		if _skills.get(player_id, -1) < 0:
@@ -170,16 +163,18 @@ func _spin_carousel(color_rect: ColorRect, label: Label, final_skill: int, playe
 			return
 		var t: float = float(i) / float(SPIN_STEPS - 1)
 		var interval: float = lerpf(0.05, 0.22, t * t)
-		color_rect.color = _SKILL_COLORS[current_idx]
-		label.text = _SKILL_NAMES[current_idx]
-		current_idx = (current_idx + 1) % _SKILL_NAMES.size()
+		var sdata: Dictionary = _skill_registry[skill_ids[current_pos]]
+		color_rect.color = sdata.get("color", Color(0.5, 0.5, 0.5, 0.75))
+		label.text = sdata.get("name", "???")
+		current_pos = (current_pos + 1) % skill_ids.size()
 		await get_tree().create_timer(interval).timeout
 
 	if _skills.get(player_id, -1) < 0:
 		_carousel_active[player_id] = false
 		return
-	color_rect.color = _SKILL_COLORS[final_skill]
-	label.text = _SKILL_NAMES[final_skill]
+	var final_data: Dictionary = _skill_registry.get(final_skill, {})
+	color_rect.color = final_data.get("color", Color(0.5, 0.5, 0.5, 0.75))
+	label.text = final_data.get("name", "???")
 	_carousel_active[player_id] = false
 
 
