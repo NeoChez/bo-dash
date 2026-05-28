@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://c3uqkeu4wa7kp"]
+[gd_scene format=3 uid="uid://c3uqkeu4wa7kp"]
 
 [ext_resource type="Script" uid="uid://0nia4bme67b6" path="res://global/conveyor.gd" id="1_kmquc"]
 

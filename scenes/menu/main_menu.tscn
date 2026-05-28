@@ -1,58 +1,151 @@
-[gd_scene load_steps=6 format=3 uid="uid://cb3menu01play"]
+[gd_scene load_steps=19 format=3 uid="uid://cb3menu01play"]
 
 [ext_resource type="Script" path="res://scenes/menu/main_menu.gd" id="1_menu"]
+[ext_resource type="Shader" path="res://assets/shaders/scrolling_stripes.gdshader" id="2_shader"]
+[ext_resource type="FontFile" path="res://assets/fonts/Wonder_Boys.ttf" id="3_font"]
+[ext_resource type="Script" path="res://scenes/menu/draw_3d.gd" id="4_spawner"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_normal"]
-bg_color = Color(0.11, 0.18, 0.24, 0.85)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.38, 0.95, 0.75, 0.6)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-shadow_color = Color(0, 0, 0, 0.25)
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_background"]
+shader = ExtResource("2_shader")
+shader_parameter/color1 = Color(0.18, 0.65, 0.95, 1)
+shader_parameter/color2 = Color(0.18, 0.65, 0.95, 1)
+shader_parameter/divisions = 15.0
+shader_parameter/speed = 0.35
+shader_parameter/angle = 45.0
+
+[sub_resource type="Curve" id="Curve_scale"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.2, 1), 0.0, 0.0, 0, 0, Vector2(0.8, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="Gradient" id="Gradient_color"]
+offsets = PackedFloat32Array(0, 0.2, 0.8, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 0.98, 0.78, 0.65, 1, 0.95, 0.88, 0.6, 0.8, 1, 1, 1, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_play_normal"]
+bg_color = Color(1, 0.56, 0, 1)
+border_width_bottom = 8
+border_color = Color(0.78, 0.37, 0, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+content_margin_top = 14
+content_margin_bottom = 22
+shadow_color = Color(0, 0, 0, 0.15)
 shadow_size = 4
+shadow_offset = Vector2(0, 6)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
-bg_color = Color(0.15, 0.25, 0.32, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.98, 0.8, 0.35, 0.9)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-shadow_color = Color(0, 0, 0, 0.35)
-shadow_size = 6
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_play_hover"]
+bg_color = Color(1, 0.63, 0.05, 1)
+border_width_bottom = 10
+border_color = Color(0.85, 0.44, 0, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+content_margin_top = 12
+content_margin_bottom = 22
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 8
+shadow_offset = Vector2(0, 8)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pressed"]
-bg_color = Color(0.08, 0.12, 0.16, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_play_pressed"]
+bg_color = Color(0.9, 0.49, 0, 1)
 border_width_bottom = 2
-border_color = Color(0.38, 0.95, 0.75, 0.9)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
+border_color = Color(0.68, 0.31, 0, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+content_margin_top = 20
+content_margin_bottom = 14
+shadow_color = Color(0, 0, 0, 0.1)
+shadow_size = 2
+shadow_offset = Vector2(0, 2)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_title_panel"]
-bg_color = Color(0.08, 0.12, 0.16, 0.7)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_settings_normal"]
+bg_color = Color(0, 0.69, 1, 1)
+border_width_bottom = 8
+border_color = Color(0, 0.48, 0.69, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+content_margin_top = 14
+content_margin_bottom = 22
+shadow_color = Color(0, 0, 0, 0.15)
+shadow_size = 4
+shadow_offset = Vector2(0, 6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_settings_hover"]
+bg_color = Color(0.25, 0.77, 1, 1)
+border_width_bottom = 10
+border_color = Color(0, 0.55, 0.79, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+content_margin_top = 12
+content_margin_bottom = 22
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 8
+shadow_offset = Vector2(0, 8)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_settings_pressed"]
+bg_color = Color(0, 0.57, 0.92, 1)
 border_width_bottom = 2
-border_color = Color(0.38, 0.95, 0.75, 0.3)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
+border_color = Color(0, 0.36, 0.56, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+content_margin_top = 20
+content_margin_bottom = 14
+shadow_color = Color(0, 0, 0, 0.1)
+shadow_size = 2
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_exit_normal"]
+bg_color = Color(1, 0.09, 0.27, 1)
+border_width_bottom = 8
+border_color = Color(0.69, 0.06, 0.18, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+content_margin_top = 14
+content_margin_bottom = 22
+shadow_color = Color(0, 0, 0, 0.15)
+shadow_size = 4
+shadow_offset = Vector2(0, 6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_exit_hover"]
+bg_color = Color(1, 0.32, 0.32, 1)
+border_width_bottom = 10
+border_color = Color(0.84, 0.08, 0.23, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+content_margin_top = 12
+content_margin_bottom = 22
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 8
+shadow_offset = Vector2(0, 8)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_exit_pressed"]
+bg_color = Color(0.84, 0, 0, 1)
+border_width_bottom = 2
+border_color = Color(0.55, 0, 0, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+content_margin_top = 20
+content_margin_bottom = 14
+shadow_color = Color(0, 0, 0, 0.1)
+shadow_size = 2
+shadow_offset = Vector2(0, 2)
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -64,41 +157,90 @@ grow_vertical = 2
 script = ExtResource("1_menu")
 
 [node name="Background" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_background")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.06, 0.1, 0.14, 1)
 
-[node name="TitlePanel" type="Panel" parent="."]
+[node name="Particles" type="CPUParticles2D" parent="Background"]
+position = Vector2(576, 680)
+amount = 25
+lifetime = 6.0
+preprocess = 3.0
+speed_scale = 0.8
+emission_shape = 3
+emission_rect_extents = Vector2(600, 10)
+direction = Vector2(0, -1)
+spread = 20.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 50.0
+initial_velocity_max = 100.0
+angular_velocity_min = -40.0
+angular_velocity_max = 40.0
+scale_amount_min = 6.0
+scale_amount_max = 18.0
+scale_amount_curve = SubResource("Curve_scale")
+color = Color(1, 1, 1, 0.3)
+color_ramp = SubResource("Gradient_color")
+
+[node name="Background3D" type="SubViewportContainer" parent="."]
 layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -250.0
-offset_top = 60.0
-offset_right = 250.0
-offset_bottom = 160.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_title_panel")
+grow_vertical = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="Background3D"]
+own_world_3d = true
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
+
+[node name="Camera3D" type="Camera3D" parent="Background3D/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8)
+current = true
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Background3D/SubViewport"]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 4, 0)
+light_color = Color(1, 0.95, 0.9, 1)
+light_energy = 2.0
+
+[node name="DirectionalLight2" type="DirectionalLight3D" parent="Background3D/SubViewport"]
+transform = Transform3D(-0.866025, 0.353553, -0.353553, 0, 0.707107, 0.707107, 0.5, 0.612372, -0.612372, 0, 4, 0)
+light_color = Color(0.7, 0.85, 1, 1)
+light_energy = 1.0
+
+[node name="Spawner" type="Node3D" parent="Background3D/SubViewport"]
+script = ExtResource("4_spawner")
 
 [node name="TitleLabel" type="Label" parent="."]
 layout_mode = 1
-anchors_preset = 5
+anchors_preset = 8
 anchor_left = 0.5
+anchor_top = 0.5
 anchor_right = 0.5
-offset_left = -200.0
-offset_top = 70.0
-offset_right = 200.0
-offset_bottom = 150.0
+anchor_bottom = 0.5
+offset_left = -500.0
+offset_top = -250.0
+offset_right = 500.0
+offset_bottom = -50.0
 grow_horizontal = 2
-theme_override_colors/font_color = Color(0.38, 0.95, 0.75, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.45)
-theme_override_constants/shadow_offset_x = 2
-theme_override_constants/shadow_offset_y = 3
-theme_override_font_sizes/font_size = 48
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.05, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
+theme_override_colors/font_shadow_color = Color(1, 0.82, 0.15, 0.95)
+theme_override_constants/outline_size = 28
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 0
+theme_override_constants/shadow_outline_size = 24
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 180
 text = "BO-DASH"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -110,46 +252,58 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -150.0
-offset_top = -60.0
-offset_right = 150.0
-offset_bottom = 190.0
+offset_left = -210.0
+offset_top = -20.0
+offset_right = 210.0
+offset_bottom = 280.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
-custom_minimum_size = Vector2(300, 0)
+custom_minimum_size = Vector2(420, 0)
 layout_mode = 2
-theme_override_constants/separation = 22
+theme_override_constants/separation = 24
 
 [node name="PlayButton" type="Button" parent="CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 76)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 22
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
+theme_override_constants/outline_size = 16
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_play_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_play_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_play_pressed")
+theme_override_styles/focus = SubResource("StyleBoxFlat_play_hover")
 text = "PLAY"
 
 [node name="SettingsButton" type="Button" parent="CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 76)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 22
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
+theme_override_constants/outline_size = 16
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_settings_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_settings_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_settings_pressed")
+theme_override_styles/focus = SubResource("StyleBoxFlat_settings_hover")
 text = "SETTINGS"
 
 [node name="ExitButton" type="Button" parent="CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 76)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 22
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_normal")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
+theme_override_constants/outline_size = 16
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_exit_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_exit_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_exit_pressed")
+theme_override_styles/focus = SubResource("StyleBoxFlat_exit_hover")
 text = "EXIT"
 
 [node name="HintLabel" type="Label" parent="."]
@@ -165,7 +319,10 @@ offset_right = 200.0
 offset_bottom = -30.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_colors/font_color = Color(0.62, 0.7, 0.75, 0.8)
+theme_override_colors/font_color = Color(1, 1, 1, 0.8)
+theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 0.8)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 14
 text = "Bo-Dash © 2026 - Modern Runner Coop"
 horizontal_alignment = 1
