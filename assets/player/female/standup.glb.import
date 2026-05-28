@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://tt7mf8jaeoxl"
-path="res://.godot/imported/jumping.glb-3e825084c0ef160bda914990c554385b.scn"
+uid="uid://kjj7qgk2p8c4"
+path="res://.godot/imported/standup.glb-09524effa98af9ee45f33e5c9ed7f4b4.scn"
 
 [deps]
 
-source_file="res://assets/player/female/jumping.glb"
-dest_files=["res://.godot/imported/jumping.glb-3e825084c0ef160bda914990c554385b.scn"]
+source_file="res://assets/player/female/standup.glb"
+dest_files=["res://.godot/imported/standup.glb-09524effa98af9ee45f33e5c9ed7f4b4.scn"]
 
 [params]
 
