@@ -2,7 +2,12 @@ extends Node3D
 
 const MATCH_DURATION: float = 180.0
 
-const _SKILL_NAMES: Array[String] = ["SPEED\nBOOST", "SLOW\nENEMY", "PULL\nENEMY"]
+# Ganti label di sini ketika asset sudah siap. Key = skill_type int.
+const _SKILL_NAMES: Dictionary = {
+	0: "BASIC",    # Speed Boost — ganti ke nama/ikon sesuai asset nanti
+	1: "ANNOYING", # Slow Enemy  — ganti ke nama/ikon sesuai asset nanti
+	2: "ANNOYING", # Pull Enemy  — ganti ke nama/ikon sesuai asset nanti
+}
 const _SKILL_COLORS: Array[Color] = [
 	Color(0.2, 0.9, 0.4, 0.75),
 	Color(1.0, 0.45, 0.2, 0.75),
@@ -16,6 +21,7 @@ var _match_time_left: float = MATCH_DURATION
 var _match_active: bool = true
 var _scores := {1: 0, 2: 0}
 var _skills := {1: -1, 2: -1}
+var _carousel_active := {1: false, 2: false}
 var _dash_bar_left: ProgressBar = null
 var _dash_bar_right: ProgressBar = null
 
@@ -71,7 +77,9 @@ func on_skill_picked_up(player_id: int, skill_type: int) -> void:
 	if not _skills.has(player_id):
 		return
 	_skills[player_id] = skill_type
-	_update_skill_slots()
+	var color_rect: ColorRect = _skill_left_color if player_id == 2 else _skill_right_color
+	var label: Label = _skill_left_label if player_id == 2 else _skill_right_label
+	_spin_carousel(color_rect, label, skill_type, player_id)
 
 
 func use_skill(player_id: int) -> void:
@@ -146,6 +154,33 @@ func _refresh_slot(color_rect: ColorRect, label: Label, skill: int) -> void:
 	else:
 		color_rect.color = _SKILL_COLORS[skill]
 		label.text = _SKILL_NAMES[skill]
+
+
+func _spin_carousel(color_rect: ColorRect, label: Label, final_skill: int, player_id: int) -> void:
+	if color_rect == null or label == null:
+		return
+	_carousel_active[player_id] = true
+
+	const SPIN_STEPS: int = 14
+	var current_idx: int = randi() % _SKILL_NAMES.size()
+
+	for i in range(SPIN_STEPS):
+		if _skills.get(player_id, -1) < 0:
+			_carousel_active[player_id] = false
+			return
+		var t: float = float(i) / float(SPIN_STEPS - 1)
+		var interval: float = lerpf(0.05, 0.22, t * t)
+		color_rect.color = _SKILL_COLORS[current_idx]
+		label.text = _SKILL_NAMES[current_idx]
+		current_idx = (current_idx + 1) % _SKILL_NAMES.size()
+		await get_tree().create_timer(interval).timeout
+
+	if _skills.get(player_id, -1) < 0:
+		_carousel_active[player_id] = false
+		return
+	color_rect.color = _SKILL_COLORS[final_skill]
+	label.text = _SKILL_NAMES[final_skill]
+	_carousel_active[player_id] = false
 
 
 func _update_hud() -> void:

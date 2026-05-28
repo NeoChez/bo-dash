@@ -1,6 +1,8 @@
 extends Area3D
 
-@export_enum("Speed Boost:0", "Slow Opponent:1", "Yank Opponent:2") var skill_type: int = 0
+@export_enum("Speed Boost:0", "Slow Opponent:1", "Yank Opponent:2") var skill_type: int = -1
+@export var danger_zone_threshold: float = 35.0
+@export var danger_boost_weight: float = 0.75
 @export var move_speed: float = 7.0
 @export var move_direction: Vector3 = Vector3(-1, 0, 0)
 @export var bob_height: float = 0.22
@@ -49,12 +51,28 @@ func _on_body_entered(body: Node) -> void:
 	if body == null or not body.is_in_group("player"):
 		return
 	var player_id: int = int(body.get("player_id"))
-	get_tree().call_group("match_controller", "on_skill_picked_up", player_id, skill_type)
+	get_tree().call_group("match_controller", "on_skill_picked_up", player_id, _resolve_skill_type())
 	_pickup()
 
 
+func _resolve_skill_type() -> int:
+	var dist: float = absf(global_position.x)
+	var r := randf()
+	if dist < danger_zone_threshold:
+		# Bahaya (dekat inner edge): item powerful/annoying untuk fight back
+		if r < 0.60:
+			return 1  # Slow Enemy
+		elif r < 0.90:
+			return 2  # Pull Enemy
+		else:
+			return 0  # Speed Boost
+	else:
+		# Aman (jauh dari edge, menang): hanya BASIC, tidak annoying
+		return 0  # Speed Boost only
+
+
 func _apply_visual() -> void:
-	if visual == null:
+	if visual == null or skill_type < 0:
 		return
 	var mat := StandardMaterial3D.new()
 	mat.emission_enabled = true

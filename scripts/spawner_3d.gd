@@ -1,7 +1,6 @@
 extends Node3D
 
 @export var obstacle_scene: PackedScene = preload("res://global/obstacle_3d.tscn")
-@export var powerup_scene: PackedScene = preload("res://scenes/powerups/powerup.tscn")
 @export var star_scene: PackedScene = preload("res://scenes/powerups/star_collectible.tscn")
 @export var obstacles_enabled: bool = true
 @export var spawn_interval: float = 2.0
@@ -28,14 +27,6 @@ extends Node3D
 @export var late_game_start: float = 0.62
 @export var frenzy_start: float = 0.84
 
-@export var powerup_spawn_interval: float = 9.0
-@export var powerup_spawn_chance: float = 0.25
-@export var powerup_y_offset: float = 2.0
-@export var powerup_y_jitter: float = 0.05
-@export var powerup_lateral_jitter: float = 0.2
-@export var powerup_chance_speed: float = 0.5
-@export var powerup_chance_slow: float = 0.3
-@export var powerup_chance_yank: float = 0.2
 @export var star_spawn_interval: float = 5.5
 @export var star_spawn_chance: float = 0.7
 @export var star_y_offset: float = 2.4
@@ -59,7 +50,6 @@ extends Node3D
 var spawn_points: Array = []
 var last_spawn_index: int = -1
 var obstacle_timer: Timer
-var powerup_timer: Timer
 var star_timer: Timer
 var skill_timer: Timer
 var _obstacle_pool: Array[PackedScene] = []
@@ -122,13 +112,6 @@ func _ready() -> void:
 	_set_next_obstacle_interval()
 	obstacle_timer.start()
 
-	powerup_timer = Timer.new()
-	powerup_timer.autostart = false
-	powerup_timer.wait_time = powerup_spawn_interval
-	powerup_timer.timeout.connect(_on_powerup_timer)
-	add_child(powerup_timer)
-	powerup_timer.start()
-
 	star_timer = Timer.new()
 	star_timer.autostart = false
 	star_timer.wait_time = star_spawn_interval
@@ -157,20 +140,6 @@ func _on_spawn_timer():
 
 	_spawn_obstacle_pattern(lane_index, spawn_point)
 	_set_next_obstacle_interval()
-
-func _on_powerup_timer() -> void:
-	if not _match_active:
-		return
-	if spawn_points.size() == 0:
-		return
-	if powerup_scene == null:
-		return
-	if randf() > powerup_spawn_chance:
-		return
-
-	var lane_index = _pick_lane()
-	var spawn_point = spawn_points[lane_index]
-	spawn_powerup(spawn_point)
 
 func _on_star_timer() -> void:
 	if not _match_active:
@@ -214,11 +183,8 @@ func spawn_skill(spawn_point: Marker3D) -> void:
 	if item.has_method("set_base_height"):
 		item.set_base_height(item.global_position.y)
 
-	var skill_type: int = randi() % 3
 	if item.get("skill_type") != null:
-		item.set("skill_type", skill_type)
-	if item.has_method("refresh_visual"):
-		item.refresh_visual()
+		item.set("skill_type", -1)  # resolved at pickup time via _resolve_skill_type()
 
 	var move_direction := Vector3(arah_x, 0, 0)
 	var speed := move_speed * randf_range(speed_random_range.x, speed_random_range.y)
@@ -389,42 +355,6 @@ func spawn_obstacle(spawn_point: Marker3D, forced_scene: PackedScene = null):
 		var end_x: float = g_pos.x + float(arah_x) * 50.0
 		obs.set_conveyor_info(end_x, g_pos.y, 2.0)
 
-func spawn_powerup(spawn_point: Marker3D) -> void:
-	var powerup = powerup_scene.instantiate()
-	var wrap_src: Node3D = conveyor_wrap_node if conveyor_wrap_node else ground_node
-
-	add_child(powerup)
-	powerup.top_level = true
-	powerup.global_transform = spawn_point.global_transform
-	powerup.global_position.y += powerup_y_offset
-	_apply_powerup_jitter(powerup)
-	_apply_spawn_juice(powerup)
-	if powerup.has_method("set_base_height"):
-		powerup.set_base_height(powerup.global_position.y)
-
-	if powerup.get("powerup_type") != null:
-		powerup.set("powerup_type", _pick_powerup_type())
-		if powerup.has_method("refresh_visual"):
-			powerup.refresh_visual()
-
-	var move_direction = Vector3(arah_x, 0, 0)
-	var speed = move_speed * randf_range(speed_random_range.x, speed_random_range.y)
-	if powerup.has_method("set_movement"):
-		powerup.set_movement(move_direction, speed)
-	elif powerup.has_variable("move_direction"):
-		powerup.move_direction = move_direction
-		powerup.move_speed = speed
-
-	if not powerup.is_in_group("item"):
-		powerup.add_to_group("item")
-	if not powerup.is_in_group("powerup"):
-		powerup.add_to_group("powerup")
-
-	if ground_node:
-		ground_node.register_obstacle(powerup)
-	elif wrap_src != null and wrap_src.has_method("register_obstacle"):
-		wrap_src.register_obstacle(powerup)
-
 func spawn_star(spawn_point: Marker3D) -> void:
 	var star = star_scene.instantiate()
 	var wrap_src: Node3D = conveyor_wrap_node if conveyor_wrap_node else ground_node
@@ -456,25 +386,10 @@ func spawn_star(spawn_point: Marker3D) -> void:
 	elif wrap_src != null and wrap_src.has_method("register_obstacle"):
 		wrap_src.register_obstacle(star)
 
-func _pick_powerup_type() -> int:
-	var total = powerup_chance_speed + powerup_chance_slow + powerup_chance_yank
-	if total <= 0.0:
-		return 0
-	var roll = randf() * total
-	if roll < powerup_chance_speed:
-		return 0
-	if roll < powerup_chance_speed + powerup_chance_slow:
-		return 1
-	return 2
-
 func _apply_spawn_jitter(node: Node3D) -> void:
 	var offset = Vector3(0, randf_range(-y_jitter, y_jitter), randf_range(-lateral_jitter, lateral_jitter))
 	node.global_position += offset
 	node.rotation.y += deg_to_rad(randf_range(-rotation_y_jitter, rotation_y_jitter))
-
-func _apply_powerup_jitter(node: Node3D) -> void:
-	var offset = Vector3(0, randf_range(-powerup_y_jitter, powerup_y_jitter), randf_range(-powerup_lateral_jitter, powerup_lateral_jitter))
-	node.global_position += offset
 
 func _apply_star_jitter(node: Node3D) -> void:
 	var offset = Vector3(0, randf_range(-star_y_jitter, star_y_jitter), randf_range(-star_lateral_jitter, star_lateral_jitter))
@@ -492,8 +407,6 @@ func set_match_active(active: bool) -> void:
 	_match_active = active
 	if obstacle_timer != null:
 		obstacle_timer.paused = not active
-	if powerup_timer != null:
-		powerup_timer.paused = not active
 	if star_timer != null:
 		star_timer.paused = not active
 	if skill_timer != null:
