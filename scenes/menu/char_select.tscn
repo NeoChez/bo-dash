@@ -182,7 +182,7 @@ theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
 theme_override_constants/outline_size = 10
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 24
-text = "PLAYER 2 (LEFT)"
+text = "PLAYER 1 (LEFT)"
 horizontal_alignment = 1
 
 [node name="ViewportContainer" type="SubViewportContainer" parent="HBoxContainer/P2Panel/VBox"]
@@ -256,7 +256,7 @@ theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
 theme_override_constants/outline_size = 10
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 24
-text = "PLAYER 1 (RIGHT)"
+text = "PLAYER 2 (RIGHT)"
 horizontal_alignment = 1
 
 [node name="ViewportContainer" type="SubViewportContainer" parent="HBoxContainer/P1Panel/VBox"]
@@ -305,7 +305,7 @@ theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
 theme_override_constants/outline_size = 10
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 20
-text = "PRESS 'UP' TO READY"
+text = "PRESS 'P' TO READY"
 horizontal_alignment = 1
 
 [node name="CountdownLabel" type="Label" parent="."]
@@ -350,6 +350,6 @@ theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
 theme_override_constants/outline_size = 8
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 15
-text = "P2: A / D to Cycle, W to Ready  |  P1: Left / Right Arrows to Cycle, Up Arrow to Ready"
+text = "P1: A / D to Cycle, W to Ready  |  P2: L / ' to Cycle, P to Ready"
 horizontal_alignment = 1
 vertical_alignment = 1
