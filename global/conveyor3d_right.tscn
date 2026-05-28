@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://c3uqkeu4wa7kp"]
 
 [ext_resource type="Script" uid="uid://0nia4bme67b6" path="res://global/conveyor.gd" id="1_kmquc"]
+[ext_resource type="PackedScene" uid="uid://dhfpvk2vv6rv8" path="res://assets/graphics/environment/ConveyorUnanimatedS.glb" id="2_k1n67"]
+[ext_resource type="Texture2D" uid="uid://cn6uy3u56c7fd" path="res://assets/graphics/environment/tekture.jpeg" id="3_jid02"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
 albedo_color = Color(0.25, 0.25, 0.3, 1)
@@ -12,14 +14,68 @@ size = Vector3(100, 2, 20)
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(100, 1.6403809, 20)
 
-[node name="Ground" type="StaticBody3D" groups=["ground"]]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_k1n67"]
+albedo_texture = ExtResource("3_jid02")
+
+[sub_resource type="Animation" id="Animation_of6at"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Plane_001:surface_material_override/0:uv1_offset")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector3(0, 0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_mmy5q"]
+resource_name = "jalan"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Plane_001:surface_material_override/0:uv1_offset")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0, 0, 0), Vector3(1, 0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_jid02"]
+_data = {
+&"RESET": SubResource("Animation_of6at"),
+&"jalan": SubResource("Animation_mmy5q")
+}
+
+[node name="Ground" type="StaticBody3D" unique_id=657350804 groups=["ground"]]
 collision_layer = 4
 collision_mask = 3
 script = ExtResource("1_kmquc")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1099250218]
+visible = false
 mesh = SubResource("BoxMesh_ground")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=313229496]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32019043, 0)
 shape = SubResource("BoxShape3D_ground")
+
+[node name="ConveyorUnanimatedS" parent="." unique_id=413934258 instance=ExtResource("2_k1n67")]
+transform = Transform3D(40, 0, 0, 0, 25, 0, 0, 0, 28, -9.623068, -10.453056, 0)
+
+[node name="Plane_001" parent="ConveyorUnanimatedS" index="1" unique_id=469356378]
+transform = Transform3D(0.20518212, 0, 0, 0, 0.45993173, 0, 0, 0, 0.35861683, 0, -0.003776759, 0)
+surface_material_override/0 = SubResource("StandardMaterial3D_k1n67")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="ConveyorUnanimatedS" unique_id=627880102]
+libraries/ = SubResource("AnimationLibrary_jid02")
+autoplay = &"jalan"
+
+[editable path="ConveyorUnanimatedS"]
