@@ -69,6 +69,8 @@ var _state_timer: float = 0.0
 
 @onready var animated_sprite = $AnimatedSprite3D
 @onready var visuals = $Visuals
+@onready var jump_sfx = $JumpSFX
+@onready var dash_sfx = $DashSFX
 
 # 3D Visuals & Procedural Animations
 @export_group("3D Visuals & Animation")
@@ -132,6 +134,8 @@ func _physics_process(delta: float) -> void:
 		# Jump: hanya via tombol jump (Right Alt P1 / Left Alt P2), BUKAN tombol gerak W/P
 		if Input.is_action_just_pressed(action_jump) and is_on_floor():
 			velocity.y = jump_velocity
+			if jump_sfx:
+				jump_sfx.play()
 			change_state(PlayerState.JUMPING)
 
 		# Handle dash
@@ -140,6 +144,8 @@ func _physics_process(delta: float) -> void:
 		_dash_active_timer = maxf(_dash_active_timer - delta, 0.0)
 		if Input.is_action_just_pressed(action_dash) and _dash_timer <= 0.0:
 			_do_dash()
+			if dash_sfx:
+				dash_sfx.play()
 
 		# Handle skill use
 		if Input.is_action_just_pressed(action_skill):

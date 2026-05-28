@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cpwactebxbw3v" path="res://scripts/spawner_3d.gd" id="2_spawner"]
 [ext_resource type="PackedScene" uid="uid://clbs4ut175fn5" path="res://scenes/player/player.tscn" id="5_kmy1e"]
+[ext_resource type="AudioStream" uid="uid://t0yk6bhtgebv" path="res://assets/audio/sfx/ropeTension.mp3" id="6_s8d85"]
 [ext_resource type="Script" uid="uid://cdswhror157d0" path="res://global/death_area.gd" id="7_gj00n"]
 [ext_resource type="PackedScene" uid="uid://2uwdpea6iavo" path="res://global/conveyor3d_left.tscn" id="8_l633n"]
 [ext_resource type="Script" uid="uid://c4qmujd6nywag" path="res://scripts/player_rope_3d.gd" id="8_rope"]
@@ -387,13 +388,12 @@ shadow_bias = 0.05
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=676440190]
 environment = SubResource("Environment_world")
 
-[node name="Spawner_Ground1" type="Node3D" parent="." unique_id=197413536 node_paths=PackedStringArray("ground_node") groups=["spawner"]]
+[node name="Spawner_Ground1" type="Node3D" parent="." unique_id=197413536 groups=["spawner"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 0)
 script = ExtResource("2_spawner")
 spawn_interval = 3.5
 spawn_interval_jitter = 0.5
 move_speed = 20.0
-ground_node = NodePath("")
 
 [node name="Lane1" type="Marker3D" parent="Spawner_Ground1" unique_id=26834894]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -5.345)
@@ -453,6 +453,10 @@ dash_yank_multiplier = 4.0
 segment_count = 50
 rope_radius = 0.1
 
+[node name="TensionSFX" type="AudioStreamPlayer" parent="PlayerRope" unique_id=1638115608]
+stream = ExtResource("6_s8d85")
+volume_db = -5.0
+
 [node name="ConveyorDivider" type="StaticBody3D" parent="." unique_id=1839882021]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
 collision_layer = 0
@@ -492,7 +496,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57.212036, 0, 0)
 [node name="Conveyor Right" parent="." unique_id=657350804 instance=ExtResource("9_yw17d")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 57.219734, 0, 0)
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=546582301]
+[node name="MainSounds" type="AudioStreamPlayer" parent="." unique_id=546582301]
 stream = ExtResource("10_s8d85")
 volume_db = -10.0
 autoplay = true
