@@ -22,6 +22,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 GlobalSettings="*res://global/global_settings.gd"
+MenuMusic="*uid://cifvbme6rriyr"
 
 [display]
 
