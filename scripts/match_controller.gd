@@ -15,6 +15,15 @@ const SKILL_EMOJI := {
 	6: "⚡",    # Dash Recharge
 }
 
+@export_group("Sudden Death")
+@export var sudden_death_enabled: bool = true
+@export var sudden_death_duration: float = 60.0
+@export var sd_conveyor_multiplier: float = 1.8
+@export var sd_star_interval: float = 2.5
+@export var sd_star_chance: float = 0.95
+@export var sd_skill_interval: float = 6.0
+@export var sd_skill_chance: float = 0.85
+
 @onready var _skill_registry: Dictionary = GlobalSettings.skills
 
 var _match_time_left: float = MATCH_DURATION
@@ -22,6 +31,15 @@ var _match_active: bool = true
 var _scores := {1: 0, 2: 0}
 var _skills := {1: -1, 2: -1}
 var _carousel_active := {1: false, 2: false}
+var _sudden_death_active: bool = false
+var _sd_time_left: float = 0.0
+var _sd_star_interval_orig: float = 0.0
+var _sd_star_chance_orig: float = 0.0
+var _sd_skill_interval_orig: float = 0.0
+var _sd_skill_chance_orig: float = 0.0
+var _sd_canvas: CanvasLayer = null
+var _sd_camera_tween: Tween = null
+var _sd_orig_fov: float = 75.0
 var _dash_bar_left: ProgressBar = null
 var _dash_bar_right: ProgressBar = null
 var _slot_left_sb: StyleBoxFlat = null
@@ -59,6 +77,15 @@ func _process(delta: float) -> void:
 	_debug_handle_keys()
 	if Input.is_action_just_pressed("ui_home"):
 		_debug_spawn_skill_items()
+
+	if _sudden_death_active:
+		_sd_time_left = max(0.0, _sd_time_left - delta)
+		_update_timer_label()
+		_update_dash_bars()
+		if _sd_time_left <= 0.0:
+			_end_sudden_death()
+		return
+
 	if not _match_active:
 		return
 
@@ -144,6 +171,145 @@ func _finish_match() -> void:
 	_match_active = false
 	_match_time_left = 0.0
 	_update_timer_label()
+
+	if sudden_death_enabled and int(_scores[1]) == int(_scores[2]):
+		_start_sudden_death()
+		return
+
+	_stop_match_nodes()
+	_show_result()
+
+
+func _start_sudden_death() -> void:
+	_sudden_death_active = true
+	_sd_time_left = sudden_death_duration
+	_match_active = true
+
+	_result_label.visible = false
+
+	# Simpan nilai original spawner
+	if _spawner_1:
+		_sd_star_interval_orig = _spawner_1.get("star_spawn_interval") if _spawner_1.get("star_spawn_interval") else 5.5
+		_sd_star_chance_orig = _spawner_1.get("star_spawn_chance") if _spawner_1.get("star_spawn_chance") else 0.7
+		_sd_skill_interval_orig = _spawner_1.get("skill_spawn_interval") if _spawner_1.get("skill_spawn_interval") else 14.0
+		_sd_skill_chance_orig = _spawner_1.get("skill_spawn_chance") if _spawner_1.get("skill_spawn_chance") else 0.55
+
+	# Terapkan setting SD ke kedua spawner
+	for spawner in [_spawner_1, _spawner_2]:
+		if spawner == null:
+			continue
+		spawner.set("star_spawn_interval", sd_star_interval)
+		spawner.set("star_spawn_chance", sd_star_chance)
+		spawner.set("skill_spawn_interval", sd_skill_interval)
+		spawner.set("skill_spawn_chance", sd_skill_chance)
+		if spawner.has_method("set_match_active"):
+			spawner.set_match_active(true)
+
+	# Conveyor lebih cepat
+	for node in get_tree().get_nodes_in_group("conveyor"):
+		if node.has_method("set_speed_multiplier"):
+			node.set_speed_multiplier(sd_conveyor_multiplier)
+
+	_show_sd_effects()
+
+
+func _show_sd_effects() -> void:
+	var font = load("res://assets/fonts/Wonder_Boys.ttf")
+
+	_sd_canvas = CanvasLayer.new()
+	_sd_canvas.layer = 20
+	add_child(_sd_canvas)
+
+	# Vignette merah gradient ke transparan dengan shader
+	var vignette := ColorRect.new()
+	vignette.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var shader := Shader.new()
+	shader.code = """
+shader_type canvas_item;
+uniform float intensity : hint_range(0.0, 1.0) = 0.0;
+void fragment() {
+	vec2 uv = UV * 2.0 - 1.0;
+	float edge = max(abs(uv.x), abs(uv.y));
+	float alpha = smoothstep(0.72, 1.05, edge) * intensity;
+	COLOR = vec4(1.0, 0.0, 0.0, alpha);
+}
+"""
+	var mat := ShaderMaterial.new()
+	mat.shader = shader
+	mat.set_shader_parameter("intensity", 0.0)
+	vignette.material = mat
+	_sd_canvas.add_child(vignette)
+
+	# Breathing: tween shader parameter intensity
+	_sd_camera_tween = create_tween().set_loops()
+	_sd_camera_tween.tween_method(
+		func(v: float): mat.set_shader_parameter("intensity", v),
+		0.0, 0.55, 0.8
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_sd_camera_tween.tween_method(
+		func(v: float): mat.set_shader_parameter("intensity", v),
+		0.55, 0.0, 0.8
+	).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+	# Teks SUDDEN DEATH besar (muncul sekali lalu fade)
+	var lbl := Label.new()
+	lbl.text = "SUDDEN DEATH!"
+	lbl.set_anchors_preset(Control.PRESET_CENTER)
+	lbl.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	lbl.grow_vertical = Control.GROW_DIRECTION_BOTH
+	lbl.offset_left = -700.0
+	lbl.offset_right = 700.0
+	lbl.offset_top = -100.0
+	lbl.offset_bottom = 100.0
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_override("font", font)
+	lbl.add_theme_font_size_override("font_size", 110)
+	lbl.add_theme_color_override("font_color", Color(1, 0.08, 0.08, 1))
+	lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	lbl.add_theme_constant_override("outline_size", 22)
+	lbl.scale = Vector2(0.05, 0.05)
+	lbl.pivot_offset = Vector2(700, 100)
+	_sd_canvas.add_child(lbl)
+
+	var tween := create_tween()
+	tween.tween_property(lbl, "scale", Vector2(1.0, 1.0), 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_interval(1.0)
+	# Fade out sambil muter
+	tween.set_parallel(true)
+	tween.tween_property(lbl, "modulate:a", 0.0, 0.7).set_trans(Tween.TRANS_QUAD)
+	tween.tween_property(lbl, "rotation_degrees", 360.0, 0.7).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_property(lbl, "scale", Vector2(0.3, 0.3), 0.7).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.chain().tween_callback(lbl.queue_free)
+
+
+func _end_sudden_death() -> void:
+	_sudden_death_active = false
+	_match_active = false
+	_result_label.visible = false
+
+	# Hapus efek SD
+	if _sd_canvas and is_instance_valid(_sd_canvas):
+		_sd_canvas.queue_free()
+		_sd_canvas = null
+	if _sd_camera_tween:
+		_sd_camera_tween.kill()
+		_sd_camera_tween = null
+
+	# Reset spawner ke nilai original
+	for spawner in [_spawner_1, _spawner_2]:
+		if spawner == null:
+			continue
+		spawner.set("star_spawn_interval", _sd_star_interval_orig)
+		spawner.set("star_spawn_chance", _sd_star_chance_orig)
+		spawner.set("skill_spawn_interval", _sd_skill_interval_orig)
+		spawner.set("skill_spawn_chance", _sd_skill_chance_orig)
+
+	# Reset conveyor
+	for node in get_tree().get_nodes_in_group("conveyor"):
+		if node.has_method("set_speed_multiplier"):
+			node.set_speed_multiplier(1.0)
+
 	_stop_match_nodes()
 	_show_result()
 
@@ -238,10 +404,16 @@ func _update_match_progress() -> void:
 
 
 func _update_timer_label() -> void:
-	var total_seconds: int = int(ceil(_match_time_left))
-	var minutes: int = total_seconds / 60
-	var seconds: int = total_seconds % 60
-	_timer_label.text = "Time %02d:%02d" % [minutes, seconds]
+	if _sudden_death_active:
+		var secs: int = int(ceil(_sd_time_left))
+		_timer_label.text = "⚡ SD %02d:%02d" % [secs / 60, secs % 60]
+		_timer_label.add_theme_color_override("font_color", Color(1, 0.2, 0.2, 1))
+	else:
+		var total_seconds: int = int(ceil(_match_time_left))
+		var minutes: int = total_seconds / 60
+		var seconds: int = total_seconds % 60
+		_timer_label.text = "Time %02d:%02d" % [minutes, seconds]
+		_timer_label.remove_theme_color_override("font_color")
 
 
 func _update_score_labels() -> void:
