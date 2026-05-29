@@ -12,9 +12,9 @@
 [ext_resource type="AudioStream" uid="uid://cbnd1xeye8ks6" path="res://assets/audio/soundtrack/MainSounds.mp3" id="10_s8d85"]
 [ext_resource type="FontFile" uid="uid://e3l61vub5yqc" path="res://assets/fonts/Wonder_Boys.ttf" id="11_font"]
 [ext_resource type="Shader" path="res://assets/shaders/aurora.gdshader" id="12_aurora"]
-[ext_resource type="PackedScene" path="res://assets/modular_terrain.glb" id="13_terrain"]
-[ext_resource type="Script" path="res://global/terrain_color.gd" id="14_tcolor"]
 [ext_resource type="AudioStream" uid="uid://t0yk6bhtgebv" path="res://assets/audio/sfx/ropeTension.mp3" id="12_rigln"]
+[ext_resource type="PackedScene" uid="uid://dn2o1g606452b" path="res://assets/modular_terrain.glb" id="13_terrain"]
+[ext_resource type="Script" path="res://global/terrain_color.gd" id="14_tcolor"]
 [ext_resource type="FontFile" uid="uid://dvpungdk7wwy7" path="res://assets/fonts/Twemoji.Mozilla.ttf" id="20_emoji"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_left"]
@@ -201,6 +201,16 @@ sky = SubResource("Sky_sky")
 tonemap_mode = 2
 glow_enabled = true
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_aurora"]
+render_priority = 0
+shader = ExtResource("12_aurora")
+shader_parameter/speed = 0.12
+shader_parameter/intensity = 0.85
+
+[sub_resource type="QuadMesh" id="QuadMesh_aurora"]
+material = SubResource("ShaderMaterial_aurora")
+size = Vector2(320, 130)
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_divider"]
 size = Vector3(2.170044, 19, 20)
 
@@ -212,15 +222,6 @@ size = Vector3(1, 9.580627, 20.002106)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_rgk4m"]
 size = Vector3(1, 17.366913, 28.854675)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_aurora"]
-shader = ExtResource("12_aurora")
-shader_parameter/speed = 0.12
-shader_parameter/intensity = 0.85
-
-[sub_resource type="QuadMesh" id="QuadMesh_aurora"]
-material = SubResource("ShaderMaterial_aurora")
-size = Vector2(320, 130)
 
 [node name="world_3d" type="Node3D" unique_id=2012842173]
 script = ExtResource("9_match")
@@ -321,8 +322,6 @@ offset_right = 182.0
 offset_bottom = 101.0
 theme_override_fonts/font = ExtResource("20_emoji")
 theme_override_font_sizes/font_size = 36
-horizontal_alignment = 1
-vertical_alignment = 1
 text = "⭐"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -336,8 +335,6 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 36
-horizontal_alignment = 0
-vertical_alignment = 1
 text = "0"
 vertical_alignment = 1
 
@@ -352,8 +349,6 @@ offset_bottom = 101.0
 grow_horizontal = 0
 theme_override_fonts/font = ExtResource("20_emoji")
 theme_override_font_sizes/font_size = 36
-horizontal_alignment = 1
-vertical_alignment = 1
 text = "⭐"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -580,14 +575,14 @@ shadow_bias = 0.05
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1706876778]
 environment = SubResource("Environment_world")
 
-[node name="Terrain" parent="." instance=ExtResource("13_terrain")]
+[node name="Terrain" parent="." unique_id=1050635094 instance=ExtResource("13_terrain")]
 transform = Transform3D(6, 0, 0, 0, 6, 0, 0, 0, 6, 0, -38, -55)
 script = ExtResource("14_tcolor")
 
-[node name="AuroraBackdrop" type="MeshInstance3D" parent="."]
+[node name="AuroraBackdrop" type="MeshInstance3D" parent="." unique_id=1475785584]
 transform = Transform3D(1, 0, 0, 0, 0.7814, 0.6241, 0, -0.6241, 0.7814, 0, 65, -80)
-mesh = SubResource("QuadMesh_aurora")
 cast_shadow = 0
+mesh = SubResource("QuadMesh_aurora")
 
 [node name="Spawner_Ground1" type="Node3D" parent="." unique_id=1139470842 groups=["spawner"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102.854, 0.9, 0)
@@ -596,7 +591,6 @@ offset_obstacle3 = Vector3(0, 0, -1)
 offset_obstacle5 = Vector3(0, 2, -2.5)
 offset_obstacle6 = Vector3(0, 2, 2.5)
 move_speed = 10.0
-obstacles_enabled = false
 
 [node name="Lane" type="Marker3D" parent="Spawner_Ground1" unique_id=1547013836]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15951538, 0.03716135, 0)
@@ -615,7 +609,6 @@ offset_obstacle5 = Vector3(0, 2, -2.5)
 offset_obstacle6 = Vector3(0, 2, 2.5)
 move_speed = 10.0
 spawn_interval = 6.0
-obstacles_enabled = false
 arah_x = 1
 
 [node name="Lane" type="Marker3D" parent="Spawner_Ground2" unique_id=1031364845]
@@ -729,9 +722,9 @@ collision_mask = 0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.573593, -0.17434692)
 shape = SubResource("BoxShape3D_rgk4m")
 
-[node name="Aurora" type="MeshInstance3D" parent="."]
+[node name="Aurora" type="MeshInstance3D" parent="." unique_id=469904059]
 transform = Transform3D(1, 0, 0, 0, 0.95, -0.31, 0, 0.31, 0.95, 0, 58, -38)
-mesh = SubResource("QuadMesh_aurora")
 cast_shadow = 0
+mesh = SubResource("QuadMesh_aurora")
 
 [connection signal="body_entered" from="ConveyorDivider" to="ConveyorDivider" method="_on_body_entered"]
