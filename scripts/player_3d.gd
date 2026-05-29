@@ -310,24 +310,18 @@ func _update_3d_animations(delta: float, input_dir: Vector2, direction: Vector3,
 			visuals.rotation.x = rotate_toward(visuals.rotation.x, 0.35, delta * 10.0)
 
 func _check_collisions():
+	# Player tidak lagi jatuh saat menabrak obstacle — cukup terdorong/terblok
+	# oleh fisika (obstacle pakai sync_to_physics=true sehingga mendorong halus).
+	# on_player_collision tetap dipanggil agar obstacle khusus (mis. destruct
+	# yang pecah saat di-dash) tetap berfungsi.
 	for i in range(get_slide_collision_count()):
 		var collision = get_slide_collision(i)
-		if collision:
-			var collider = collision.get_collider()
-
-			if collider and collider.is_in_group("obstacle"):
-				if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP and _fall_immunity_timer <= 0.0:
-					if collider.has_method("on_player_collision"):
-						var should_fall: bool = collider.on_player_collision(self, collision)
-						if not should_fall:
-							return
-					# Dorong menjauh dari obstacle agar tidak nyangkut
-					var push_dir = (global_position - collider.global_position).normalized()
-					push_dir.y = 0.0
-					velocity.x += push_dir.x * 8.0
-					velocity.z += push_dir.z * 8.0
-					change_state(PlayerState.FALLING)
-					return
+		if not collision:
+			continue
+		var collider = collision.get_collider()
+		if collider and collider.is_in_group("obstacle"):
+			if collider.has_method("on_player_collision"):
+				collider.on_player_collision(self, collision)
 
 func _do_dash() -> void:
 	var input_dir := Input.get_vector(action_left, action_right, action_up, action_down)
