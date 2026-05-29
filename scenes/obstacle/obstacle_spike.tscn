@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b1tvwjc5d0w1u" path="res://scripts/obstacle/obstacle_spike.gd" id="1_rt4eq"]
 [ext_resource type="PackedScene" uid="uid://b2tj52xptp4q3" path="res://assets/obstacle/spikes.glb" id="2_1pngq"]
+[ext_resource type="AudioStream" uid="uid://dytowjhjhrqjg" path="res://assets/audio/sfx/scream.mp3" id="3_4ng7f"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_54qds"]
 size = Vector3(2.0349426, 4.115162, 1.8193359)
@@ -12,8 +13,6 @@ size = Vector3(2.8359375, 4.699951, 2.8161926)
 [node name="obstacle_spike" type="AnimatableBody3D" unique_id=1268452587 groups=["item", "obstacle"]]
 transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
 collision_layer = 2
-collision_mask = 1
-sync_to_physics = false
 script = ExtResource("1_rt4eq")
 knockback_force = 100.0
 
@@ -30,7 +29,6 @@ shape = SubResource("BoxShape3D_54qds")
 
 [node name="Area3D" type="Area3D" parent="." unique_id=854503621]
 collision_layer = 2
-collision_mask = 1
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1302043236]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.02724433, 2.5076215, -3.5092802)
@@ -39,5 +37,9 @@ shape = SubResource("BoxShape3D_4ng7f")
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="Area3D" unique_id=1366736571]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.039406538, 2.33845, 2.8424654)
 shape = SubResource("BoxShape3D_4ng7f")
+
+[node name="HitSFX" type="AudioStreamPlayer" parent="." unique_id=495581947]
+stream = ExtResource("3_4ng7f")
+volume_db = -10.0
 
 [connection signal="body_entered" from="Area3D" to="." method="_on_area_3d_body_entered"]

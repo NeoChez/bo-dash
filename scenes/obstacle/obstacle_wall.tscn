@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://d36k13n1dpt1x"]
+[gd_scene load_steps=0 format=3 uid="uid://d36k13n1dpt1x"]
 
 [ext_resource type="Script" uid="uid://oaqowpciif2p" path="res://global/obstacle_3d.gd" id="1_x7vhc"]
 [ext_resource type="PackedScene" uid="uid://cw3re3cuqq821" path="res://assets/obstacle/obstacle1.glb" id="2_36jc2"]
@@ -9,7 +9,7 @@ size = Vector3(3.3923035, 5.3992043, 20.29657)
 [node name="obstacle_wall" type="AnimatableBody3D" unique_id=1741062986 groups=["item", "obstacle"]]
 collision_layer = 2
 collision_mask = 1
-sync_to_physics = false
+sync_to_physics = true
 script = ExtResource("1_x7vhc")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=967071279]

@@ -2,6 +2,7 @@ extends AnimatableBody3D
 @export var move_speed: float = 1.0
 @export var move_direction: Vector3 = Vector3(-1, 0, 0)
 @export var knockback_force: float = 10.0
+@onready var hit_sfx = $HitSFX
 var _dying: bool = false
 var _falling: bool = false
 var _fall_velocity: float = 0.0
@@ -14,6 +15,7 @@ func _ready() -> void:
 
 func _on_body_entered(body: Node3D) -> void:
 	if body.is_in_group("player"):
+		hit_sfx.play()
 		var knockback_dir = (body.global_position - global_position).normalized()
 		knockback_dir.y = 0.0
 		knockback_dir = knockback_dir.normalized()

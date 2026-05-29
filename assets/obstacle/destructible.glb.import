@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://hdhggylwnebm"
-path="res://.godot/imported/floating.glb-ed56f3f6aa34489cceeb65b93e376101.scn"
+uid="uid://r815pl8dbjyu"
+path="res://.godot/imported/destructible.glb-d4d0caac7cce5f50af63b96ea97e533e.scn"
 
 [deps]
 
-source_file="res://assets/player/male/floating.glb"
-dest_files=["res://.godot/imported/floating.glb-ed56f3f6aa34489cceeb65b93e376101.scn"]
+source_file="res://assets/obstacle/destructible.glb"
+dest_files=["res://.godot/imported/destructible.glb-d4d0caac7cce5f50af63b96ea97e533e.scn"]
 
 [params]
 

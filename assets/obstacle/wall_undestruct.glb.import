@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://hdhggylwnebm"
-path="res://.godot/imported/floating.glb-ed56f3f6aa34489cceeb65b93e376101.scn"
+uid="uid://bf3rdvfpfgfvc"
+path="res://.godot/imported/wall_undestruct.glb-ab3e6c5517e9869a2eec31de8a3dac7b.scn"
 
 [deps]
 
-source_file="res://assets/player/male/floating.glb"
-dest_files=["res://.godot/imported/floating.glb-ed56f3f6aa34489cceeb65b93e376101.scn"]
+source_file="res://assets/obstacle/wall_undestruct.glb"
+dest_files=["res://.godot/imported/wall_undestruct.glb-ab3e6c5517e9869a2eec31de8a3dac7b.scn"]
 
 [params]
 

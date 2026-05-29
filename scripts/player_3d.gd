@@ -69,6 +69,8 @@ var _state_timer: float = 0.0
 
 @onready var animated_sprite = $AnimatedSprite3D
 @onready var visuals = $Visuals
+@onready var jump_sfx = $JumpSFX
+@onready var dash_sfx = $DashSFX
 
 # 3D Visuals & Procedural Animations
 @export_group("3D Visuals & Animation")
@@ -88,6 +90,8 @@ var _is_recoil_active: bool = false
 const ANIM_FALL_STANDUP_SPEED: float = 3.0
 const FALL_IMMUNITY_DURATION: float = 0.4
 var _fall_immunity_timer: float = 0.0
+const FLOOR_GRACE_TIME: float = 0.12
+var _floor_grace_timer: float = 0.0
 
 func _ready():
 	spawn_position = global_position
@@ -114,12 +118,19 @@ func _physics_process(delta: float) -> void:
 	_fall_immunity_timer = maxf(_fall_immunity_timer - delta, 0.0)
 	rope_grace_timer = maxf(rope_grace_timer - delta, 0.0)
 
-	# State machine: jangan override state spesial (FALLING/STANDING_UP/FLOATING)
-	if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP and current_state != PlayerState.FLOATING:
-		if is_on_floor():
+	if is_on_floor():
+		_floor_grace_timer = FLOOR_GRACE_TIME
+	else:
+		_floor_grace_timer = maxf(_floor_grace_timer - delta, 0.0)
+
+	# State machine: jangan override state spesial (FALLING/STANDING_UP)
+	if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP:
+		if yank_source != null:
+			change_state(PlayerState.FLOATING)
+		elif is_on_floor() or _floor_grace_timer > 0.0:
 			change_state(PlayerState.RUNNING)
-		else:
-			change_state(PlayerState.JUMPING)
+		elif current_state != PlayerState.JUMPING:
+			change_state(PlayerState.FLOATING)
 
 	# Terapkan gravitasi
 	if slingshot_active:
@@ -133,6 +144,7 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_just_pressed(action_jump) and is_on_floor():
 			velocity.y = jump_velocity
 			change_state(PlayerState.JUMPING)
+			jump_sfx.play()
 
 		# Handle dash
 		if _dash_timer > 0.0:
@@ -209,8 +221,12 @@ func _update_3d_animations(delta: float, input_dir: Vector2, direction: Vector3,
 	var base_scale = rex_model_scale
 	
 	# 1. Rotasi model ke arah pergerakan (Y-axis)
+	# Prioritas: input direction (stabil) > velocity (osilasi saat diblok obstacle)
 	var horiz_vel = Vector2(velocity.x, velocity.z)
-	if horiz_vel.length() > 0.5:
+	if input_dir != Vector2.ZERO:
+		var target_angle = atan2(direction.x, direction.z)
+		visuals.rotation.y = rotate_toward(visuals.rotation.y, target_angle, delta * rotation_speed)
+	elif horiz_vel.length() > 0.5:
 		var target_angle = atan2(velocity.x, velocity.z)
 		visuals.rotation.y = rotate_toward(visuals.rotation.y, target_angle, delta * rotation_speed)
 	
@@ -228,10 +244,12 @@ func _update_3d_animations(delta: float, input_dir: Vector2, direction: Vector3,
 		_landing_recoil_time = 0.0
 	
 	# 3. Hitung posisi Y, Rotasi X/Z (Waddle/Recoil), dan Skala (Squash & Stretch)
-	if is_on_floor():
+	# Pakai state (sudah punya coyote time) bukan raw is_on_floor() agar tidak flip 1-2 frame
+	var on_ground = (current_state == PlayerState.RUNNING)
+	if on_ground:
 		# Reset rotasi X ke normal secara bertahap
 		visuals.rotation.x = rotate_toward(visuals.rotation.x, 0.0, delta * 12.0)
-		
+
 		# Jika sedang membal setelah mendarat
 		if _is_recoil_active:
 			_landing_recoil_time += delta * 15.0 # Kecepatan pantulan pegas
@@ -252,10 +270,14 @@ func _update_3d_animations(delta: float, input_dir: Vector2, direction: Vector3,
 				visuals.rotation.x = rotate_toward(visuals.rotation.x, amp * 0.12, delta * 15.0)
 				visuals.position.y = base_y_offset - amp * 0.16
 				
-		elif horiz_vel.length() > 0.5:
+		elif horiz_vel.length() > 0.5 or input_dir != Vector2.ZERO:
 			# Berjalan (Waddle walk)
-			# Kecepatan animasi berskala dengan pergerakan player
-			var speed_factor = clamp(horiz_vel.length() / SPEED, 0.3, 1.8)
+			# Saat input ada: pakai max(velocity, minimum) agar speed stabil saat diblok obstacle
+			var speed_factor: float
+			if input_dir != Vector2.ZERO:
+				speed_factor = clamp(maxf(horiz_vel.length(), SPEED * 0.5) / SPEED, 0.4, 1.8)
+			else:
+				speed_factor = clamp(horiz_vel.length() / SPEED, 0.3, 1.8)
 			_anim_time += delta * speed_factor * 10.0
 			
 			# Kemiringan badan ke samping kiri-kanan (Waddle)
@@ -281,7 +303,7 @@ func _update_3d_animations(delta: float, input_dir: Vector2, direction: Vector3,
 			var target_scale = Vector3(base_scale.x * breathe_xz, base_scale.y * breathe_y, base_scale.z * breathe_xz)
 			visuals.scale = visuals.scale.lerp(target_scale, delta * 5.0)
 			
-	else:
+	else: # not on_ground
 		# Sedang melompat atau jatuh (Di udara)
 		_is_recoil_active = false # matikan recoil saat lepas landas
 		
@@ -310,20 +332,18 @@ func _update_3d_animations(delta: float, input_dir: Vector2, direction: Vector3,
 			visuals.rotation.x = rotate_toward(visuals.rotation.x, 0.35, delta * 10.0)
 
 func _check_collisions():
+	# Player tidak lagi jatuh saat menabrak obstacle — cukup terdorong/terblok
+	# oleh fisika (obstacle pakai sync_to_physics=true sehingga mendorong halus).
+	# on_player_collision tetap dipanggil agar obstacle khusus (mis. destruct
+	# yang pecah saat di-dash) tetap berfungsi.
 	for i in range(get_slide_collision_count()):
 		var collision = get_slide_collision(i)
-		if collision:
-			var collider = collision.get_collider()
-
-			if collider and collider.is_in_group("obstacle"):
-				if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP and _fall_immunity_timer <= 0.0:
-					# Dorong menjauh dari obstacle agar tidak nyangkut
-					var push_dir = (global_position - collider.global_position).normalized()
-					push_dir.y = 0.0
-					velocity.x += push_dir.x * 8.0
-					velocity.z += push_dir.z * 8.0
-					change_state(PlayerState.FALLING)
-					return
+		if not collision:
+			continue
+		var collider = collision.get_collider()
+		if collider and collider.is_in_group("obstacle"):
+			if collider.has_method("on_player_collision"):
+				collider.on_player_collision(self, collision)
 
 func _do_dash() -> void:
 	var input_dir := Input.get_vector(action_left, action_right, action_up, action_down)
@@ -338,6 +358,7 @@ func _do_dash() -> void:
 	velocity.z = dir.z * dash_speed
 	_dash_timer = dash_cooldown
 	_dash_active_timer = dash_active_duration
+	dash_sfx.play()
 
 func apply_rope_pull(pull: Vector3) -> void:
 	if _dash_active_timer > 0.0:
@@ -816,7 +837,7 @@ func _play_first_animation(model: Node, speed: float = 1.0) -> void:
 			var anim = anim_player.get_animation(anim_name)
 			if anim:
 				var path_lower = _current_model_path.to_lower()
-				if "running" in path_lower or "jumping" in path_lower or "floating" in path_lower or "idle" in path_lower:
+				if "running" in path_lower or "floating" in path_lower or "idle" in path_lower:
 					anim.loop_mode = Animation.LOOP_LINEAR
 				else:
 					anim.loop_mode = Animation.LOOP_NONE

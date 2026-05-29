@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://bslwpfqqigx31"]
+[gd_scene load_steps=0 format=3 uid="uid://bslwpfqqigx31"]
 
 [ext_resource type="Script" uid="uid://dg0eiuw6g5tsj" path="res://scripts/obstacle/obstacle_box.gd" id="1_1dk53"]
 [ext_resource type="PackedScene" uid="uid://dppvkldgqvrc4" path="res://assets/obstacle/obstacle2.glb" id="1_2lv2r"]
@@ -9,23 +9,22 @@ size = Vector3(3.500122, 1.8085938, 3.4505768)
 [node name="obstacle_box" type="AnimatableBody3D" unique_id=379642703]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2630527, 0.58009267, 0)
 collision_layer = 2
-collision_mask = 1
 script = ExtResource("1_1dk53")
 
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="." unique_id=1848791221]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3185167, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3185167, 0.5299752, 0)
 shape = SubResource("BoxShape3D_1dk53")
 debug_color = Color(0.6761218, 0.20456761, 0.13620397, 1)
 
 [node name="CollisionShape3D4" type="CollisionShape3D" parent="." unique_id=270229425]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3185167, 0, -8.432427)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3185167, 0.5299752, -8.432427)
 shape = SubResource("BoxShape3D_1dk53")
 debug_color = Color(0.6761218, 0.20456761, 0.13620397, 1)
 
 [node name="CollisionShape3D3" type="CollisionShape3D" parent="." unique_id=1584990973]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3185167, 0, 8.397164)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3185167, 0.5299752, 8.397164)
 shape = SubResource("BoxShape3D_1dk53")
 debug_color = Color(0.6761218, 0.20456761, 0.13620397, 1)
 
 [node name="obstacle2" parent="." unique_id=880088665 instance=ExtResource("1_2lv2r")]
-transform = Transform3D(-1.7484556e-08, 0, 0.4, 0, 0.4, 0, -0.4, 0, -1.7484556e-08, 1.3185167, 0, 0)
+transform = Transform3D(-1.7484556e-08, 0, 0.4, 0, 0.4, 0, -0.4, 0, -1.7484556e-08, 1.3185167, 0.5299752, 0)
