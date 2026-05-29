@@ -1,0 +1,122 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/intro/intro.gd" id="1_script"]
+[ext_resource type="Shader" uid="uid://cfm73xm7gcseu" path="res://assets/shaders/scrolling_stripes.gdshader" id="2_shader"]
+[ext_resource type="FontFile" uid="uid://e3l61vub5yqc" path="res://assets/fonts/Wonder_Boys.ttf" id="3_font"]
+
+[sub_resource type="ShaderMaterial" id="SM_bg"]
+shader = ExtResource("2_shader")
+shader_parameter/color1 = Color(0.18, 0.65, 0.95, 1)
+shader_parameter/color2 = Color(0.14, 0.52, 0.82, 1)
+shader_parameter/divisions = 15.0
+shader_parameter/speed = 0.35
+shader_parameter/angle = 45.0
+
+[sub_resource type="Curve" id="Curve_star"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.2, 1), 0.0, 0.0, 0, 0, Vector2(0.8, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="Gradient" id="Gradient_star"]
+offsets = PackedFloat32Array(0, 0.2, 0.8, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 0.98, 0.78, 0.65, 1, 0.95, 0.88, 0.6, 0.8, 1, 1, 1)
+
+[node name="IntroScene" type="Node"]
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+material = SubResource("SM_bg")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Particles" type="CPUParticles2D" parent="Background"]
+position = Vector2(576, 680)
+amount = 22
+lifetime = 6.0
+preprocess = 3.0
+speed_scale = 0.8
+emission_shape = 3
+emission_rect_extents = Vector2(600, 10)
+direction = Vector2(0, -1)
+spread = 20.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 50.0
+initial_velocity_max = 100.0
+angular_velocity_min = -40.0
+angular_velocity_max = 40.0
+scale_amount_min = 5.0
+scale_amount_max = 16.0
+scale_amount_curve = SubResource("Curve_star")
+color = Color(1, 1, 1, 0.3)
+color_ramp = SubResource("Gradient_star")
+
+[node name="Viewport3D" type="SubViewportContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="Viewport3D"]
+own_world_3d = true
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
+
+[node name="Camera3D" type="Camera3D" parent="Viewport3D/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 6)
+current = true
+fov = 62.0
+
+[node name="SunLight" type="DirectionalLight3D" parent="Viewport3D/SubViewport"]
+transform = Transform3D(0.866025, -0.353553, 0.353553, 0, 0.707107, 0.707107, -0.5, -0.612372, 0.612372, 0, 4, 0)
+light_color = Color(1, 0.95, 0.88, 1)
+light_energy = 2.2
+shadow_enabled = true
+
+[node name="FillLight" type="DirectionalLight3D" parent="Viewport3D/SubViewport"]
+transform = Transform3D(-0.866025, 0.353553, -0.353553, 0, 0.707107, 0.707107, 0.5, 0.612372, -0.612372, 0, 0, 0)
+light_color = Color(0.5, 0.7, 1.0, 1)
+light_energy = 0.8
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="BlackOverlay" type="ColorRect" parent="UI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0)
+
+[node name="LogoLabel" type="Label" parent="UI"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -60.0
+offset_right = 400.0
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 3
+theme_override_constants/outline_size = 10
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 52
+text = "Neochez Production"
+horizontal_alignment = 1
+vertical_alignment = 1
+modulate = Color(1, 1, 1, 0)
