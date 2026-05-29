@@ -6,6 +6,8 @@
 [ext_resource type="Texture2D" uid="uid://b4bnuofbtxiat" path="res://assets/player/3.PNG" id="4_toylo"]
 [ext_resource type="Texture2D" uid="uid://djat880cmtnka" path="res://assets/player/4.PNG" id="5_tb4ck"]
 [ext_resource type="PackedScene" uid="uid://dggg4ombyv4f5" path="res://assets/player/kingdom_hearts_iii_-_rex.glb" id="6_rex"]
+[ext_resource type="AudioStream" uid="uid://cwhi8brmw41v5" path="res://assets/audio/sfx/jump.mp3" id="7_0owmy"]
+[ext_resource type="AudioStream" uid="uid://dq0hd2rklpo7c" path="res://assets/audio/sfx/dash.mp3" id="8_qek5x"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_kwvpd"]
 atlas = ExtResource("2_v2miy")
@@ -76,3 +78,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.82488, 0.53, 0.09399593)
 
 [node name="RexModel" parent="Visuals" unique_id=1956170659 instance=ExtResource("6_rex")]
 transform = Transform3D(25, 0, 0, 0, 25, 0, 0, 0, 25, 0, 0, 0)
+
+[node name="JumpSFX" type="AudioStreamPlayer" parent="." unique_id=268068971]
+stream = ExtResource("7_0owmy")
+volume_db = -15.0
+
+[node name="DashSFX" type="AudioStreamPlayer" parent="." unique_id=113148632]
+stream = ExtResource("8_qek5x")
+volume_db = -10.0

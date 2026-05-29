@@ -69,6 +69,8 @@ var _state_timer: float = 0.0
 
 @onready var animated_sprite = $AnimatedSprite3D
 @onready var visuals = $Visuals
+@onready var jump_sfx = $JumpSFX
+@onready var dash_sfx = $DashSFX
 
 # 3D Visuals & Procedural Animations
 @export_group("3D Visuals & Animation")
@@ -135,6 +137,7 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_just_pressed(action_jump) and is_on_floor():
 			velocity.y = jump_velocity
 			change_state(PlayerState.JUMPING)
+			jump_sfx.play()
 
 		# Handle dash
 		if _dash_timer > 0.0:
@@ -338,6 +341,7 @@ func _do_dash() -> void:
 	velocity.z = dir.z * dash_speed
 	_dash_timer = dash_cooldown
 	_dash_active_timer = dash_active_duration
+	dash_sfx.play()
 
 func apply_rope_pull(pull: Vector3) -> void:
 	if _dash_active_timer > 0.0:

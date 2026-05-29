@@ -32,6 +32,9 @@ extends Node3D
 @export var player_a_offset: Vector3 = Vector3(0, 1.2, 0)
 @export var player_b_offset: Vector3 = Vector3(0, 1.2, 0)
 
+@onready var rope_tension_sfx = $RopeTensionSFX
+var has_played_tension_sfx: bool = false
+
 var player_a: CharacterBody3D
 var player_b: CharacterBody3D
 var points: PackedVector3Array
@@ -197,6 +200,14 @@ func _apply_player_tension(a_pos: Vector3, b_pos: Vector3, delta: float) -> void
 	var dir3d := Vector3(dir_flat.x, 0.0, dir_flat.y)
 
 	var stretch := dist - rope_max_length
+	
+	#SFX Rope Tension
+	if stretch > 5.5: 
+		if not has_played_tension_sfx:
+			rope_tension_sfx.play()
+			has_played_tension_sfx = true
+	else:
+		has_played_tension_sfx = false
 
 	# Soft spring — smooth elastic pull proportional to stretch, ramped up after respawn
 	var force := stretch * spring_strength * _tension_ramp
