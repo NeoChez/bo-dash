@@ -13,7 +13,7 @@ size = Vector3(2.8359375, 4.699951, 2.8161926)
 transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
 collision_layer = 2
 collision_mask = 1
-sync_to_physics = false
+sync_to_physics = true
 script = ExtResource("1_rt4eq")
 knockback_force = 100.0
 

@@ -312,13 +312,18 @@ func _update_3d_animations(delta: float, input_dir: Vector2, direction: Vector3,
 			visuals.rotation.x = rotate_toward(visuals.rotation.x, 0.35, delta * 10.0)
 
 func _check_collisions():
+	# Player tidak lagi jatuh saat menabrak obstacle — cukup terdorong/terblok
+	# oleh fisika (obstacle pakai sync_to_physics=true sehingga mendorong halus).
+	# on_player_collision tetap dipanggil agar obstacle khusus (mis. destruct
+	# yang pecah saat di-dash) tetap berfungsi.
 	for i in range(get_slide_collision_count()):
 		var collision = get_slide_collision(i)
-		if collision:
-			var collider = collision.get_collider()
-
-			if collider and collider.is_in_group("obstacle"):
-				pass # Sesuai permintaan, tidak terjadi apa-apa saat menabrak obstacle
+		if not collision:
+			continue
+		var collider = collision.get_collider()
+		if collider and collider.is_in_group("obstacle"):
+			if collider.has_method("on_player_collision"):
+				collider.on_player_collision(self, collision)
 
 func _do_dash() -> void:
 	var input_dir := Input.get_vector(action_left, action_right, action_up, action_down)

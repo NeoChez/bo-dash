@@ -127,29 +127,13 @@ func _on_spawn_timer() -> void:
 	elif roll == 1:
 		_spawn(obstacle3_scene, offset_obstacle3)
 	elif roll == 2:
-		_spawn_spike()
+		_spawn(obstacle4_scene, offset_obstacle4)
 	elif roll == 3:
 		_spawn(obstacle5_scene, offset_obstacle5)
 		await get_tree().create_timer(chalwall_delay).timeout
 		_spawn(obstacle6_scene, offset_obstacle6)
 	else:
 		_spawn(obstacle7_scene, offset_obstacle7)
-
-
-func _spawn_spike() -> void:
-	var obs := obstacle4_scene.instantiate()
-	add_child(obs)
-	obs.top_level = true
-	obs.global_position = _obstacle_lane.global_position
-	obs.global_position.z = randf_range(-5.0, 5.0)
-	if ground_node:
-		obs.global_position.y = ground_node.global_position.y + 1.0
-	var direction := Vector3(arah_x, 0, 0)
-	if obs.has_method("set_movement"):
-		obs.set_movement(direction, move_speed)
-	else:
-		obs.set("move_direction", direction)
-		obs.set("move_speed", move_speed)
 
 
 func _spawn(scene: PackedScene, offset: Vector3 = Vector3.ZERO) -> void:

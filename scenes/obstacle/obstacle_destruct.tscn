@@ -15,7 +15,7 @@ size = Vector3(2, 5.2799683, 3.411621)
 
 [node name="obstacle_destruct" type="AnimatableBody3D" unique_id=516793063 groups=["item", "obstacle"]]
 collision_layer = 2
-sync_to_physics = false
+sync_to_physics = true
 script = ExtResource("1_u5n6x")
 
 [node name="wall_undestruct" parent="." unique_id=830935162 instance=ExtResource("1_qxk23")]
