@@ -4,6 +4,8 @@ const CONFIG_PATH := "user://settings.cfg"
 
 var player_1_character: String = "male"
 var player_2_character: String = "male"
+var last_winner_id: int = 0  # 0 = draw, 1 = player1, 2 = player2
+var last_scores: Dictionary = {1: 0, 2: 0}
 var player_1_colors: Dictionary = {"pants": Color(0.22,0.22,0.22), "hair": Color(0.03,0.03,0.03), "top": Color(0.03,0.03,0.03), "shoes": Color(0.03,0.03,0.03)}
 var player_2_colors: Dictionary = {"pants": Color(0.22,0.22,0.22), "hair": Color(0.03,0.03,0.03), "top": Color(0.03,0.03,0.03), "shoes": Color(0.03,0.03,0.03)}
 

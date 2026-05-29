@@ -125,13 +125,16 @@ func _stop_match_nodes() -> void:
 func _show_result() -> void:
 	var score_1: int = int(_scores[1])
 	var score_2: int = int(_scores[2])
+	GlobalSettings.last_scores = {1: score_1, 2: score_2}
 	if score_1 > score_2:
-		_result_label.text = "Waktu habis - Player 1 menang!"
+		GlobalSettings.last_winner_id = 1
 	elif score_2 > score_1:
-		_result_label.text = "Waktu habis - Player 2 menang!"
+		GlobalSettings.last_winner_id = 2
 	else:
-		_result_label.text = "Waktu habis - Seri!"
-	_result_label.visible = true
+		GlobalSettings.last_winner_id = 0
+
+	await get_tree().create_timer(1.5).timeout
+	get_tree().change_scene_to_file("res://scenes/menu/end_screen.tscn")
 
 
 func _update_skill_slots() -> void:
