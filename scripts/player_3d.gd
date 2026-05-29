@@ -317,6 +317,10 @@ func _check_collisions():
 
 			if collider and collider.is_in_group("obstacle"):
 				if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP and _fall_immunity_timer <= 0.0:
+					if collider.has_method("on_player_collision"):
+						var should_fall: bool = collider.on_player_collision(self, collision)
+						if not should_fall:
+							return
 					# Dorong menjauh dari obstacle agar tidak nyangkut
 					var push_dir = (global_position - collider.global_position).normalized()
 					push_dir.y = 0.0

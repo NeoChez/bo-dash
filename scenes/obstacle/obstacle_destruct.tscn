@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://clf2vnid1y4ko"]
+
+[ext_resource type="PackedScene" uid="uid://bf3rdvfpfgfvc" path="res://assets/obstacle/wall_undestruct.glb" id="1_qxk23"]
+[ext_resource type="Script" uid="uid://47fy88il363e" path="res://scripts/obstacle/obstacle_destruct.gd" id="1_u5n6x"]
+[ext_resource type="PackedScene" uid="uid://r815pl8dbjyu" path="res://assets/obstacle/destructible.glb" id="2_7xatn"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_undst"]
+size = Vector3(2, 5.5, 13.514648)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_right"]
+size = Vector3(2, 5.2801514, 3.4995117)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_left"]
+size = Vector3(2, 5.2799683, 3.411621)
+
+[node name="obstacle_destruct" type="AnimatableBody3D" unique_id=516793063 groups=["item", "obstacle"]]
+collision_layer = 2
+sync_to_physics = false
+script = ExtResource("1_u5n6x")
+
+[node name="wall_undestruct" parent="." unique_id=830935162 instance=ExtResource("1_qxk23")]
+transform = Transform3D(-1.7484556e-08, 0, 0.4, 0, 0.6, 0, -0.4, 0, -1.7484556e-08, 0, 2.2851257, 0)
+
+[node name="destructible" parent="." unique_id=1132051954 instance=ExtResource("2_7xatn")]
+transform = Transform3D(-1.7484556e-08, 0, 0.4, 0, 0.6, 0, -0.4, 0, -1.7484556e-08, -0.13788986, 0.07850528, -8.889704)
+
+[node name="destructible2" parent="." unique_id=1883235053 instance=ExtResource("2_7xatn")]
+transform = Transform3D(-1.7484556e-08, 0, 0.4, 0, 0.6, 0, -0.4, 0, -1.7484556e-08, -0.13199317, 0.07850528, 7.8612385)
+
+[node name="CollisionShape3D_undestruct" type="CollisionShape3D" parent="." unique_id=400512345]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18985224, 2.75, -0.017089844)
+shape = SubResource("BoxShape3D_undst")
+
+[node name="CollisionShape3D_right" type="CollisionShape3D" parent="." unique_id=400512346]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.24972105, 2.6400757, -8.597496)
+shape = SubResource("BoxShape3D_right")
+
+[node name="CollisionShape3D_left" type="CollisionShape3D" parent="." unique_id=400512347]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.26880217, 2.6399841, 8.240019)
+shape = SubResource("BoxShape3D_left")
