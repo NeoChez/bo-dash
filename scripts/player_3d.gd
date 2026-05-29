@@ -316,14 +316,7 @@ func _check_collisions():
 			var collider = collision.get_collider()
 
 			if collider and collider.is_in_group("obstacle"):
-				if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP and _fall_immunity_timer <= 0.0:
-					# Dorong menjauh dari obstacle agar tidak nyangkut
-					var push_dir = (global_position - collider.global_position).normalized()
-					push_dir.y = 0.0
-					velocity.x += push_dir.x * 8.0
-					velocity.z += push_dir.z * 8.0
-					change_state(PlayerState.FALLING)
-					return
+				pass # Sesuai permintaan, tidak terjadi apa-apa saat menabrak obstacle
 
 func _do_dash() -> void:
 	var input_dir := Input.get_vector(action_left, action_right, action_up, action_down)
