@@ -732,6 +732,83 @@ func _change_model(path: String, speed: float = 1.0) -> void:
 	_current_model_node.rotation = Vector3.ZERO
 	
 	_play_first_animation(_current_model_node, speed)
+	_apply_outfit_colors(_current_model_node)
+
+func _apply_outfit_colors(model: Node) -> void:
+	var colors: Dictionary = GlobalSettings.player_1_colors if player_id == 1 else GlobalSettings.player_2_colors
+	if colors.is_empty():
+		return
+	var is_female := "female" in _current_model_path.to_lower()
+	_smart_tint_all(model, colors, is_female)
+
+func _smart_tint_all(node: Node, colors: Dictionary, is_female: bool) -> void:
+	if node is MeshInstance3D:
+		var mi := node as MeshInstance3D
+		if mi.mesh == null:
+			return
+		for i in range(mi.mesh.get_surface_count()):
+			var mat = mi.mesh.surface_get_material(i)
+			if not (mat is BaseMaterial3D):
+				mat = mi.get_active_material(i)
+			if mat is BaseMaterial3D:
+				var orig := (mat as BaseMaterial3D).albedo_color
+				var cat := _classify_by_color(node.name, orig, is_female)
+				if cat != "" and colors.has(cat):
+					var nm := mat.duplicate() as BaseMaterial3D
+					nm.albedo_color = colors[cat]
+					mi.set_surface_override_material(i, nm)
+	for child in node.get_children():
+		_smart_tint_all(child, colors, is_female)
+
+func _classify_by_color(mesh_name: String, color: Color, is_female: bool) -> String:
+	var brightness := (color.r + color.g + color.b) / 3.0
+	var chroma := maxf(maxf(color.r, color.g), color.b) - minf(minf(color.r, color.g), color.b)
+
+	if is_female:
+		# Hair: Object_2 specifically (bisa golden atau dark setelah update model)
+		if mesh_name == "Object_2":
+			return "hair"
+		# Golden hair fallback
+		if color.r > 0.75 and color.g > 0.55 and color.b < 0.45:
+			return "hair"
+		# Baju pink/mauve: b >= g (cool/pink), bukan kulit hangat (g > b)
+		if brightness >= 0.35 and brightness <= 0.68 and chroma >= 0.18 and chroma <= 0.45 and color.b >= color.g:
+			return "top"
+		# Celana pinkish-gray
+		if brightness >= 0.38 and brightness <= 0.60 and chroma >= 0.05 and chroma < 0.18:
+			return "pants"
+		# Sepatu: dark Vert_ saja (hindari Cube_ yang bisa jadi mata/alis)
+		if mesh_name.begins_with("Vert_") and brightness > 0.008 and brightness < 0.07:
+			return "shoes"
+		return ""
+	else:
+		# Male: skip colorful/skin
+		if chroma > 0.15:
+			return ""
+		# Pants: neutral mid-gray
+		if brightness >= 0.40 and brightness <= 0.65:
+			return "pants"
+		# Shoes: neutral very dark
+		if brightness > 0.008 and brightness < 0.08:
+			return "shoes"
+		# Near-black: Vert_ = shirt, other = hair
+		if brightness <= 0.008:
+			return "top" if mesh_name.begins_with("Vert_") else "hair"
+		return ""
+
+func _tint_mesh_nodes(node: Node, names: Array, color: Color) -> void:
+	if node is MeshInstance3D and node.name in names:
+		var mi := node as MeshInstance3D
+		if mi.mesh == null:
+			return
+		for i in range(mi.mesh.get_surface_count()):
+			var mat = mi.get_active_material(i)
+			if mat is BaseMaterial3D:
+				var nm := mat.duplicate() as BaseMaterial3D
+				nm.albedo_color = color
+				mi.set_surface_override_material(i, nm)
+	for child in node.get_children():
+		_tint_mesh_nodes(child, names, color)
 
 func _play_first_animation(model: Node, speed: float = 1.0) -> void:
 	var anim_player = _find_animation_player(model)

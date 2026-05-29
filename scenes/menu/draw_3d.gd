@@ -5,11 +5,16 @@ extends Node3D
 var sphere_mesh: SphereMesh = null
 var current_color_index = 0
 var colors = [
-	Color(1.0, 0.42, 0.63),  # Candy Pink
+	Color(1.0, 0.18, 0.35),  # Red
 	Color(0.0, 0.73, 1.0),   # Bright Cyan
-	Color(1.0, 0.6, 0.0),    # Orange
-	Color(0.55, 0.85, 0.15), # Lime Green
-	Color(0.85, 0.35, 1.0)   # Purple
+	Color(1.0, 0.55, 0.0),   # Orange
+	Color(0.4, 0.92, 0.1),   # Lime Green
+	Color(0.75, 0.22, 1.0),  # Purple
+	Color(1.0, 0.88, 0.0),   # Yellow
+	Color(0.0, 0.88, 0.7),   # Turquoise
+	Color(1.0, 0.32, 0.88),  # Hot Pink
+	Color(0.18, 0.48, 1.0),  # Deep Blue
+	Color(1.0, 0.48, 0.22),  # Coral
 ]
 
 var last_spawn_pos = Vector3.ZERO
@@ -20,17 +25,21 @@ var materials = []
 
 func _ready() -> void:
 	sphere_mesh = SphereMesh.new()
-	sphere_mesh.radius = 0.16
-	sphere_mesh.height = 0.32
-	
-	# Pre-allocate glossy 3D plastic materials for colors
+	sphere_mesh.radius = 0.22
+	sphere_mesh.height = 0.44
+	sphere_mesh.radial_segments = 32
+	sphere_mesh.rings = 16
+
+	# Smooth glossy plastic materials — low roughness, soft rim for 3D depth
 	for col in colors:
 		var mat = StandardMaterial3D.new()
 		mat.albedo_color = col
-		mat.roughness = 0.15
-		mat.metallic = 0.1
+		mat.roughness = 0.08
+		mat.metallic = 0.05
+		mat.specular_mode = BaseMaterial3D.SPECULAR_SCHLICK_GGX
 		mat.rim_enabled = true
-		mat.rim = 0.5
+		mat.rim = 0.35
+		mat.rim_tint = 0.5
 		materials.append(mat)
 
 func _input(event: InputEvent) -> void:
@@ -50,8 +59,8 @@ func _input(event: InputEvent) -> void:
 		var dist = last_spawn_pos.distance_to(target_pos)
 		
 		# If mouse is dragged quickly, interpolate to ensure a solid 3D line
-		if dist > 0.05:
-			var segments = ceil(dist / 0.05)
+		if dist > 0.014:
+			var segments = ceil(dist / 0.014)
 			for i in range(1, segments + 1):
 				var t = float(i) / float(segments)
 				var interp_pos = last_spawn_pos.lerp(target_pos, t)
