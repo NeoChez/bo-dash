@@ -114,12 +114,14 @@ func _physics_process(delta: float) -> void:
 	_fall_immunity_timer = maxf(_fall_immunity_timer - delta, 0.0)
 	rope_grace_timer = maxf(rope_grace_timer - delta, 0.0)
 
-	# State machine: jangan override state spesial (FALLING/STANDING_UP/FLOATING)
-	if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP and current_state != PlayerState.FLOATING:
-		if is_on_floor():
+	# State machine: jangan override state spesial (FALLING/STANDING_UP)
+	if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP:
+		if yank_source != null:
+			change_state(PlayerState.FLOATING)
+		elif is_on_floor():
 			change_state(PlayerState.RUNNING)
-		else:
-			change_state(PlayerState.JUMPING)
+		elif current_state != PlayerState.JUMPING:
+			change_state(PlayerState.FLOATING)
 
 	# Terapkan gravitasi
 	if slingshot_active:
@@ -809,7 +811,7 @@ func _play_first_animation(model: Node, speed: float = 1.0) -> void:
 			var anim = anim_player.get_animation(anim_name)
 			if anim:
 				var path_lower = _current_model_path.to_lower()
-				if "running" in path_lower or "jumping" in path_lower or "floating" in path_lower or "idle" in path_lower:
+				if "running" in path_lower or "floating" in path_lower or "idle" in path_lower:
 					anim.loop_mode = Animation.LOOP_LINEAR
 				else:
 					anim.loop_mode = Animation.LOOP_NONE
