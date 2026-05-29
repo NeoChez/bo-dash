@@ -88,11 +88,24 @@ func _on_play_pressed() -> void:
 	)
 
 func _on_settings_pressed() -> void:
+	var orig_y: float = settings_btn.position.y
+	var orig_n: StyleBox = settings_btn.get_theme_stylebox("normal")
+	var orig_h: StyleBox = settings_btn.get_theme_stylebox("hover")
+	var orig_f: StyleBox = settings_btn.get_theme_stylebox("focus")
+
 	_play_press_anim(settings_btn, func():
-		settings_btn.disabled = false
-		settings_btn.scale = Vector2(1.0, 1.0)
-		var settings = load("res://scenes/menu/settings_menu.tscn").instantiate()
-		add_child(settings)
+		# Kembalikan tombol ke posisi & style semula
+		settings_btn.add_theme_stylebox_override("normal", orig_n)
+		settings_btn.add_theme_stylebox_override("hover",  orig_h)
+		settings_btn.add_theme_stylebox_override("focus",  orig_f)
+		settings_btn.remove_theme_stylebox_override("disabled")
+		var r = create_tween().set_parallel(true)
+		r.tween_property(settings_btn, "scale",      Vector2(1.0, 1.0), 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		r.tween_property(settings_btn, "position:y", orig_y,             0.18).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		r.tween_callback(func(): settings_btn.disabled = false)
+		# Buka settings overlay
+		var s = load("res://scenes/menu/settings_menu.tscn").instantiate()
+		add_child(s)
 	)
 
 func _on_exit_pressed() -> void:
