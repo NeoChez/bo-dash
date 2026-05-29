@@ -75,6 +75,8 @@ var _state_timer: float = 0.0
 
 @onready var animated_sprite = $AnimatedSprite3D
 @onready var visuals = $Visuals
+@onready var jump_sfx = $JumpSFX
+@onready var dash_sfx = $DashSFX
 
 # 3D Visuals & Procedural Animations
 @export_group("3D Visuals & Animation")
@@ -84,6 +86,7 @@ var _state_timer: float = 0.0
 @export var rotation_speed: float = 18.0
 @export var base_y_offset: float = 0.53
 @export var enable_procedural_animations: bool = true
+@onready var dash_particles: GPUParticles3D = $Visuals/DashParticle
 
 var _was_on_floor: bool = true
 var _anim_time: float = 0.0
@@ -105,10 +108,11 @@ func _ready():
 	if visuals:
 		visuals.position = Vector3(0.82488, base_y_offset, 0.09399593)
 		
-		# Clear old placeholder models if any
+		# Clear old placeholder models if any, but keep DashParticle
 		for child in visuals.get_children():
-			child.queue_free()
-			visuals.remove_child(child)
+			if child.name != "DashParticle":
+				child.queue_free()
+				visuals.remove_child(child)
 			
 		# Initialize default state as running!
 		current_state = PlayerState.RUNNING
@@ -127,12 +131,14 @@ func _physics_process(delta: float) -> void:
 	else:
 		_floor_grace_timer = maxf(_floor_grace_timer - delta, 0.0)
 
-	# State machine: jangan override state spesial (FALLING/STANDING_UP/FLOATING)
-	if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP and current_state != PlayerState.FLOATING:
-		if is_on_floor() or _floor_grace_timer > 0.0:
+	# State machine: jangan override state spesial (FALLING/STANDING_UP)
+	if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP:
+		if yank_source != null:
+			change_state(PlayerState.FLOATING)
+		elif is_on_floor() or _floor_grace_timer > 0.0:
 			change_state(PlayerState.RUNNING)
-		else:
-			change_state(PlayerState.JUMPING)
+		elif current_state != PlayerState.JUMPING:
+			change_state(PlayerState.FLOATING)
 
 	# Terapkan gravitasi
 	if slingshot_active:
@@ -146,6 +152,7 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_just_pressed(action_jump) and is_on_floor():
 			velocity.y = jump_velocity
 			change_state(PlayerState.JUMPING)
+			jump_sfx.play()
 
 		# Handle dash
 		if _dash_timer > 0.0:
@@ -359,6 +366,8 @@ func _do_dash() -> void:
 	velocity.z = dir.z * dash_speed
 	_dash_timer = dash_cooldown
 	_dash_active_timer = dash_active_duration
+	dash_sfx.play()
+	dash_particles.emitting = true
 
 func apply_rope_pull(pull: Vector3) -> void:
 	if _dash_active_timer > 0.0:
@@ -851,7 +860,7 @@ func _play_first_animation(model: Node, speed: float = 1.0) -> void:
 			var anim = anim_player.get_animation(anim_name)
 			if anim:
 				var path_lower = _current_model_path.to_lower()
-				if "running" in path_lower or "jumping" in path_lower or "floating" in path_lower or "idle" in path_lower:
+				if "running" in path_lower or "floating" in path_lower or "idle" in path_lower:
 					anim.loop_mode = Animation.LOOP_LINEAR
 				else:
 					anim.loop_mode = Animation.LOOP_NONE

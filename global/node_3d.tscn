@@ -12,6 +12,7 @@
 [ext_resource type="AudioStream" uid="uid://cbnd1xeye8ks6" path="res://assets/audio/soundtrack/MainSounds.mp3" id="10_s8d85"]
 [ext_resource type="FontFile" uid="uid://e3l61vub5yqc" path="res://assets/fonts/Wonder_Boys.ttf" id="11_font"]
 [ext_resource type="FontFile" uid="uid://dvpungdk7wwy7" path="res://assets/fonts/Twemoji.Mozilla.ttf" id="20_emoji"]
+[ext_resource type="AudioStream" uid="uid://t0yk6bhtgebv" path="res://assets/audio/sfx/ropeTension.mp3" id="12_rigln"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_left"]
 bg_color = Color(0, 0.45, 0.78, 0.92)
@@ -568,7 +569,6 @@ offset_obstacle3 = Vector3(0, 0, -1)
 offset_obstacle5 = Vector3(0, 2, -2.5)
 offset_obstacle6 = Vector3(0, 2, 2.5)
 move_speed = 10.0
-obstacles_enabled = false
 
 [node name="Lane" type="Marker3D" parent="Spawner_Ground1" unique_id=1547013836]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15951538, 0.03716135, 0)
@@ -587,7 +587,6 @@ offset_obstacle5 = Vector3(0, 2, -2.5)
 offset_obstacle6 = Vector3(0, 2, 2.5)
 move_speed = 10.0
 spawn_interval = 6.0
-obstacles_enabled = false
 arah_x = 1
 
 [node name="Lane" type="Marker3D" parent="Spawner_Ground2" unique_id=1031364845]
@@ -634,6 +633,11 @@ dash_yank_multiplier = 4.0
 segment_count = 50
 rope_radius = 0.1
 
+[node name="RopeTensionSFX" type="AudioStreamPlayer" parent="PlayerRope" unique_id=1319112448]
+stream = ExtResource("12_rigln")
+volume_db = -10.0
+
+
 [node name="ConveyorDivider" type="Area3D" parent="." unique_id=1205435418]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
 collision_layer = 4
@@ -674,7 +678,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -57, 0, 0)
 [node name="Conveyor Right" parent="." unique_id=364237748 instance=ExtResource("9_yw17d")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 57, 0, 0)
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1271690960]
+[node name="MainMusic" type="AudioStreamPlayer" parent="." unique_id=546582301]
 stream = ExtResource("10_s8d85")
 volume_db = -10.0
 autoplay = true
