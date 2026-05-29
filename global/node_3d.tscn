@@ -593,6 +593,8 @@ offset_obstacle3 = Vector3(0, 0, -1)
 offset_obstacle5 = Vector3(0, 2, -2.5)
 offset_obstacle6 = Vector3(0, 2, 2.5)
 move_speed = 10.0
+skill_spawn_interval = 6.0
+skill_spawn_chance = 0.78
 
 [node name="Lane" type="Marker3D" parent="Spawner_Ground1" unique_id=1547013836]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15951538, 0.03716135, 0)
@@ -609,9 +611,9 @@ script = ExtResource("2_spawner")
 offset_obstacle3 = Vector3(0, 0, -1.5)
 offset_obstacle5 = Vector3(0, 2, -2.5)
 offset_obstacle6 = Vector3(0, 2, 2.5)
-move_speed = 10.0
-spawn_interval = 6.0
 arah_x = 1
+spawn_interval = 6.0
+move_speed = 10.0
 
 [node name="Lane" type="Marker3D" parent="Spawner_Ground2" unique_id=1031364845]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15951538, 0.03716135, 0)

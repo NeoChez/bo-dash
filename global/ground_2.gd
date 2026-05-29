@@ -5,20 +5,19 @@ extends StaticBody3D
 @export var despawn_distance_from_center: float = 80.0
 
 var active_obstacles: Array = []
-var despawn_y_limit: float = -20.0  
+var despawn_y_limit: float = -20.0
 var _despawn_x_limit: float = -80.0
 var _moves_positive_x: bool = false
+var _anim_player: AnimationPlayer = null
 
 func _ready() -> void:
 	add_to_group("conveyor")
-	# Setup conveyor velocity untuk mendorong player
 	var push_velocity = conveyor_direction.normalized() * -conveyor_speed
 	constant_linear_velocity = push_velocity
 	_moves_positive_x = push_velocity.x > 0.0
 	_despawn_x_limit = 0.0
+	_anim_player = get_node_or_null("ConveyorUnanimatedS/AnimationPlayer")
 
-	
-	
 	var cleanup_timer = Timer.new()
 	cleanup_timer.wait_time = 0.5
 	cleanup_timer.autostart = true
@@ -28,12 +27,15 @@ func _ready() -> void:
 
 func set_speed_multiplier(mult: float) -> void:
 	constant_linear_velocity = conveyor_direction.normalized() * -conveyor_speed * mult
+	if _anim_player:
+		_anim_player.speed_scale = mult
+
 
 func register_obstacle(obs: Node3D) -> void:
 	active_obstacles.append(obs)
 
+
 func _cleanup_obstacles() -> void:
-	# Hapus obstacle yang sudah lewat jauh di belakang player atau jatuh terlalu jauh
 	for i in range(active_obstacles.size() - 1, -1, -1):
 		var obs = active_obstacles[i]
 		if not is_instance_valid(obs):

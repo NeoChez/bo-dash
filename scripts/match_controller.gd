@@ -15,6 +15,10 @@ const SKILL_EMOJI := {
 	6: "⚡",    # Dash Recharge
 }
 
+@export_group("Tweak — Conveyor")
+@export var conveyor_start_multiplier: float = 0.92
+@export var conveyor_end_multiplier: float = 1.45
+
 @export_group("Sudden Death")
 @export var sudden_death_enabled: bool = true
 @export var sudden_death_duration: float = 60.0
@@ -165,10 +169,42 @@ func on_player_down(player_id: int) -> void:
 	if not _scores.has(player_id):
 		return
 
-	_scores[player_id] = 0
-	_update_score_labels()
+	const FALL_PENALTY := 1
+	if _scores[player_id] > 0:
+		var actual_penalty := mini(FALL_PENALTY, _scores[player_id])
+		_scores[player_id] -= actual_penalty
+		_update_score_labels()
+		_show_score_change(player_id, -actual_penalty)
 	_skills[player_id] = -1
 	_update_skill_slots()
+
+
+func _show_score_change(player_id: int, delta: int) -> void:
+	var left_id := _get_left_side_player_id()
+	var cx: float = 170.0 if player_id == left_id else 1750.0
+
+	var lbl := Label.new()
+	lbl.text = "%+d" % delta
+	lbl.add_theme_font_size_override("font_size", 42)
+	lbl.add_theme_color_override("font_color",
+		Color(1.0, 0.22, 0.12, 1.0) if delta < 0 else Color(0.2, 1.0, 0.35, 1.0))
+	lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	lbl.add_theme_constant_override("outline_size", 7)
+	if _score_font:
+		lbl.add_theme_font_override("font", _score_font)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.offset_left  = cx - 55.0
+	lbl.offset_right = cx + 55.0
+	lbl.offset_top    = 48.0
+	lbl.offset_bottom = 102.0
+
+	$HUD.add_child(lbl)
+
+	var tw := create_tween().set_parallel(true)
+	tw.tween_property(lbl, "offset_top",    -20.0, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tw.tween_property(lbl, "offset_bottom",  34.0, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tw.tween_property(lbl, "modulate:a",      0.0, 1.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tw.chain().tween_callback(lbl.queue_free)
 
 
 func _finish_match() -> void:
@@ -212,10 +248,13 @@ func _start_sudden_death() -> void:
 		if spawner.has_method("set_match_active"):
 			spawner.set_match_active(true)
 
-	# Conveyor lebih cepat
+	# Conveyor + obstacle lebih cepat saat SD
 	for node in get_tree().get_nodes_in_group("conveyor"):
 		if node.has_method("set_speed_multiplier"):
 			node.set_speed_multiplier(sd_conveyor_multiplier)
+	for spawner in [_spawner_1, _spawner_2]:
+		if spawner and spawner.has_method("set_speed_multiplier"):
+			spawner.set_speed_multiplier(sd_conveyor_multiplier)
 
 	_show_sd_effects()
 
@@ -312,10 +351,13 @@ func _end_sudden_death() -> void:
 		spawner.set("skill_spawn_interval", _sd_skill_interval_orig)
 		spawner.set("skill_spawn_chance", _sd_skill_chance_orig)
 
-	# Reset conveyor
+	# Reset conveyor + obstacle speed
 	for node in get_tree().get_nodes_in_group("conveyor"):
 		if node.has_method("set_speed_multiplier"):
 			node.set_speed_multiplier(1.0)
+	for spawner in [_spawner_1, _spawner_2]:
+		if spawner and spawner.has_method("set_speed_multiplier"):
+			spawner.set_speed_multiplier(1.0)
 
 	_stop_match_nodes()
 	_show_result()
@@ -408,6 +450,13 @@ func _update_match_progress() -> void:
 	for spawner in [_spawner_1, _spawner_2]:
 		if spawner and spawner.has_method("set_match_progress"):
 			spawner.set_match_progress(progress)
+	var conv_mult: float = lerpf(conveyor_start_multiplier, conveyor_end_multiplier, progress)
+	for node in get_tree().get_nodes_in_group("conveyor"):
+		if node.has_method("set_speed_multiplier"):
+			node.set_speed_multiplier(conv_mult)
+	for spawner in [_spawner_1, _spawner_2]:
+		if spawner and spawner.has_method("set_speed_multiplier"):
+			spawner.set_speed_multiplier(conv_mult)
 
 
 func _update_timer_label() -> void:

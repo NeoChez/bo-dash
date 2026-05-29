@@ -18,35 +18,50 @@ extends Node3D
 @export var obstacle2_delay: float = 1.5
 @export var chalwall_delay: float = 2.0
 
-# --- Spawn settings ---
-@export var move_speed: float = 8.0
-@export var spawn_interval: float = 4.0
+# --- Internal setup (tidak perlu diubah) ---
 @export var obstacles_enabled: bool = true
 @export_enum("Ke Kiri:-1", "Ke Kanan:1") var arah_x: int = -1
 @export var ground_node: Node3D
 @export var conveyor_wrap_node: Node3D
-
-# --- Star ---
 @export var star_scene: PackedScene = preload("res://scenes/powerups/star_collectible.tscn")
-@export var star_spawn_interval: float = 5.5
-@export var star_spawn_chance: float = 0.7
+@export var skill_item_scene: PackedScene = preload("res://scenes/powerups/skill_item.tscn")
 @export var star_y_offset: float = 2.4
 @export var star_y_jitter: float = 0.08
 @export var star_lateral_jitter: float = 0.25
 
-# --- Skill item ---
-@export var skill_item_scene: PackedScene = preload("res://scenes/powerups/skill_item.tscn")
-@export var skill_spawn_interval: float = 14.0
-@export var skill_spawn_chance: float = 0.55
+# ── TWEAK: Obstacle ──────────────────────────────────────────────────────
+@export_group("Tweak — Obstacle")
+@export var spawn_interval: float = 3.5
+@export var move_speed: float = 9.5
 
-# --- Intensity scaling ---
-@export var min_spawn_interval: float = 1.35
-@export var max_move_speed_multiplier: float = 1.45
-@export var early_game_spawn_scale: float = 1.2
-@export var late_game_spawn_scale: float = 0.78
-@export var mid_game_start: float = 0.28
-@export var late_game_start: float = 0.62
-@export var frenzy_start: float = 0.84
+# ── TWEAK: Star ──────────────────────────────────────────────────────────
+@export_group("Tweak — Star")
+@export var star_spawn_interval: float = 4.2
+@export var star_spawn_chance: float = 0.78
+
+# ── TWEAK: Skill ─────────────────────────────────────────────────────────
+@export_group("Tweak — Skill")
+@export var skill_spawn_interval: float = 10.0
+@export var skill_spawn_chance: float = 0.65
+
+# --- Kurva intensitas (internal, tidak perlu diubah) ---
+var min_spawn_interval: float = 1.35
+var max_move_speed_multiplier: float = 1.45
+var early_game_spawn_scale: float = 1.2
+var late_game_spawn_scale: float = 0.78
+var mid_game_start: float = 0.28
+var late_game_start: float = 0.62
+var frenzy_start: float = 0.84
+var star_early_chance: float = 0.58
+var star_late_chance: float = 0.90
+var star_early_interval_scale: float = 1.18
+var star_late_interval_scale: float = 0.68
+var star_min_interval: float = 2.5
+var skill_early_chance: float = 0.50
+var skill_late_chance: float = 0.75
+var skill_early_interval_scale: float = 1.22
+var skill_late_interval_scale: float = 0.62
+var skill_min_interval: float = 5.0
 
 # Titik tengah untuk obstacle (node "Lane")
 var _obstacle_lane: Marker3D = null
@@ -60,6 +75,8 @@ var skill_timer: Timer
 var _match_active: bool = true
 var _base_spawn_interval: float = 0.0
 var _base_move_speed: float = 0.0
+var _base_star_spawn_interval: float = 0.0
+var _base_skill_spawn_interval: float = 0.0
 var _intensity_progress: float = 0.0
 
 
@@ -67,6 +84,8 @@ func _ready() -> void:
 	randomize()
 	_base_spawn_interval = spawn_interval
 	_base_move_speed = move_speed
+	_base_star_spawn_interval = star_spawn_interval
+	_base_skill_spawn_interval = skill_spawn_interval
 
 	for child in get_children():
 		if child is Marker3D:
@@ -119,6 +138,9 @@ func _on_spawn_timer() -> void:
 	if not _match_active or not obstacles_enabled or _obstacle_lane == null:
 		return
 
+	# Stop timer dulu agar tidak fire lagi saat kita masih dalam await (pair spawn)
+	spawn_timer.stop()
+
 	var roll := randi() % 5
 	if roll == 0:
 		_spawn(obstacle1_scene, offset_obstacle1)
@@ -134,6 +156,10 @@ func _on_spawn_timer() -> void:
 		_spawn(obstacle6_scene, offset_obstacle6)
 	else:
 		_spawn(obstacle7_scene, offset_obstacle7)
+
+	# Restart setelah semua obstacle selesai spawn → gap selalu >= spawn_interval
+	if _match_active and obstacles_enabled:
+		spawn_timer.start(spawn_interval)
 
 
 func _spawn(scene: PackedScene, offset: Vector3 = Vector3.ZERO) -> void:
@@ -227,6 +253,10 @@ func _spawn_skill() -> void:
 
 # ─── MATCH CONTROL ────────────────────────────────────────────────────────────
 
+func set_speed_multiplier(mult: float) -> void:
+	move_speed = _base_move_speed * mult
+
+
 func set_match_active(active: bool) -> void:
 	_match_active = active
 	if spawn_timer != null:
@@ -240,11 +270,23 @@ func set_match_active(active: bool) -> void:
 func set_match_progress(progress: float) -> void:
 	_intensity_progress = clamp(progress, 0.0, 1.0)
 	var phase_curve: float = _get_phase_curve()
+
+	# Obstacle speed & spawn rate
 	var spawn_scale: float = lerpf(early_game_spawn_scale, late_game_spawn_scale, phase_curve)
 	spawn_interval = max(min_spawn_interval, _base_spawn_interval * spawn_scale)
 	move_speed = lerpf(_base_move_speed * 0.92, _base_move_speed * max_move_speed_multiplier, phase_curve)
 	if spawn_timer != null:
 		spawn_timer.wait_time = spawn_interval
+
+	# Star spawn rate & chance
+	var star_scale: float = lerpf(star_early_interval_scale, star_late_interval_scale, phase_curve)
+	star_spawn_interval = max(star_min_interval, _base_star_spawn_interval * star_scale)
+	star_spawn_chance = lerpf(star_early_chance, star_late_chance, phase_curve)
+
+	# Skill spawn rate & chance
+	var skill_scale: float = lerpf(skill_early_interval_scale, skill_late_interval_scale, phase_curve)
+	skill_spawn_interval = max(skill_min_interval, _base_skill_spawn_interval * skill_scale)
+	skill_spawn_chance = lerpf(skill_early_chance, skill_late_chance, phase_curve)
 
 
 func _get_phase_curve() -> float:
