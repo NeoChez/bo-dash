@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://bytwj1v3w2ub0"]
+[gd_scene load_steps=0 format=3 uid="uid://bytwj1v3w2ub0"]
 
 [ext_resource type="Script" uid="uid://cgmcs6pw7j7ww" path="res://scripts/obstacle/obstacle_chalwall.gd" id="1_4odgk"]
 [ext_resource type="PackedScene" uid="uid://u53fxp8mwcfi" path="res://assets/obstacle/emptywall.glb" id="1_ohv7p"]

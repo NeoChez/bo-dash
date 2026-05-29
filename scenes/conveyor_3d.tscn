@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://djmc7vfmw7slb"]
+
+[ext_resource type="Script" uid="uid://dq7irspprrqpu" path="res://conveyor.gd" id="1_conveyor"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mat"]
+albedo_color = Color(0.35, 0.35, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_mesh"]
+material = SubResource("StandardMaterial3D_mat")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_shape"]
+
+[node name="Conveyor" type="MeshInstance3D" unique_id=2084112948 groups=["conveyor"]]
+mesh = SubResource("BoxMesh_mesh")
+script = ExtResource("1_conveyor")
+
+[node name="Area3D" type="Area3D" parent="." unique_id=1626546829]
+collision_layer = 8
+collision_mask = 7
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=1194046223]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("BoxShape3D_shape")
