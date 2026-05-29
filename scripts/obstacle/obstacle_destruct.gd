@@ -96,27 +96,40 @@ func _spawn_break_particles(world_pos: Vector3) -> void:
 	var scene_root := get_tree().current_scene
 	if not scene_root:
 		return
+
 	var particles := CPUParticles3D.new()
 	var sphere := SphereMesh.new()
-	sphere.radius = 0.1
-	sphere.height = 0.2
+	sphere.radius = 0.35
+	sphere.height = 0.7
+	sphere.radial_segments = 6
+	sphere.rings = 3
 	particles.mesh = sphere
+	particles.position = world_pos
 	scene_root.add_child(particles)
-	particles.global_position = world_pos
 	particles.emitting = true
 	particles.one_shot = true
-	particles.explosiveness = 0.9
-	particles.amount = 30
-	particles.lifetime = 0.9
-	particles.spread = 55.0
+	particles.explosiveness = 0.88
+	particles.randomness = 0.3
+	particles.amount = 50
+	particles.lifetime = 1.2
+	particles.spread = 70.0
 	particles.direction = Vector3(0, 1, 0)
 	particles.gravity = Vector3(0, -9.8, 0)
-	particles.initial_velocity_min = 4.0
-	particles.initial_velocity_max = 10.0
-	particles.scale_amount_min = 0.4
-	particles.scale_amount_max = 1.2
+	particles.initial_velocity_min = 9.0
+	particles.initial_velocity_max = 22.0
+	particles.scale_amount_min = 1.2
+	particles.scale_amount_max = 4.0
 	var color_ramp := Gradient.new()
-	color_ramp.set_color(0, Color(0.85, 0.75, 0.55, 1.0))
-	color_ramp.set_color(1, Color(0.6, 0.5, 0.35, 0.0))
+	color_ramp.set_color(0, Color(0.9, 0.8, 0.55, 1.0))
+	color_ramp.set_color(1, Color(0.65, 0.5, 0.3, 0.0))
 	particles.color_ramp = color_ramp
-	get_tree().create_timer(particles.lifetime + 0.5).timeout.connect(particles.queue_free)
+
+	var light := OmniLight3D.new()
+	light.light_color = Color(1.0, 0.82, 0.4, 1)
+	light.light_energy = 3.0
+	light.omni_range = 8.0
+	light.position = world_pos
+	scene_root.add_child(light)
+
+	get_tree().create_timer(0.4).timeout.connect(light.queue_free)
+	get_tree().create_timer(particles.lifetime + 0.4).timeout.connect(particles.queue_free)

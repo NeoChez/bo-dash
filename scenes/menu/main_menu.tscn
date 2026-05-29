@@ -323,6 +323,6 @@ theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 0.8)
 theme_override_constants/outline_size = 8
 theme_override_fonts/font = ExtResource("3_font")
 theme_override_font_sizes/font_size = 14
-text = "Bo-Dash © 2026 - Modern Runner Coop"
+text = "Bo-Dash © 2026 - Neochez Production"
 horizontal_alignment = 1
 vertical_alignment = 1

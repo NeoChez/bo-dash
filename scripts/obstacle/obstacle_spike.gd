@@ -15,7 +15,9 @@ func _ready() -> void:
 
 func _on_body_entered(body: Node3D) -> void:
 	if body.is_in_group("player"):
-		hit_sfx.play()
+		var has_shield: bool = body.get("shield_active") == true
+		if not has_shield:
+			hit_sfx.play()
 		var knockback_dir = (body.global_position - global_position).normalized()
 		knockback_dir.y = 0.0
 		knockback_dir = knockback_dir.normalized()

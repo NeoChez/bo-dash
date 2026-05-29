@@ -26,6 +26,10 @@ var _dash_bar_left: ProgressBar = null
 var _dash_bar_right: ProgressBar = null
 var _slot_left_sb: StyleBoxFlat = null
 var _slot_right_sb: StyleBoxFlat = null
+var _score_font: Font = null
+
+const _STAR_W := 44.0   # lebar emoji ⭐ di font_size 36
+const _SCORE_GAP := 8.0 # jarak antara star dan angka
 
 @onready var _player_1: CharacterBody3D = $Player2
 @onready var _player_2: CharacterBody3D = $Player
@@ -34,6 +38,8 @@ var _slot_right_sb: StyleBoxFlat = null
 @onready var _timer_label: Label = $HUD/TimerLabel
 @onready var _score_left_label: Label = $HUD/ScoreLeftLabel
 @onready var _score_right_label: Label = $HUD/ScoreRightLabel
+@onready var _star_left_label: Label = $HUD/StarEmojiLeft
+@onready var _star_right_label: Label = $HUD/StarEmojiRight
 @onready var _result_label: Label = $HUD/ResultLabel
 @onready var _skill_left_label: Label = $HUD/LeftSkillSlotA/SkillLabel
 @onready var _skill_right_label: Label = $HUD/RightSkillSlotA/SkillLabel
@@ -47,6 +53,7 @@ func _ready() -> void:
 	_skill_left_panel.add_theme_stylebox_override("panel", _slot_left_sb)
 	_slot_right_sb = _skill_right_panel.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
 	_skill_right_panel.add_theme_stylebox_override("panel", _slot_right_sb)
+	_score_font = load("res://assets/fonts/Wonder_Boys.ttf")
 	_setup_dash_bars()
 	_update_hud()
 	_update_skill_slots()
@@ -249,6 +256,33 @@ func _update_score_labels() -> void:
 	var right_player_id: int = 2 if left_player_id == 1 else 1
 	_score_left_label.text = "%d" % int(_scores[left_player_id])
 	_score_right_label.text = "%d" % int(_scores[right_player_id])
+	_reposition_score_groups()
+
+
+func _reposition_score_groups() -> void:
+	if _score_font == null:
+		return
+	# Left card: spans x 20-320, center = 170. Layout: [⭐ score]
+	var sw_l: float = _score_font.get_string_size(
+		_score_left_label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 36
+	).x
+	var total_l: float = _STAR_W + _SCORE_GAP + sw_l
+	var gx_l: float = 170.0 - total_l * 0.5
+	_star_left_label.offset_left = gx_l
+	_star_left_label.offset_right = gx_l + _STAR_W
+	_score_left_label.offset_left = gx_l + _STAR_W + _SCORE_GAP
+	_score_left_label.offset_right = 312.0
+
+	# Right card: spans -320 to -20, center = -170. Layout: [score ⭐]
+	var sw_r: float = _score_font.get_string_size(
+		_score_right_label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 36
+	).x
+	var total_r: float = _STAR_W + _SCORE_GAP + sw_r
+	var star_r: float = -170.0 + total_r * 0.5
+	_star_right_label.offset_right = star_r
+	_star_right_label.offset_left = star_r - _STAR_W
+	_score_right_label.offset_right = _star_right_label.offset_left - _SCORE_GAP
+	_score_right_label.offset_left = -312.0
 
 
 func _get_left_side_player_id() -> int:
@@ -264,7 +298,9 @@ func _debug_handle_keys() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	# DEBUG: Shift+1~7 → trigger skill id 0~6 di P1 (VFX preview)
+	# DEBUG: Shift+1~7 → trigger skill id 0~6 di P1 (VFX preview). Hanya aktif di debug build.
+	if not OS.is_debug_build():
+		return
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
 	if not event.shift_pressed:

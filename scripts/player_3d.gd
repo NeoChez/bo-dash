@@ -876,4 +876,6 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 	return null
 
 func apply_knockback(force: Vector3) -> void:
+	if _check_and_consume_shield():
+		return
 	velocity += force

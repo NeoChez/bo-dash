@@ -152,7 +152,7 @@ func _on_select_char() -> void:
 
 func _on_exit() -> void:
 	_play_press_anim(exit_btn, func():
-		get_tree().quit()
+		get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
 	)
 
 func _on_btn_hover(btn: Button, hover_angle: float) -> void:
