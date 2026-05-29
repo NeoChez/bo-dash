@@ -3,6 +3,8 @@ extends Node3D
 const FALL_DELAY: float = 0.6
 const AOE_RADIUS: float = 7.0
 const _IMPACT_VFX := preload("res://scenes/skills/vfx/meteor_impact_vfx.tscn")
+const _IMPACT_SFX := preload("res://assets/audio/sfx/meteor.mp3")
+const _SCREAM_SFX := preload("res://assets/audio/sfx/scream.mp3")
 
 @onready var _aoe: Node3D = $AOE
 
@@ -57,6 +59,22 @@ func _on_impact() -> void:
 	var vfx := _IMPACT_VFX.instantiate()
 	vfx.position = _target_pos
 	get_tree().current_scene.add_child(vfx)
+	# Putar SFX benturan meteor ke tanah
+	var sfx := AudioStreamPlayer.new()
+	sfx.stream = _IMPACT_SFX
+	sfx.volume_db = -5.0
+	sfx.bus = "Master"
+	get_tree().current_scene.add_child(sfx)
+	sfx.play()
+	sfx.finished.connect(sfx.queue_free)
+	# Putar SFX teriakan bersamaan dengan impact
+	var scream := AudioStreamPlayer.new()
+	scream.stream = _SCREAM_SFX
+	scream.volume_db = -5.0
+	scream.bus = "Master"
+	get_tree().current_scene.add_child(scream)
+	scream.play()
+	scream.finished.connect(scream.queue_free)
 	for player in get_tree().get_nodes_in_group("player"):
 		var dist := Vector2(
 			player.global_position.x - _target_pos.x,

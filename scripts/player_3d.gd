@@ -8,6 +8,9 @@ const _IRON_ANCHOR_VFX := preload("res://scenes/skills/vfx/iron_anchor_vfx.tscn"
 const _BALLOON_CURSE_VFX := preload("res://scenes/skills/vfx/balloon_curse_vfx.tscn")
 const _SLINGSHOT_VFX := preload("res://scenes/skills/vfx/slingshot_vfx.tscn")
 const _METEOR_CAST_VFX := preload("res://scenes/skills/vfx/meteor_cast_vfx.tscn")
+const _SKILL_SFX := preload("res://assets/audio/sfx/skill.mp3")
+const _ROCKET_SFX := preload("res://assets/audio/sfx/rocket.mp3")
+const _METEOR_FALL_SFX := preload("res://assets/audio/sfx/meteorFall.mp3")
 
 @export_category("Player Controls")
 @export var action_left: String = "ui_left"
@@ -77,6 +80,8 @@ var _state_timer: float = 0.0
 @onready var visuals = $Visuals
 @onready var jump_sfx = $JumpSFX
 @onready var dash_sfx = $DashSFX
+@onready var meteor_fall_sfx = $MeteorFallSFX
+@onready var rocket_sfx = $RocketSFX
 
 # 3D Visuals & Procedural Animations
 @export_group("3D Visuals & Animation")
@@ -428,6 +433,7 @@ func _apply_speed_boost(multiplier: float, duration: float) -> void:
 	boost_multiplier = max(boost_multiplier, multiplier)
 	boost_end_time = max(boost_end_time, now + duration)
 	_spawn_skill_vfx(_SPEED_BOOST_VFX)
+	_play_skill_sfx()
 
 
 # Instansiasi scene VFX sebagai child player agar mengikuti pergerakan.
@@ -436,6 +442,17 @@ func _spawn_skill_vfx(scene: PackedScene) -> void:
 	if scene == null:
 		return
 	add_child(scene.instantiate())
+
+
+# Putar SFX skill secara dinamis agar tidak perlu node permanen.
+func _play_skill_sfx() -> void:
+	var sfx := AudioStreamPlayer.new()
+	sfx.stream = _SKILL_SFX
+	sfx.volume_db = -5.0
+	sfx.bus = "Master"
+	add_child(sfx)
+	sfx.play()
+	sfx.finished.connect(sfx.queue_free)
 
 func _apply_slow(multiplier: float, duration: float) -> void:
 	if _check_and_consume_shield():
@@ -598,11 +615,13 @@ func _apply_bubble_shield() -> void:
 	shield_active = true
 	if _shield_visual:
 		_shield_visual.visible = true
+	_play_skill_sfx()
 
 
 func _apply_dash_recharge() -> void:
 	_dash_timer = 0.0
 	_spawn_skill_vfx(_DASH_RECHARGE_VFX)
+	_play_skill_sfx()
 
 
 func _apply_iron_anchor(resist: float, duration: float) -> void:
@@ -610,6 +629,7 @@ func _apply_iron_anchor(resist: float, duration: float) -> void:
 	anchor_resist = max(anchor_resist, resist)
 	anchor_end_time = max(anchor_end_time, now + duration)
 	_spawn_skill_vfx(_IRON_ANCHOR_VFX)
+	_play_skill_sfx()
 
 
 func _apply_balloon_curse(bonus: float, duration: float) -> void:
@@ -619,6 +639,7 @@ func _apply_balloon_curse(bonus: float, duration: float) -> void:
 	balloon_curse_bonus = max(balloon_curse_bonus, bonus)
 	balloon_curse_end_time = max(balloon_curse_end_time, now + duration)
 	_spawn_skill_vfx(_BALLOON_CURSE_VFX)
+	_play_skill_sfx()
 
 
 func _apply_balloon_curse_opponent(bonus: float, duration: float) -> void:
@@ -629,6 +650,7 @@ func _apply_balloon_curse_opponent(bonus: float, duration: float) -> void:
 
 func _apply_slingshot_rocket(strength: float, duration: float) -> void:
 	_spawn_skill_vfx(_SLINGSHOT_VFX)
+	rocket_sfx.play()
 	var horiz_vel := Vector3(velocity.x, 0.0, velocity.z)
 	if horiz_vel.length() > 0.5:
 		slingshot_dir = horiz_vel.normalized()
@@ -667,6 +689,7 @@ func _apply_meteor_from(impact_center: Vector3, strength: float) -> void:
 
 func _apply_meteor_strike(strength: float) -> void:
 	_spawn_skill_vfx(_METEOR_CAST_VFX)
+	meteor_fall_sfx.play()
 	var other := _get_other_player()
 	if other == null:
 		return
