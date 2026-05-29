@@ -80,6 +80,7 @@ var _state_timer: float = 0.0
 @export var rotation_speed: float = 18.0
 @export var base_y_offset: float = 0.53
 @export var enable_procedural_animations: bool = true
+@onready var dash_particles: GPUParticles3D = $Visuals/DashParticle
 
 var _was_on_floor: bool = true
 var _anim_time: float = 0.0
@@ -101,10 +102,11 @@ func _ready():
 	if visuals:
 		visuals.position = Vector3(0.82488, base_y_offset, 0.09399593)
 		
-		# Clear old placeholder models if any
+		# Clear old placeholder models if any, but keep DashParticle
 		for child in visuals.get_children():
-			child.queue_free()
-			visuals.remove_child(child)
+			if child.name != "DashParticle":
+				child.queue_free()
+				visuals.remove_child(child)
 			
 		# Initialize default state as running!
 		current_state = PlayerState.RUNNING
@@ -359,6 +361,7 @@ func _do_dash() -> void:
 	_dash_timer = dash_cooldown
 	_dash_active_timer = dash_active_duration
 	dash_sfx.play()
+	dash_particles.emitting = true
 
 func apply_rope_pull(pull: Vector3) -> void:
 	if _dash_active_timer > 0.0:

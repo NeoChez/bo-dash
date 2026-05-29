@@ -11,6 +11,9 @@
 [ext_resource type="Script" uid="uid://ctko058g4f6r0" path="res://scripts/pause_menu.gd" id="10_pause"]
 [ext_resource type="AudioStream" uid="uid://cbnd1xeye8ks6" path="res://assets/audio/soundtrack/MainSounds.mp3" id="10_s8d85"]
 [ext_resource type="FontFile" uid="uid://e3l61vub5yqc" path="res://assets/fonts/Wonder_Boys.ttf" id="11_font"]
+[ext_resource type="Shader" path="res://assets/shaders/aurora.gdshader" id="12_aurora"]
+[ext_resource type="PackedScene" path="res://assets/modular_terrain.glb" id="13_terrain"]
+[ext_resource type="Script" path="res://global/terrain_color.gd" id="14_tcolor"]
 [ext_resource type="AudioStream" uid="uid://t0yk6bhtgebv" path="res://assets/audio/sfx/ropeTension.mp3" id="12_rigln"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_left"]
@@ -185,8 +188,8 @@ corner_radius_bottom_left = 22
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.28, 0.54, 0.88, 1)
 sky_horizon_color = Color(0.52, 0.76, 1, 1)
-ground_bottom_color = Color(0.22, 0.32, 0.48, 1)
-ground_horizon_color = Color(0.38, 0.6, 0.85, 1)
+ground_bottom_color = Color(0.42, 0.68, 0.92, 1)
+ground_horizon_color = Color(0.52, 0.76, 1, 1)
 
 [sub_resource type="Sky" id="Sky_sky"]
 sky_material = SubResource("ProceduralSkyMaterial_sky")
@@ -208,6 +211,15 @@ size = Vector3(1, 9.580627, 20.002106)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_rgk4m"]
 size = Vector3(1, 17.366913, 28.854675)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_aurora"]
+shader = ExtResource("12_aurora")
+shader_parameter/speed = 0.12
+shader_parameter/intensity = 0.85
+
+[sub_resource type="QuadMesh" id="QuadMesh_aurora"]
+material = SubResource("ShaderMaterial_aurora")
+size = Vector2(320, 130)
 
 [node name="world_3d" type="Node3D" unique_id=2012842173]
 script = ExtResource("9_match")
@@ -576,6 +588,15 @@ shadow_bias = 0.05
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1706876778]
 environment = SubResource("Environment_world")
 
+[node name="Terrain" parent="." instance=ExtResource("13_terrain")]
+transform = Transform3D(6, 0, 0, 0, 6, 0, 0, 0, 6, 0, -38, -55)
+script = ExtResource("14_tcolor")
+
+[node name="AuroraBackdrop" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.7814, 0.6241, 0, -0.6241, 0.7814, 0, 65, -80)
+mesh = SubResource("QuadMesh_aurora")
+cast_shadow = 0
+
 [node name="Spawner_Ground1" type="Node3D" parent="." unique_id=1139470842 groups=["spawner"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 102.854, 0.9, 0)
 script = ExtResource("2_spawner")
@@ -714,5 +735,10 @@ collision_mask = 0
 [node name="CollisionShape3D" type="CollisionShape3D" parent="WallLeft" unique_id=1834696942]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.573593, -0.17434692)
 shape = SubResource("BoxShape3D_rgk4m")
+
+[node name="Aurora" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.95, -0.31, 0, 0.31, 0.95, 0, 58, -38)
+mesh = SubResource("QuadMesh_aurora")
+cast_shadow = 0
 
 [connection signal="body_entered" from="ConveyorDivider" to="ConveyorDivider" method="_on_body_entered"]
