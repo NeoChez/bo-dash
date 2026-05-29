@@ -89,7 +89,10 @@ func _on_play_pressed() -> void:
 
 func _on_settings_pressed() -> void:
 	_play_press_anim(settings_btn, func():
-		get_tree().change_scene_to_file("res://scenes/menu/settings_menu.tscn")
+		settings_btn.disabled = false
+		settings_btn.scale = Vector2(1.0, 1.0)
+		var settings = load("res://scenes/menu/settings_menu.tscn").instantiate()
+		add_child(settings)
 	)
 
 func _on_exit_pressed() -> void:
