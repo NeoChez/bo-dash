@@ -1,0 +1,67 @@
+[gd_scene load_steps=5 format=3]
+
+[sub_resource type="TorusMesh" id="mesh_ring"]
+inner_radius = 1.0
+outer_radius = 1.5
+rings = 24
+ring_segments = 8
+
+[sub_resource type="StandardMaterial3D" id="mat_ring"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1.0, 0.4, 0.1, 0.8)
+emission_enabled = true
+emission = Color(1.0, 0.35, 0.05, 1)
+emission_energy_multiplier = 2.5
+
+[sub_resource type="SphereMesh" id="mesh_ember"]
+radius = 0.12
+height = 0.24
+radial_segments = 6
+rings = 3
+
+[sub_resource type="StandardMaterial3D" id="mat_ember"]
+shading_mode = 0
+albedo_color = Color(1.0, 0.55, 0.1, 1)
+emission_enabled = true
+emission = Color(1.0, 0.4, 0.05, 1)
+emission_energy_multiplier = 2.5
+
+[node name="MeteorCastVFX" type="Node3D"]
+
+[node name="Ring" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+material_override = SubResource("mat_ring")
+mesh = SubResource("mesh_ring")
+
+[node name="Embers" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+material_override = SubResource("mat_ember")
+emitting = true
+amount = 30
+lifetime = 0.6
+one_shot = true
+explosiveness = 0.8
+mesh = SubResource("mesh_ember")
+emission_shape = 1
+emission_sphere_radius = 0.5
+direction = Vector3(0, 1, 0)
+spread = 60.0
+gravity = Vector3(0, -4.0, 0)
+initial_velocity_min = 4.0
+initial_velocity_max = 9.0
+scale_amount_min = 0.8
+scale_amount_max = 2.0
+
+[node name="Glow" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+light_color = Color(1.0, 0.4, 0.1, 1)
+light_energy = 2.0
+omni_range = 5.5
+
+[node name="Life" type="Timer" parent="."]
+wait_time = 0.8
+one_shot = true
+autostart = true
+
+[connection signal="timeout" from="Life" to="." method="queue_free"]

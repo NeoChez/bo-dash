@@ -226,7 +226,7 @@ func _make_button(text: String, font: Font) -> Button:
 func _make_key_button(label: String, font: Font) -> Button:
 	var btn := Button.new()
 	btn.text = label
-	btn.custom_minimum_size = Vector2(160, 48)
+	btn.custom_minimum_size = Vector2(190, 48)
 	btn.add_theme_font_size_override("font_size", 20)
 	if font: btn.add_theme_font_override("font", font)
 	btn.add_theme_color_override("font_color", Color(1, 1, 0.8, 1))
@@ -278,14 +278,21 @@ const SYMBOL_MAP := {
 	KEY_ASTERISK: "*",
 }
 
+# Keys that exist in Left and Right variants
+const SIDED_KEYS := [KEY_SHIFT, KEY_CTRL, KEY_ALT, KEY_META]
+
 
 func _get_key_label(action: String) -> String:
 	for ev in InputMap.action_get_events(action):
 		if ev is InputEventKey:
 			var kc: int = ev.physical_keycode if ev.physical_keycode != 0 else ev.keycode
-			if SYMBOL_MAP.has(kc):
-				return SYMBOL_MAP[kc]
-			return OS.get_keycode_string(kc)
+			var label: String = SYMBOL_MAP.get(kc, OS.get_keycode_string(kc))
+			if kc in SIDED_KEYS:
+				if ev.location == 1:    # KEY_LOCATION_LEFT
+					label += " (L)"
+				elif ev.location == 2:  # KEY_LOCATION_RIGHT
+					label += " (R)"
+			return label
 	return "---"
 
 
@@ -323,6 +330,7 @@ func _input(event: InputEvent) -> void:
 
 	var new_ev := InputEventKey.new()
 	new_ev.physical_keycode = event.physical_keycode if event.physical_keycode != 0 else event.keycode
+	new_ev.location = event.location  # preserve Left/Right side info
 	InputMap.action_add_event(_listening_action, new_ev)
 
 	if _listening_btn:

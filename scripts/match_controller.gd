@@ -2,6 +2,18 @@ extends Node3D
 
 const MATCH_DURATION: float = 180.0
 const _DEBUG_SKILL_SCENE := preload("res://scenes/powerups/skill_item.tscn")
+const _CAST_BANNER := preload("res://scenes/ui/cast_banner.tscn")
+
+# Emoji per skill id (urut sesuai GlobalSettings.skills)
+const SKILL_EMOJI := {
+	0: "🛡️",   # Bubble Shield
+	1: "⚓",    # Iron Anchor
+	2: "🎈",   # Balloon Curse
+	3: "🚀",   # Slingshot Rocket
+	4: "☄️",   # Meteor Strike
+	5: "💨",   # Speed Boost
+	6: "⚡",    # Dash Recharge
+}
 
 @onready var _skill_registry: Dictionary = GlobalSettings.skills
 
@@ -12,6 +24,8 @@ var _skills := {1: -1, 2: -1}
 var _carousel_active := {1: false, 2: false}
 var _dash_bar_left: ProgressBar = null
 var _dash_bar_right: ProgressBar = null
+var _slot_left_sb: StyleBoxFlat = null
+var _slot_right_sb: StyleBoxFlat = null
 
 @onready var _player_1: CharacterBody3D = $Player2
 @onready var _player_2: CharacterBody3D = $Player
@@ -20,17 +34,19 @@ var _dash_bar_right: ProgressBar = null
 @onready var _timer_label: Label = $HUD/TimerLabel
 @onready var _score_left_label: Label = $HUD/ScoreLeftLabel
 @onready var _score_right_label: Label = $HUD/ScoreRightLabel
-@onready var _speed_left_label: Label = $HUD/SpeedLeftLabel
-@onready var _speed_right_label: Label = $HUD/SpeedRightLabel
 @onready var _result_label: Label = $HUD/ResultLabel
-@onready var _skill_left_color: ColorRect = $HUD/LeftSkillSlotA/SkillColor
 @onready var _skill_left_label: Label = $HUD/LeftSkillSlotA/SkillLabel
-@onready var _skill_right_color: ColorRect = $HUD/RightSkillSlotA/SkillColor
 @onready var _skill_right_label: Label = $HUD/RightSkillSlotA/SkillLabel
+@onready var _skill_left_panel: Panel = $HUD/LeftSkillSlotA
+@onready var _skill_right_panel: Panel = $HUD/RightSkillSlotA
 
 
 func _ready() -> void:
 	add_to_group("match_controller")
+	_slot_left_sb = _skill_left_panel.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
+	_skill_left_panel.add_theme_stylebox_override("panel", _slot_left_sb)
+	_slot_right_sb = _skill_right_panel.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
+	_skill_right_panel.add_theme_stylebox_override("panel", _slot_right_sb)
 	_setup_dash_bars()
 	_update_hud()
 	_update_skill_slots()
@@ -40,6 +56,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	_debug_handle_keys()
 	if Input.is_action_just_pressed("ui_home"):
 		_debug_spawn_skill_items()
 	if not _match_active:
@@ -48,7 +65,6 @@ func _process(delta: float) -> void:
 	_match_time_left = max(0.0, _match_time_left - delta)
 	_update_match_progress()
 	_update_timer_label()
-	_update_speed_labels()
 	_update_dash_bars()
 	if _match_time_left <= 0.0:
 		_finish_match()
@@ -70,9 +86,9 @@ func on_skill_picked_up(player_id: int, skill_type: int) -> void:
 	if not _skills.has(player_id):
 		return
 	_skills[player_id] = skill_type
-	var color_rect: ColorRect = _skill_left_color if player_id == 1 else _skill_right_color
+	var sb: StyleBoxFlat = _slot_left_sb if player_id == 1 else _slot_right_sb
 	var label: Label = _skill_left_label if player_id == 1 else _skill_right_label
-	_spin_carousel(color_rect, label, skill_type, player_id)
+	_spin_carousel(sb, label, skill_type, player_id)
 
 
 func use_skill(player_id: int) -> void:
@@ -85,8 +101,28 @@ func use_skill(player_id: int) -> void:
 	var sdata: Dictionary = _skill_registry.get(skill, {})
 	if player != null and player.has_method("apply_powerup") and not sdata.is_empty():
 		player.apply_powerup(sdata["key"], sdata["duration"], sdata["magnitude"])
+		_show_cast_banner(player_id, skill, sdata)
+		_flash_slot(_skill_left_panel if player_id == 1 else _skill_right_panel)
 	_skills[player_id] = -1
 	_update_skill_slots()
+
+
+func _show_cast_banner(player_id: int, skill: int, sdata: Dictionary) -> void:
+	var banner := _CAST_BANNER.instantiate()
+	$HUD.add_child(banner)
+	# Player 1 = sisi kiri, Player 2 = sisi kanan (koordinat base 1920x1080)
+	banner.position = Vector2(480.0 if player_id == 1 else 1440.0, 360.0)
+	if banner.has_method("setup"):
+		banner.setup(SKILL_EMOJI.get(skill, "✨"), sdata.get("name", "SKILL"), sdata.get("color", Color(1, 1, 1, 1)))
+
+
+func _flash_slot(panel: Control) -> void:
+	if panel == null:
+		return
+	panel.pivot_offset = panel.size / 2.0
+	var tw := create_tween()
+	tw.tween_property(panel, "scale", Vector2(1.3, 1.3), 0.08).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(panel, "scale", Vector2(1.0, 1.0), 0.18).set_trans(Tween.TRANS_SINE)
 
 
 func on_player_down(player_id: int) -> void:
@@ -135,24 +171,24 @@ func _show_result() -> void:
 
 
 func _update_skill_slots() -> void:
-	_refresh_slot(_skill_left_color, _skill_left_label, _skills.get(1, -1))
-	_refresh_slot(_skill_right_color, _skill_right_label, _skills.get(2, -1))
+	_refresh_slot(_slot_left_sb, _skill_left_label, _skills.get(1, -1))
+	_refresh_slot(_slot_right_sb, _skill_right_label, _skills.get(2, -1))
 
 
-func _refresh_slot(color_rect: ColorRect, label: Label, skill: int) -> void:
-	if color_rect == null or label == null:
+func _refresh_slot(sb: StyleBoxFlat, label: Label, skill: int) -> void:
+	if sb == null or label == null:
 		return
 	if skill < 0:
-		color_rect.color = Color(0, 0, 0, 0)
+		sb.bg_color = Color(0.04, 0.1, 0.16, 0.95)
 		label.text = ""
 	else:
 		var sdata: Dictionary = _skill_registry.get(skill, {})
-		color_rect.color = sdata.get("color", Color(0.5, 0.5, 0.5, 0.75))
-		label.text = sdata.get("name", "???")
+		sb.bg_color = sdata.get("color", Color(0.5, 0.5, 0.5, 0.75))
+		label.text = SKILL_EMOJI.get(skill, "?")
 
 
-func _spin_carousel(color_rect: ColorRect, label: Label, final_skill: int, player_id: int) -> void:
-	if color_rect == null or label == null:
+func _spin_carousel(sb: StyleBoxFlat, label: Label, final_skill: int, player_id: int) -> void:
+	if sb == null or label == null:
 		return
 	_carousel_active[player_id] = true
 
@@ -169,9 +205,10 @@ func _spin_carousel(color_rect: ColorRect, label: Label, final_skill: int, playe
 			return
 		var t: float = float(i) / float(SPIN_STEPS - 1)
 		var interval: float = lerpf(0.05, 0.22, t * t)
-		var sdata: Dictionary = _skill_registry[skill_ids[current_pos]]
-		color_rect.color = sdata.get("color", Color(0.5, 0.5, 0.5, 0.75))
-		label.text = sdata.get("name", "???")
+		var spin_id: int = skill_ids[current_pos]
+		var sdata: Dictionary = _skill_registry[spin_id]
+		sb.bg_color = sdata.get("color", Color(0.5, 0.5, 0.5, 0.75))
+		label.text = SKILL_EMOJI.get(spin_id, "?")
 		current_pos = (current_pos + 1) % skill_ids.size()
 		await get_tree().create_timer(interval).timeout
 
@@ -179,15 +216,14 @@ func _spin_carousel(color_rect: ColorRect, label: Label, final_skill: int, playe
 		_carousel_active[player_id] = false
 		return
 	var final_data: Dictionary = _skill_registry.get(final_skill, {})
-	color_rect.color = final_data.get("color", Color(0.5, 0.5, 0.5, 0.75))
-	label.text = final_data.get("name", "???")
+	sb.bg_color = final_data.get("color", Color(0.5, 0.5, 0.5, 0.75))
+	label.text = SKILL_EMOJI.get(final_skill, "?")
 	_carousel_active[player_id] = false
 
 
 func _update_hud() -> void:
 	_update_timer_label()
 	_update_score_labels()
-	_update_speed_labels()
 
 
 func _update_match_progress() -> void:
@@ -208,21 +244,8 @@ func _update_timer_label() -> void:
 func _update_score_labels() -> void:
 	var left_player_id: int = _get_left_side_player_id()
 	var right_player_id: int = 2 if left_player_id == 1 else 1
-	_score_left_label.text = "Star: %d" % int(_scores[left_player_id])
-	_score_right_label.text = "Star: %d" % int(_scores[right_player_id])
-
-
-func _update_speed_labels() -> void:
-	var left_player_id: int = _get_left_side_player_id()
-	var right_player_id: int = 2 if left_player_id == 1 else 1
-	var left_player: CharacterBody3D = _player_1 if left_player_id == 1 else _player_2
-	var right_player: CharacterBody3D = _player_2 if left_player_id == 1 else _player_1
-	if left_player != null:
-		var left_speed: float = Vector2(left_player.velocity.x, left_player.velocity.z).length()
-		_speed_left_label.text = "Speed: %.2f" % left_speed
-	if right_player != null:
-		var right_speed: float = Vector2(right_player.velocity.x, right_player.velocity.z).length()
-		_speed_right_label.text = "Speed: %.2f" % right_speed
+	_score_left_label.text = "%d" % int(_scores[left_player_id])
+	_score_right_label.text = "%d" % int(_scores[right_player_id])
 
 
 func _get_left_side_player_id() -> int:
@@ -231,6 +254,32 @@ func _get_left_side_player_id() -> int:
 	if _player_2 == null:
 		return 1
 	return 1 if _player_1.global_position.x <= _player_2.global_position.x else 2
+
+
+func _debug_handle_keys() -> void:
+	pass
+
+
+func _input(event: InputEvent) -> void:
+	# DEBUG: Shift+1~7 → trigger skill id 0~6 di P1 (VFX preview)
+	if not (event is InputEventKey and event.pressed and not event.echo):
+		return
+	if not event.shift_pressed:
+		return
+	const KEY_MAP := {
+		KEY_1: 0, KEY_2: 1, KEY_3: 2, KEY_4: 3,
+		KEY_5: 4, KEY_6: 5, KEY_7: 6,
+	}
+	var skill_id: int = KEY_MAP.get(event.physical_keycode, -1)
+	if skill_id < 0:
+		return
+	var sdata: Dictionary = _skill_registry.get(skill_id, {})
+	if sdata.is_empty():
+		return
+	if _player_1 and _player_1.has_method("apply_powerup"):
+		_player_1.apply_powerup(sdata["key"], sdata["duration"], sdata["magnitude"])
+		_show_cast_banner(1, skill_id, sdata)
+		_flash_slot(_skill_left_panel)
 
 
 func _debug_spawn_skill_items() -> void:
@@ -258,12 +307,12 @@ func _setup_dash_bars() -> void:
 
 	_dash_bar_left = _make_dash_bar(
 		hud, false,
-		38.0, 118.0, 322.0, 158.0,
+		20.0, 108.0, 320.0, 144.0,
 		Color(0.25, 0.95, 0.78, 1.0), bg_left, font
 	)
 	_dash_bar_right = _make_dash_bar(
 		hud, true,
-		-322.0, 118.0, -38.0, 158.0,
+		-320.0, 108.0, -20.0, 144.0,
 		Color(1.0, 0.72, 0.15, 1.0), bg_right, font
 	)
 

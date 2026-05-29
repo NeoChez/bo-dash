@@ -1,0 +1,118 @@
+[gd_scene load_steps=7 format=3]
+
+[sub_resource type="TorusMesh" id="mesh_ring"]
+inner_radius = 0.8
+outer_radius = 1.15
+rings = 24
+ring_segments = 8
+
+[sub_resource type="StandardMaterial3D" id="mat_ring"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0.9, 0.25, 0.85)
+emission_enabled = true
+emission = Color(1, 0.85, 0.2, 1)
+emission_energy_multiplier = 2.5
+
+[sub_resource type="SphereMesh" id="mesh_spark"]
+radius = 0.14
+height = 0.28
+radial_segments = 6
+rings = 3
+
+[sub_resource type="StandardMaterial3D" id="mat_spark"]
+shading_mode = 0
+albedo_color = Color(1, 0.9, 0.3, 1)
+emission_enabled = true
+emission = Color(1, 0.9, 0.3, 1)
+emission_energy_multiplier = 2.5
+
+[sub_resource type="Animation" id="anim_burst"]
+resource_name = "burst"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Ring:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(0.5, 0.5, 0.5), Vector3(7.0, 7.0, 7.0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Ring:material_override:albedo_color")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 0.9, 0.25, 0.85), Color(1, 0.9, 0.25, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Flash:light_energy")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [3.0, 0.0]
+}
+
+[sub_resource type="AnimationLibrary" id="animlib"]
+_data = {
+&"burst": SubResource("anim_burst")
+}
+
+[node name="DashRechargeVFX" type="Node3D"]
+
+[node name="Ring" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+material_override = SubResource("mat_ring")
+mesh = SubResource("mesh_ring")
+
+[node name="Sparks" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+material_override = SubResource("mat_spark")
+emitting = true
+amount = 36
+lifetime = 0.5
+one_shot = true
+explosiveness = 0.9
+mesh = SubResource("mesh_spark")
+emission_shape = 1
+emission_sphere_radius = 0.6
+direction = Vector3(0, 1, 0)
+spread = 80.0
+gravity = Vector3(0, -6.0, 0)
+initial_velocity_min = 5.0
+initial_velocity_max = 11.0
+scale_amount_min = 1.2
+scale_amount_max = 2.2
+
+[node name="Flash" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+light_color = Color(1, 0.9, 0.3, 1)
+light_energy = 3.0
+omni_range = 7.0
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("animlib")
+}
+autoplay = "burst"
+
+[node name="Life" type="Timer" parent="."]
+wait_time = 0.7
+one_shot = true
+autostart = true
+
+[connection signal="timeout" from="Life" to="." method="queue_free"]

@@ -1,4 +1,4 @@
-[gd_scene load_steps=0 format=3 uid="uid://des7xuf250uuy"]
+[gd_scene format=3 uid="uid://des7xuf250uuy"]
 
 [ext_resource type="PackedScene" uid="uid://u53fxp8mwcfi" path="res://assets/obstacle/emptywall.glb" id="1_ja72x"]
 
