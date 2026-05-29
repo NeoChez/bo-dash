@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://h2y2t6acfwjc"
-path="res://.godot/imported/idle.glb-033d4776610dd910f661e92c3241777b.scn"
+uid="uid://bf3rdvfpfgfvc"
+path="res://.godot/imported/wall_undestruct.glb-ab3e6c5517e9869a2eec31de8a3dac7b.scn"
 
 [deps]
 
-source_file="res://assets/player/female/idle.glb"
-dest_files=["res://.godot/imported/idle.glb-033d4776610dd910f661e92c3241777b.scn"]
+source_file="res://assets/obstacle/wall_undestruct.glb"
+dest_files=["res://.godot/imported/wall_undestruct.glb-ab3e6c5517e9869a2eec31de8a3dac7b.scn"]
 
 [params]
 

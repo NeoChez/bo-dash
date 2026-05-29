@@ -21,41 +21,56 @@ func _ready() -> void:
 func _build_ui() -> void:
 	var font: Font = load(FONT_PATH) if ResourceLoader.exists(FONT_PATH) else null
 
-	# Dark overlay background
-	var bg := ColorRect.new()
-	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	bg.color = Color(0.06, 0.08, 0.12, 0.97)
-	add_child(bg)
+	# Semi-transparent dark overlay
+	var overlay := ColorRect.new()
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.color = Color(0, 0, 0, 0.72)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(overlay)
 
-	# Scroll container for all content
+	# Popup panel — 62% lebar, 82% tinggi layar, centered via anchor
+	var panel := Panel.new()
+	panel.anchor_left = 0.25
+	panel.anchor_right = 0.75
+	panel.anchor_top = 0.14
+	panel.anchor_bottom = 0.86
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.05, 0.08, 0.11, 0.97)
+	panel_style.border_color = Color(0.9, 0.78, 0.46, 0.9)
+	for side in [0, 1, 2, 3]: panel_style.set_border_width(side, 3)
+	panel_style.border_width_bottom = 7
+	for c in range(4): panel_style.set_corner_radius(c, 24)
+	panel_style.shadow_color = Color(0, 0, 0, 0.45)
+	panel_style.shadow_size = 16
+	panel.add_theme_stylebox_override("panel", panel_style)
+	add_child(panel)
+
+	# Scroll container inside panel
 	var scroll := ScrollContainer.new()
 	scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	scroll.offset_left = 0
 	scroll.offset_top = 0
-	add_child(scroll)
-
-	var vbox := VBoxContainer.new()
-	vbox.set_h_size_flags(Control.SIZE_EXPAND_FILL)
-	vbox.add_theme_constant_override("separation", 16)
-	vbox.offset_left = 0
-	scroll.add_child(vbox)
+	panel.add_child(scroll)
 
 	var inner := MarginContainer.new()
 	inner.set_h_size_flags(Control.SIZE_EXPAND_FILL)
-	inner.add_theme_constant_override("margin_left", 60)
-	inner.add_theme_constant_override("margin_right", 60)
-	inner.add_theme_constant_override("margin_top", 40)
-	inner.add_theme_constant_override("margin_bottom", 40)
-	vbox.add_child(inner)
+	inner.add_theme_constant_override("margin_left", 50)
+	inner.add_theme_constant_override("margin_right", 50)
+	inner.add_theme_constant_override("margin_top", 32)
+	inner.add_theme_constant_override("margin_bottom", 32)
+	scroll.add_child(inner)
 
 	var content := VBoxContainer.new()
-	content.add_theme_constant_override("separation", 24)
+	content.add_theme_constant_override("separation", 20)
 	inner.add_child(content)
 
 	# ── Title
 	var title := Label.new()
 	title.text = "SETTINGS"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 42)
+	title.add_theme_font_size_override("font_size", 64)
 	if font: title.add_theme_font_override("font", font)
 	title.add_theme_color_override("font_color", Color(1, 0.92, 0.05, 1))
 	title.add_theme_color_override("font_outline_color", Color(0.04, 0.08, 0.18, 1))
@@ -99,7 +114,7 @@ func _build_ui() -> void:
 	var hint := Label.new()
 	hint.text = "Click a button then press a key to remap. Press Esc to cancel."
 	hint.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9, 0.8))
-	hint.add_theme_font_size_override("font_size", 14)
+	hint.add_theme_font_size_override("font_size", 18)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_child(hint)
 
@@ -134,7 +149,7 @@ func _build_player_bindings(parent: Control, title: String, actions: Array, font
 	var lbl := Label.new()
 	lbl.text = title
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl.add_theme_font_size_override("font_size", 18)
+	lbl.add_theme_font_size_override("font_size", 30)
 	if font: lbl.add_theme_font_override("font", font)
 	lbl.add_theme_color_override("font_color", Color(0.85, 0.95, 1.0, 1))
 	col.add_child(lbl)
@@ -149,9 +164,9 @@ func _build_player_bindings(parent: Control, title: String, actions: Array, font
 		var action: String = actions[i]
 		var row_lbl := Label.new()
 		row_lbl.text = ACTION_LABELS[i]
-		row_lbl.add_theme_font_size_override("font_size", 15)
+		row_lbl.add_theme_font_size_override("font_size", 22)
 		row_lbl.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9, 1))
-		row_lbl.custom_minimum_size = Vector2(80, 0)
+		row_lbl.custom_minimum_size = Vector2(100, 0)
 		grid.add_child(row_lbl)
 
 		var btn := _make_key_button(_get_key_label(action), font)
@@ -166,7 +181,7 @@ func _make_slider(value: float) -> HSlider:
 	s.max_value = 1.0
 	s.step = 0.01
 	s.value = value
-	s.custom_minimum_size = Vector2(260, 28)
+	s.custom_minimum_size = Vector2(260, 36)
 	s.set_h_size_flags(Control.SIZE_EXPAND_FILL)
 	return s
 
@@ -174,28 +189,45 @@ func _make_slider(value: float) -> HSlider:
 func _make_pct_label(pct: int) -> Label:
 	var l := Label.new()
 	l.text = "%d%%" % pct
-	l.add_theme_font_size_override("font_size", 15)
+	l.add_theme_font_size_override("font_size", 22)
 	l.add_theme_color_override("font_color", Color(1, 1, 1, 0.8))
-	l.custom_minimum_size = Vector2(48, 0)
+	l.custom_minimum_size = Vector2(60, 0)
 	return l
 
 
 func _make_button(text: String, font: Font) -> Button:
 	var btn := Button.new()
 	btn.text = text
-	btn.add_theme_font_size_override("font_size", 20)
+	btn.add_theme_font_size_override("font_size", 28)
 	if font: btn.add_theme_font_override("font", font)
 	btn.add_theme_color_override("font_color", Color(1, 1, 1, 1))
 	btn.add_theme_color_override("font_outline_color", Color(0.04, 0.08, 0.18, 1))
-	btn.add_theme_constant_override("outline_size", 8)
+	btn.add_theme_constant_override("outline_size", 10)
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(1, 0.09, 0.27, 1)
+	normal.border_width_bottom = 8
+	normal.border_color = Color(0.69, 0.06, 0.18, 1)
+	for c in range(4): normal.set_corner_radius(c, 22)
+	normal.content_margin_top = 10
+	normal.content_margin_bottom = 18
+	btn.add_theme_stylebox_override("normal", normal)
+	var hover := StyleBoxFlat.new()
+	hover.bg_color = Color(1, 0.32, 0.32, 1)
+	hover.border_width_bottom = 10
+	hover.border_color = Color(0.84, 0.08, 0.23, 1)
+	for c in range(4): hover.set_corner_radius(c, 22)
+	hover.content_margin_top = 8
+	hover.content_margin_bottom = 18
+	btn.add_theme_stylebox_override("hover", hover)
+	btn.add_theme_stylebox_override("focus", hover)
 	return btn
 
 
 func _make_key_button(label: String, font: Font) -> Button:
 	var btn := Button.new()
 	btn.text = label
-	btn.custom_minimum_size = Vector2(120, 34)
-	btn.add_theme_font_size_override("font_size", 14)
+	btn.custom_minimum_size = Vector2(160, 48)
+	btn.add_theme_font_size_override("font_size", 20)
 	if font: btn.add_theme_font_override("font", font)
 	btn.add_theme_color_override("font_color", Color(1, 1, 0.8, 1))
 	btn.add_theme_color_override("font_outline_color", Color(0.04, 0.08, 0.18, 1))
@@ -206,9 +238,9 @@ func _make_key_button(label: String, font: Font) -> Button:
 func _add_label(parent: Control, text: String, font: Font) -> void:
 	var l := Label.new()
 	l.text = text
-	l.add_theme_font_size_override("font_size", 16)
+	l.add_theme_font_size_override("font_size", 22)
 	l.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9, 1))
-	l.custom_minimum_size = Vector2(140, 0)
+	l.custom_minimum_size = Vector2(160, 0)
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	parent.add_child(l)
 
@@ -217,7 +249,7 @@ func _add_section_label(parent: Control, text: String, font: Font) -> void:
 	var l := Label.new()
 	l.text = text
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.add_theme_font_size_override("font_size", 22)
+	l.add_theme_font_size_override("font_size", 32)
 	if font: l.add_theme_font_override("font", font)
 	l.add_theme_color_override("font_color", Color(0.4, 0.88, 1.0, 1))
 	l.add_theme_color_override("font_outline_color", Color(0.04, 0.08, 0.18, 1))
@@ -313,4 +345,4 @@ func _on_sfx_changed(value: float) -> void:
 
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
+	queue_free()
