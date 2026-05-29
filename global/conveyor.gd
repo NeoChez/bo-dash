@@ -10,6 +10,7 @@ var _despawn_x_limit: float = -80.0
 var _moves_positive_x: bool = false
 
 func _ready() -> void:
+	add_to_group("conveyor")
 	# Setup conveyor velocity untuk mendorong player
 	var push_velocity = conveyor_direction.normalized() * conveyor_speed
 	constant_linear_velocity = push_velocity
@@ -24,6 +25,9 @@ func _ready() -> void:
 	add_child(cleanup_timer)
 	
 # Fungsi ini akan dipanggil oleh Spawner untuk mendaftarkan obstacle baru
+func set_speed_multiplier(mult: float) -> void:
+	constant_linear_velocity = conveyor_direction.normalized() * conveyor_speed * mult
+
 func register_obstacle(obs: Node3D) -> void:
 	active_obstacles.append(obs)
 
