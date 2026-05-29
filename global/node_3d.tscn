@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" path="res://assets/modular_terrain.glb" id="13_terrain"]
 [ext_resource type="Script" path="res://global/terrain_color.gd" id="14_tcolor"]
 [ext_resource type="AudioStream" uid="uid://t0yk6bhtgebv" path="res://assets/audio/sfx/ropeTension.mp3" id="12_rigln"]
+[ext_resource type="FontFile" uid="uid://dvpungdk7wwy7" path="res://assets/fonts/Twemoji.Mozilla.ttf" id="20_emoji"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_left"]
 bg_color = Color(0, 0.45, 0.78, 0.92)
@@ -227,9 +228,9 @@ script = ExtResource("9_match")
 [node name="HUD" type="CanvasLayer" parent="." unique_id=1532306003]
 
 [node name="LeftPlayerLabel" type="Label" parent="HUD" unique_id=174468606]
-offset_left = 30.0
+offset_left = 20.0
 offset_top = 6.0
-offset_right = 330.0
+offset_right = 320.0
 offset_bottom = 40.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.4)
@@ -247,9 +248,9 @@ vertical_alignment = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -330.0
+offset_left = -320.0
 offset_top = 6.0
-offset_right = -30.0
+offset_right = -20.0
 offset_bottom = 40.0
 grow_horizontal = 0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -265,20 +266,20 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="LeftCard" type="Panel" parent="HUD" unique_id=1748367201]
-offset_left = 30.0
+offset_left = 20.0
 offset_top = 42.0
-offset_right = 330.0
-offset_bottom = 172.0
+offset_right = 320.0
+offset_bottom = 158.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_hud_left")
 
 [node name="RightCard" type="Panel" parent="HUD" unique_id=1427883846]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -330.0
+offset_left = -320.0
 offset_top = 42.0
-offset_right = -30.0
-offset_bottom = 172.0
+offset_right = -20.0
+offset_bottom = 158.0
 grow_horizontal = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_hud_right")
 
@@ -313,77 +314,77 @@ text = "Time 03:00"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="StarEmojiLeft" type="Label" parent="HUD" unique_id=1781940749]
+offset_left = 20.0
+offset_top = 46.0
+offset_right = 320.0
+offset_bottom = 108.0
+theme_override_fonts/font = ExtResource("20_emoji")
+theme_override_font_sizes/font_size = 44
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "⭐"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="ScoreLeftLabel" type="Label" parent="HUD" unique_id=1781940748]
-offset_left = 38.0
-offset_top = 50.0
-offset_right = 322.0
-offset_bottom = 84.0
+offset_left = 20.0
+offset_top = 104.0
+offset_right = 320.0
+offset_bottom = 128.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
 theme_override_constants/outline_size = 5
-theme_override_font_sizes/font_size = 22
-text = "Star: 0"
+theme_override_font_sizes/font_size = 30
 horizontal_alignment = 1
+vertical_alignment = 1
+text = "0"
+vertical_alignment = 1
+
+[node name="StarEmojiRight" type="Label" parent="HUD" unique_id=785866368]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -320.0
+offset_top = 46.0
+offset_right = -20.0
+offset_bottom = 108.0
+grow_horizontal = 0
+theme_override_fonts/font = ExtResource("20_emoji")
+theme_override_font_sizes/font_size = 44
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "⭐"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="ScoreRightLabel" type="Label" parent="HUD" unique_id=785866367]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -322.0
-offset_top = 50.0
-offset_right = -38.0
-offset_bottom = 84.0
+offset_left = -320.0
+offset_top = 104.0
+offset_right = -20.0
+offset_bottom = 128.0
 grow_horizontal = 0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
 theme_override_constants/outline_size = 5
-theme_override_font_sizes/font_size = 22
-text = "Star: 0"
+theme_override_font_sizes/font_size = 30
+text = "0"
 horizontal_alignment = 1
-
-[node name="SpeedLeftLabel" type="Label" parent="HUD" unique_id=1831812731]
-offset_left = 38.0
-offset_top = 86.0
-offset_right = 322.0
-offset_bottom = 110.0
-theme_override_colors/font_color = Color(0.85, 0.95, 1, 0.85)
-theme_override_font_sizes/font_size = 16
-text = "Speed: 0.00"
-horizontal_alignment = 1
-
-[node name="SpeedRightLabel" type="Label" parent="HUD" unique_id=1558480309]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -322.0
-offset_top = 86.0
-offset_right = -38.0
-offset_bottom = 110.0
-grow_horizontal = 0
-theme_override_colors/font_color = Color(1, 0.92, 0.78, 0.85)
-theme_override_font_sizes/font_size = 16
-text = "Speed: 0.00"
-horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="LeftSkillSlotA" type="Panel" parent="HUD" unique_id=1892452287]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 35.0
-offset_top = -145.0
-offset_right = 113.0
-offset_bottom = -72.0
+offset_left = 20.0
+offset_top = -110.0
+offset_right = 100.0
+offset_bottom = -30.0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_skill_slot_left")
-
-[node name="SkillColor" type="ColorRect" parent="HUD/LeftSkillSlotA" unique_id=1233564587]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0, 0, 0, 0)
 
 [node name="SkillLabel" type="Label" parent="HUD/LeftSkillSlotA" unique_id=646315682]
 layout_mode = 0
@@ -397,8 +398,8 @@ theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
 theme_override_constants/shadow_offset_x = 0
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 6
-theme_override_fonts/font = ExtResource("11_font")
-theme_override_font_sizes/font_size = 13
+theme_override_fonts/font = ExtResource("20_emoji")
+theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -408,22 +409,13 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -114.0
-offset_top = -165.0
-offset_right = -36.0
-offset_bottom = -92.0
+offset_left = -100.0
+offset_top = -110.0
+offset_right = -20.0
+offset_bottom = -30.0
 grow_horizontal = 0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_skill_slot_left")
-
-[node name="SkillColor" type="ColorRect" parent="HUD/RightSkillSlotA" unique_id=771545867]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0, 0, 0, 0)
 
 [node name="SkillLabel" type="Label" parent="HUD/RightSkillSlotA" unique_id=1285411439]
 layout_mode = 0
@@ -437,8 +429,8 @@ theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
 theme_override_constants/shadow_offset_x = 0
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 6
-theme_override_fonts/font = ExtResource("11_font")
-theme_override_font_sizes/font_size = 13
+theme_override_fonts/font = ExtResource("20_emoji")
+theme_override_font_sizes/font_size = 40
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -604,6 +596,7 @@ offset_obstacle3 = Vector3(0, 0, -1)
 offset_obstacle5 = Vector3(0, 2, -2.5)
 offset_obstacle6 = Vector3(0, 2, 2.5)
 move_speed = 10.0
+obstacles_enabled = false
 
 [node name="Lane" type="Marker3D" parent="Spawner_Ground1" unique_id=1547013836]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15951538, 0.03716135, 0)
@@ -622,6 +615,7 @@ offset_obstacle5 = Vector3(0, 2, -2.5)
 offset_obstacle6 = Vector3(0, 2, 2.5)
 move_speed = 10.0
 spawn_interval = 6.0
+obstacles_enabled = false
 arah_x = 1
 
 [node name="Lane" type="Marker3D" parent="Spawner_Ground2" unique_id=1031364845]
@@ -671,7 +665,6 @@ rope_radius = 0.1
 [node name="RopeTensionSFX" type="AudioStreamPlayer" parent="PlayerRope" unique_id=1319112448]
 stream = ExtResource("12_rigln")
 volume_db = -10.0
-
 
 [node name="ConveyorDivider" type="Area3D" parent="." unique_id=1205435418]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)

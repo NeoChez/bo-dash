@@ -157,7 +157,8 @@ func save_settings() -> void:
 			continue
 		for ev in InputMap.action_get_events(action):
 			if ev is InputEventKey:
-				cfg.set_value("keybindings", action, ev.physical_keycode if ev.physical_keycode != 0 else ev.keycode)
+				var kc: int = ev.physical_keycode if ev.physical_keycode != 0 else ev.keycode
+				cfg.set_value("keybindings", action, [kc, ev.location])
 				break
 	cfg.save(CONFIG_PATH)
 
@@ -171,7 +172,16 @@ func load_settings() -> void:
 	for action in InputMap.get_actions():
 		if not (action.begins_with("p1_") or action.begins_with("p2_")):
 			continue
-		var keycode: int = cfg.get_value("keybindings", action, 0)
+		var stored = cfg.get_value("keybindings", action, null)
+		if stored == null:
+			continue
+		var keycode: int = 0
+		var location: int = 0
+		if stored is Array and stored.size() >= 2:
+			keycode = stored[0]
+			location = stored[1]
+		elif stored is int:
+			keycode = stored  # format lama, location tidak diketahui
 		if keycode == 0:
 			continue
 		for ev in InputMap.action_get_events(action).duplicate():
@@ -179,6 +189,7 @@ func load_settings() -> void:
 				InputMap.action_erase_event(action, ev)
 		var new_ev := InputEventKey.new()
 		new_ev.physical_keycode = keycode
+		new_ev.location = location
 		InputMap.action_add_event(action, new_ev)
 
 

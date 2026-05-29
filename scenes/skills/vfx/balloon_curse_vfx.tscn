@@ -1,0 +1,66 @@
+[gd_scene load_steps=5 format=3]
+
+[sub_resource type="SphereMesh" id="mesh_balloon"]
+radius = 1.0
+height = 1.6
+radial_segments = 16
+rings = 8
+
+[sub_resource type="StandardMaterial3D" id="mat_balloon"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1.0, 0.5, 0.82, 0.55)
+emission_enabled = true
+emission = Color(1.0, 0.4, 0.8, 1)
+emission_energy_multiplier = 1.4
+
+[sub_resource type="SphereMesh" id="mesh_bubble"]
+radius = 0.12
+height = 0.24
+radial_segments = 6
+rings = 3
+
+[sub_resource type="StandardMaterial3D" id="mat_bubble"]
+shading_mode = 0
+albedo_color = Color(1.0, 0.55, 0.85, 1)
+emission_enabled = true
+emission = Color(1.0, 0.4, 0.8, 1)
+emission_energy_multiplier = 1.5
+
+[node name="BalloonCurseVFX" type="Node3D"]
+
+[node name="Balloon" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0)
+material_override = SubResource("mat_balloon")
+mesh = SubResource("mesh_balloon")
+
+[node name="Bubbles" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+material_override = SubResource("mat_bubble")
+emitting = true
+amount = 20
+lifetime = 1.0
+randomness = 0.5
+mesh = SubResource("mesh_bubble")
+emission_shape = 1
+emission_sphere_radius = 0.8
+direction = Vector3(0, 1, 0)
+spread = 30.0
+gravity = Vector3(0, 2.0, 0)
+initial_velocity_min = 1.0
+initial_velocity_max = 2.5
+scale_amount_min = 0.8
+scale_amount_max = 2.0
+
+[node name="Glow" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+light_color = Color(1.0, 0.5, 0.9, 1)
+light_energy = 1.2
+omni_range = 4.5
+
+[node name="Life" type="Timer" parent="."]
+wait_time = 3.0
+one_shot = true
+autostart = true
+
+[connection signal="timeout" from="Life" to="." method="queue_free"]

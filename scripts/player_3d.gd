@@ -2,6 +2,12 @@ extends CharacterBody3D
 
 const _SHIELD_SCENE := preload("res://scenes/skills/bubble_shield.tscn")
 const _METEOR_SCENE := preload("res://scenes/skills/meteor.tscn")
+const _SPEED_BOOST_VFX := preload("res://scenes/skills/vfx/speed_boost_vfx.tscn")
+const _DASH_RECHARGE_VFX := preload("res://scenes/skills/vfx/dash_recharge_vfx.tscn")
+const _IRON_ANCHOR_VFX := preload("res://scenes/skills/vfx/iron_anchor_vfx.tscn")
+const _BALLOON_CURSE_VFX := preload("res://scenes/skills/vfx/balloon_curse_vfx.tscn")
+const _SLINGSHOT_VFX := preload("res://scenes/skills/vfx/slingshot_vfx.tscn")
+const _METEOR_CAST_VFX := preload("res://scenes/skills/vfx/meteor_cast_vfx.tscn")
 
 @export_category("Player Controls")
 @export var action_left: String = "ui_left"
@@ -129,7 +135,7 @@ func _physics_process(delta: float) -> void:
 	if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP:
 		if yank_source != null:
 			change_state(PlayerState.FLOATING)
-		elif is_on_floor() or _floor_grace_timer > 0.0:
+		elif is_on_floor() or (_floor_grace_timer > 0.0 and current_state != PlayerState.JUMPING):
 			change_state(PlayerState.RUNNING)
 		elif current_state != PlayerState.JUMPING:
 			change_state(PlayerState.FLOATING)
@@ -421,6 +427,15 @@ func _apply_speed_boost(multiplier: float, duration: float) -> void:
 	var now = Time.get_ticks_msec() / 1000.0
 	boost_multiplier = max(boost_multiplier, multiplier)
 	boost_end_time = max(boost_end_time, now + duration)
+	_spawn_skill_vfx(_SPEED_BOOST_VFX)
+
+
+# Instansiasi scene VFX sebagai child player agar mengikuti pergerakan.
+# Tiap scene VFX mengatur masa hidupnya sendiri (Timer -> queue_free).
+func _spawn_skill_vfx(scene: PackedScene) -> void:
+	if scene == null:
+		return
+	add_child(scene.instantiate())
 
 func _apply_slow(multiplier: float, duration: float) -> void:
 	if _check_and_consume_shield():
@@ -587,12 +602,14 @@ func _apply_bubble_shield() -> void:
 
 func _apply_dash_recharge() -> void:
 	_dash_timer = 0.0
+	_spawn_skill_vfx(_DASH_RECHARGE_VFX)
 
 
 func _apply_iron_anchor(resist: float, duration: float) -> void:
 	var now := Time.get_ticks_msec() / 1000.0
 	anchor_resist = max(anchor_resist, resist)
 	anchor_end_time = max(anchor_end_time, now + duration)
+	_spawn_skill_vfx(_IRON_ANCHOR_VFX)
 
 
 func _apply_balloon_curse(bonus: float, duration: float) -> void:
@@ -601,6 +618,7 @@ func _apply_balloon_curse(bonus: float, duration: float) -> void:
 	var now := Time.get_ticks_msec() / 1000.0
 	balloon_curse_bonus = max(balloon_curse_bonus, bonus)
 	balloon_curse_end_time = max(balloon_curse_end_time, now + duration)
+	_spawn_skill_vfx(_BALLOON_CURSE_VFX)
 
 
 func _apply_balloon_curse_opponent(bonus: float, duration: float) -> void:
@@ -610,6 +628,7 @@ func _apply_balloon_curse_opponent(bonus: float, duration: float) -> void:
 
 
 func _apply_slingshot_rocket(strength: float, duration: float) -> void:
+	_spawn_skill_vfx(_SLINGSHOT_VFX)
 	var horiz_vel := Vector3(velocity.x, 0.0, velocity.z)
 	if horiz_vel.length() > 0.5:
 		slingshot_dir = horiz_vel.normalized()
@@ -647,6 +666,7 @@ func _apply_meteor_from(impact_center: Vector3, strength: float) -> void:
 
 
 func _apply_meteor_strike(strength: float) -> void:
+	_spawn_skill_vfx(_METEOR_CAST_VFX)
 	var other := _get_other_player()
 	if other == null:
 		return
