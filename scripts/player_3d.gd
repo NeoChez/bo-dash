@@ -9,6 +9,8 @@ const _BALLOON_CURSE_VFX := preload("res://scenes/skills/vfx/balloon_curse_vfx.t
 const _SLINGSHOT_VFX := preload("res://scenes/skills/vfx/slingshot_vfx.tscn")
 const _METEOR_CAST_VFX := preload("res://scenes/skills/vfx/meteor_cast_vfx.tscn")
 const _SKILL_SFX := preload("res://assets/audio/sfx/skill.mp3")
+const _ROCKET_SFX := preload("res://assets/audio/sfx/rocket.mp3")
+const _METEOR_FALL_SFX := preload("res://assets/audio/sfx/meteorFall.mp3")
 
 @export_category("Player Controls")
 @export var action_left: String = "ui_left"
@@ -78,6 +80,8 @@ var _state_timer: float = 0.0
 @onready var visuals = $Visuals
 @onready var jump_sfx = $JumpSFX
 @onready var dash_sfx = $DashSFX
+@onready var meteor_fall_sfx = $MeteorFallSFX
+@onready var rocket_sfx = $RocketSFX
 
 # 3D Visuals & Procedural Animations
 @export_group("3D Visuals & Animation")
@@ -646,6 +650,7 @@ func _apply_balloon_curse_opponent(bonus: float, duration: float) -> void:
 
 func _apply_slingshot_rocket(strength: float, duration: float) -> void:
 	_spawn_skill_vfx(_SLINGSHOT_VFX)
+	rocket_sfx.play()
 	var horiz_vel := Vector3(velocity.x, 0.0, velocity.z)
 	if horiz_vel.length() > 0.5:
 		slingshot_dir = horiz_vel.normalized()
@@ -684,6 +689,7 @@ func _apply_meteor_from(impact_center: Vector3, strength: float) -> void:
 
 func _apply_meteor_strike(strength: float) -> void:
 	_spawn_skill_vfx(_METEOR_CAST_VFX)
+	meteor_fall_sfx.play()
 	var other := _get_other_player()
 	if other == null:
 		return

@@ -8,6 +8,8 @@
 [ext_resource type="PackedScene" uid="uid://dggg4ombyv4f5" path="res://assets/player/kingdom_hearts_iii_-_rex.glb" id="6_rex"]
 [ext_resource type="AudioStream" uid="uid://cwhi8brmw41v5" path="res://assets/audio/sfx/jump.mp3" id="7_0owmy"]
 [ext_resource type="AudioStream" uid="uid://dq0hd2rklpo7c" path="res://assets/audio/sfx/dash.mp3" id="8_qek5x"]
+[ext_resource type="AudioStream" uid="uid://bfseuxrcgoc86" path="res://assets/audio/sfx/meteorFall.mp3" id="9_h17s1"]
+[ext_resource type="AudioStream" uid="uid://dc7emtg4vd171" path="res://assets/audio/sfx/rocket.mp3" id="10_rocket"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_kwvpd"]
 atlas = ExtResource("2_v2miy")
@@ -115,3 +117,11 @@ volume_db = -15.0
 [node name="DashSFX" type="AudioStreamPlayer" parent="." unique_id=113148632]
 stream = ExtResource("8_qek5x")
 volume_db = -10.0
+
+[node name="MeteorFallSFX" type="AudioStreamPlayer" parent="." unique_id=1991557927]
+stream = ExtResource("9_h17s1")
+volume_db = -5.0
+
+[node name="RocketSFX" type="AudioStreamPlayer" parent="." unique_id=1630847717]
+stream = ExtResource("10_rocket")
+volume_db = -5.0
