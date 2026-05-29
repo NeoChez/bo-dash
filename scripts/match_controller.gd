@@ -298,21 +298,21 @@ func _setup_dash_bars() -> void:
 	var font = load("res://assets/fonts/Wonder_Boys.ttf")
 
 	var bg_left := StyleBoxFlat.new()
-	bg_left.bg_color = Color(0.0, 0.25, 0.5, 0.9)
-	for c in range(4): bg_left.set_corner_radius(c, 8)
+	bg_left.bg_color = Color(0.0, 0.22, 0.45, 0.92)
+	for c in range(4): bg_left.set_corner_radius(c, 14)
 
 	var bg_right := StyleBoxFlat.new()
-	bg_right.bg_color = Color(0.48, 0.2, 0.0, 0.9)
-	for c in range(4): bg_right.set_corner_radius(c, 8)
+	bg_right.bg_color = Color(0.45, 0.18, 0.0, 0.92)
+	for c in range(4): bg_right.set_corner_radius(c, 14)
 
 	_dash_bar_left = _make_dash_bar(
 		hud, false,
-		30.0, 126.0, 308.0, 154.0,
+		20.0, 108.0, 320.0, 142.0,
 		Color(0.25, 0.95, 0.78, 1.0), bg_left, font
 	)
 	_dash_bar_right = _make_dash_bar(
 		hud, true,
-		-308.0, 126.0, -30.0, 154.0,
+		-320.0, 108.0, -20.0, 142.0,
 		Color(1.0, 0.72, 0.15, 1.0), bg_right, font
 	)
 
@@ -336,7 +336,7 @@ func _make_dash_bar(hud: CanvasLayer, anchor_to_right: bool,
 	var fill := StyleBoxFlat.new()
 	fill.bg_color = color
 	for c in range(4):
-		fill.set_corner_radius(c, 5)
+		fill.set_corner_radius(c, 11)
 	bar.add_theme_stylebox_override("fill", fill)
 	bar.add_theme_stylebox_override("background", bg.duplicate())
 
@@ -345,7 +345,7 @@ func _make_dash_bar(hud: CanvasLayer, anchor_to_right: bool,
 	lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	lbl.add_theme_font_size_override("font_size", 14)
+	lbl.add_theme_font_size_override("font_size", 16)
 	lbl.add_theme_color_override("font_color", Color(1, 1, 1, 1.0))
 	lbl.add_theme_color_override("font_outline_color", Color(0.04, 0.08, 0.18, 1))
 	lbl.add_theme_constant_override("outline_size", 5)
