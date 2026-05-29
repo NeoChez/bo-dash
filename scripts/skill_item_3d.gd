@@ -1,5 +1,7 @@
 extends Area3D
 
+const _PICKUP_SFX := preload("res://assets/audio/sfx/power.mp3")
+
 @export_enum("Speed Boost:0", "Slow Opponent:1", "Yank Opponent:2") var skill_type: int = -1
 @export var danger_zone_threshold: float = 35.0
 @export var danger_boost_weight: float = 0.75
@@ -99,6 +101,14 @@ func _apply_visual() -> void:
 
 func _pickup() -> void:
 	set_deferred("monitoring", false)
+	# Putar SFX pickup secara dinamis agar tetap hidup saat node ini dihapus
+	var sfx := AudioStreamPlayer.new()
+	sfx.stream = _PICKUP_SFX
+	sfx.volume_db = -5.0
+	sfx.bus = "Master"
+	get_tree().current_scene.add_child(sfx)
+	sfx.play()
+	sfx.finished.connect(sfx.queue_free)
 	var tween := create_tween()
 	tween.tween_property(self, "scale", Vector3.ZERO, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	tween.tween_callback(queue_free)

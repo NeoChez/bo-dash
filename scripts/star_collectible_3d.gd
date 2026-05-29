@@ -1,5 +1,7 @@
 extends Area3D
 
+const _PICKUP_SFX := preload("res://assets/audio/sfx/star.mp3")
+
 @export var score_value: int = 1
 @export var move_speed: float = 7.5
 @export var move_direction: Vector3 = Vector3(-1, 0, 0)
@@ -66,6 +68,14 @@ func _apply_visual() -> void:
 
 func _pickup() -> void:
 	set_deferred("monitoring", false)
+	# Putar SFX pickup secara dinamis agar tetap hidup saat node ini dihapus
+	var sfx := AudioStreamPlayer.new()
+	sfx.stream = _PICKUP_SFX
+	sfx.volume_db = -5.0
+	sfx.bus = "Master"
+	get_tree().current_scene.add_child(sfx)
+	sfx.play()
+	sfx.finished.connect(sfx.queue_free)
 	var tween := create_tween()
 	tween.tween_property(self, "scale", Vector3.ZERO, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	tween.tween_callback(queue_free)
