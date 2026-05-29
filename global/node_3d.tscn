@@ -270,7 +270,7 @@ vertical_alignment = 1
 offset_left = 20.0
 offset_top = 42.0
 offset_right = 320.0
-offset_bottom = 158.0
+offset_bottom = 104.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_hud_left")
 
 [node name="RightCard" type="Panel" parent="HUD" unique_id=1427883846]
@@ -280,7 +280,7 @@ anchor_right = 1.0
 offset_left = -320.0
 offset_top = 42.0
 offset_right = -20.0
-offset_bottom = 158.0
+offset_bottom = 104.0
 grow_horizontal = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_hud_right")
 
@@ -316,40 +316,39 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StarEmojiLeft" type="Label" parent="HUD" unique_id=1781940749]
-offset_left = 20.0
-offset_top = 46.0
-offset_right = 320.0
-offset_bottom = 108.0
+offset_left = 124.0
+offset_top = 47.0
+offset_right = 182.0
+offset_bottom = 101.0
 theme_override_fonts/font = ExtResource("20_emoji")
-theme_override_font_sizes/font_size = 44
+theme_override_font_sizes/font_size = 36
 text = "⭐"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ScoreLeftLabel" type="Label" parent="HUD" unique_id=1781940748]
-offset_left = 20.0
-offset_top = 104.0
-offset_right = 320.0
-offset_bottom = 128.0
+offset_left = 182.0
+offset_top = 47.0
+offset_right = 314.0
+offset_bottom = 101.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
 theme_override_constants/outline_size = 5
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 36
 text = "0"
-horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StarEmojiRight" type="Label" parent="HUD" unique_id=785866368]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -320.0
-offset_top = 46.0
-offset_right = -20.0
-offset_bottom = 108.0
+offset_left = -182.0
+offset_top = 47.0
+offset_right = -124.0
+offset_bottom = 101.0
 grow_horizontal = 0
 theme_override_fonts/font = ExtResource("20_emoji")
-theme_override_font_sizes/font_size = 44
+theme_override_font_sizes/font_size = 36
 text = "⭐"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -358,17 +357,17 @@ vertical_alignment = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -320.0
-offset_top = 104.0
-offset_right = -20.0
-offset_bottom = 128.0
+offset_left = -314.0
+offset_top = 47.0
+offset_right = -182.0
+offset_bottom = 101.0
 grow_horizontal = 0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
 theme_override_constants/outline_size = 5
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 36
 text = "0"
-horizontal_alignment = 1
+horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="LeftSkillSlotA" type="Panel" parent="HUD" unique_id=1892452287]
@@ -576,11 +575,11 @@ shadow_bias = 0.05
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1706876778]
 environment = SubResource("Environment_world")
 
-[node name="Terrain" parent="." unique_id=2043844773 instance=ExtResource("13_terrain")]
+[node name="Terrain" parent="." unique_id=1050635094 instance=ExtResource("13_terrain")]
 transform = Transform3D(6, 0, 0, 0, 6, 0, 0, 0, 6, 0, -38, -55)
 script = ExtResource("14_tcolor")
 
-[node name="AuroraBackdrop" type="MeshInstance3D" parent="." unique_id=1023269716]
+[node name="AuroraBackdrop" type="MeshInstance3D" parent="." unique_id=1475785584]
 transform = Transform3D(1, 0, 0, 0, 0.7814, 0.6241, 0, -0.6241, 0.7814, 0, 65, -80)
 cast_shadow = 0
 mesh = SubResource("QuadMesh_aurora")
@@ -723,7 +722,7 @@ collision_mask = 0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.573593, -0.17434692)
 shape = SubResource("BoxShape3D_rgk4m")
 
-[node name="Aurora" type="MeshInstance3D" parent="." unique_id=2103239592]
+[node name="Aurora" type="MeshInstance3D" parent="." unique_id=469904059]
 transform = Transform3D(1, 0, 0, 0, 0.95, -0.31, 0, 0.31, 0.95, 0, 58, -38)
 cast_shadow = 0
 mesh = SubResource("QuadMesh_aurora")
