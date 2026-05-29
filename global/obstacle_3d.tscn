@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://bex34eq434opt"]
+[gd_scene format=3 uid="uid://bex34eq434opt"]
 
 [ext_resource type="Script" uid="uid://dqwn6o10oj21w" path="res://global/obstacle_3d.gd" id="1_obstacle"]
 

@@ -651,9 +651,6 @@ rope_radius = 0.1
 stream = ExtResource("12_rigln")
 volume_db = -10.0
 
-[node name="RopeTensionSFX" type="AudioStreamPlayer" parent="PlayerRope" unique_id=1319112448]
-stream = ExtResource("12_rigln")
-volume_db = -10.0
 
 [node name="ConveyorDivider" type="Area3D" parent="." unique_id=1205435418]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
