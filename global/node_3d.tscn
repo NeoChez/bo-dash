@@ -11,8 +11,8 @@
 [ext_resource type="Script" uid="uid://ctko058g4f6r0" path="res://scripts/pause_menu.gd" id="10_pause"]
 [ext_resource type="AudioStream" uid="uid://cbnd1xeye8ks6" path="res://assets/audio/soundtrack/MainSounds.mp3" id="10_s8d85"]
 [ext_resource type="FontFile" uid="uid://e3l61vub5yqc" path="res://assets/fonts/Wonder_Boys.ttf" id="11_font"]
-[ext_resource type="FontFile" uid="uid://dvpungdk7wwy7" path="res://assets/fonts/Twemoji.Mozilla.ttf" id="20_emoji"]
 [ext_resource type="AudioStream" uid="uid://t0yk6bhtgebv" path="res://assets/audio/sfx/ropeTension.mp3" id="12_rigln"]
+[ext_resource type="FontFile" uid="uid://dvpungdk7wwy7" path="res://assets/fonts/Twemoji.Mozilla.ttf" id="20_emoji"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_left"]
 bg_color = Color(0, 0.45, 0.78, 0.92)
@@ -257,7 +257,7 @@ vertical_alignment = 1
 offset_left = 20.0
 offset_top = 42.0
 offset_right = 320.0
-offset_bottom = 100.0
+offset_bottom = 158.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_hud_left")
 
 [node name="RightCard" type="Panel" parent="HUD" unique_id=1427883846]
@@ -267,7 +267,7 @@ anchor_right = 1.0
 offset_left = -320.0
 offset_top = 42.0
 offset_right = -20.0
-offset_bottom = 100.0
+offset_bottom = 158.0
 grow_horizontal = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_hud_right")
 
@@ -303,25 +303,29 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StarEmojiLeft" type="Label" parent="HUD" unique_id=1781940749]
-offset_left = 26.0
-offset_top = 44.0
-offset_right = 76.0
-offset_bottom = 98.0
+offset_left = 20.0
+offset_top = 46.0
+offset_right = 320.0
+offset_bottom = 108.0
 theme_override_fonts/font = ExtResource("20_emoji")
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 44
+horizontal_alignment = 1
+vertical_alignment = 1
 text = "⭐"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ScoreLeftLabel" type="Label" parent="HUD" unique_id=1781940748]
-offset_left = 76.0
-offset_top = 46.0
-offset_right = 318.0
-offset_bottom = 96.0
+offset_left = 20.0
+offset_top = 104.0
+offset_right = 320.0
+offset_bottom = 128.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 30
+horizontal_alignment = 1
+vertical_alignment = 1
 text = "0"
 vertical_alignment = 1
 
@@ -329,13 +333,15 @@ vertical_alignment = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -76.0
-offset_top = 44.0
-offset_right = -26.0
-offset_bottom = 98.0
+offset_left = -320.0
+offset_top = 46.0
+offset_right = -20.0
+offset_bottom = 108.0
 grow_horizontal = 0
 theme_override_fonts/font = ExtResource("20_emoji")
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 44
+horizontal_alignment = 1
+vertical_alignment = 1
 text = "⭐"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -344,17 +350,17 @@ vertical_alignment = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -318.0
-offset_top = 46.0
-offset_right = -76.0
-offset_bottom = 96.0
+offset_left = -320.0
+offset_top = 104.0
+offset_right = -20.0
+offset_bottom = 128.0
 grow_horizontal = 0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.04, 0.08, 0.18, 1)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 30
 text = "0"
-horizontal_alignment = 2
+horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="LeftSkillSlotA" type="Panel" parent="HUD" unique_id=1892452287]
@@ -569,6 +575,7 @@ offset_obstacle3 = Vector3(0, 0, -1)
 offset_obstacle5 = Vector3(0, 2, -2.5)
 offset_obstacle6 = Vector3(0, 2, 2.5)
 move_speed = 10.0
+obstacles_enabled = false
 
 [node name="Lane" type="Marker3D" parent="Spawner_Ground1" unique_id=1547013836]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15951538, 0.03716135, 0)
@@ -587,6 +594,7 @@ offset_obstacle5 = Vector3(0, 2, -2.5)
 offset_obstacle6 = Vector3(0, 2, 2.5)
 move_speed = 10.0
 spawn_interval = 6.0
+obstacles_enabled = false
 arah_x = 1
 
 [node name="Lane" type="Marker3D" parent="Spawner_Ground2" unique_id=1031364845]
@@ -636,7 +644,6 @@ rope_radius = 0.1
 [node name="RopeTensionSFX" type="AudioStreamPlayer" parent="PlayerRope" unique_id=1319112448]
 stream = ExtResource("12_rigln")
 volume_db = -10.0
-
 
 [node name="ConveyorDivider" type="Area3D" parent="." unique_id=1205435418]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)

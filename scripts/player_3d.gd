@@ -135,7 +135,7 @@ func _physics_process(delta: float) -> void:
 	if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP:
 		if yank_source != null:
 			change_state(PlayerState.FLOATING)
-		elif is_on_floor() or _floor_grace_timer > 0.0:
+		elif is_on_floor() or (_floor_grace_timer > 0.0 and current_state != PlayerState.JUMPING):
 			change_state(PlayerState.RUNNING)
 		elif current_state != PlayerState.JUMPING:
 			change_state(PlayerState.FLOATING)

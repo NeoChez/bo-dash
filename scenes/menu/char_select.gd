@@ -132,17 +132,54 @@ const SHOWCASE_SPIN_SPEED: float = 50.0  # derajat per detik
 
 func _ready() -> void:
 	countdown_lbl.visible = false
-	
-	# Set up pivots and automatic center tracking on resizing
+
 	for card in [p2_card, p1_card]:
 		card.pivot_offset = card.size / 2.0
 		card.resized.connect(func(): card.pivot_offset = card.size / 2.0)
-		
+
 	_update_p2_ui()
 	_update_p1_ui()
 	_build_swatch_rows(p2_vbox, 2)
 	_build_swatch_rows(p1_vbox, 1)
 	_setup_external_labels()
+	_add_back_button()
+
+
+func _add_back_button() -> void:
+	var font: Font = load("res://assets/fonts/Wonder_Boys.ttf")
+	var btn := Button.new()
+	btn.text = "← BACK"
+	btn.offset_left = 20.0
+	btn.offset_top = 18.0
+	btn.offset_right = 180.0
+	btn.offset_bottom = 64.0
+	btn.add_theme_font_size_override("font_size", 22)
+	if font:
+		btn.add_theme_font_override("font", font)
+	btn.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	btn.add_theme_color_override("font_outline_color", Color(0.04, 0.08, 0.18, 1))
+	btn.add_theme_constant_override("outline_size", 8)
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.95, 0.56, 0.1)
+	normal.border_color = Color(0.72, 0.36, 0.02)
+	for s in [0, 1, 2, 3]: normal.set_border_width(s, 2)
+	normal.border_width_bottom = 6
+	for c in range(4): normal.set_corner_radius(c, 20)
+	normal.content_margin_top = 8.0
+	normal.content_margin_bottom = 14.0
+	btn.add_theme_stylebox_override("normal", normal)
+	var hover := StyleBoxFlat.new()
+	hover.bg_color = Color(1.0, 0.68, 0.18)
+	hover.border_color = Color(0.72, 0.36, 0.02)
+	for s in [0, 1, 2, 3]: hover.set_border_width(s, 2)
+	hover.border_width_bottom = 6
+	for c in range(4): hover.set_corner_radius(c, 20)
+	hover.content_margin_top = 8.0
+	hover.content_margin_bottom = 14.0
+	btn.add_theme_stylebox_override("hover", hover)
+	btn.add_theme_stylebox_override("focus", hover)
+	btn.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn"))
+	add_child(btn)
 
 func _input(event: InputEvent) -> void:
 	if countdown_active:

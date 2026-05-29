@@ -2,6 +2,7 @@ extends Node3D
 
 const FALL_DELAY: float = 0.6
 const AOE_RADIUS: float = 7.0
+const _IMPACT_VFX := preload("res://scenes/skills/vfx/meteor_impact_vfx.tscn")
 
 @onready var _aoe: Node3D = $AOE
 
@@ -53,6 +54,9 @@ func _on_impact() -> void:
 	set_process(false)
 	if _aoe:
 		_aoe.visible = false
+	var vfx := _IMPACT_VFX.instantiate()
+	vfx.position = _target_pos
+	get_tree().current_scene.add_child(vfx)
 	for player in get_tree().get_nodes_in_group("player"):
 		var dist := Vector2(
 			player.global_position.x - _target_pos.x,

@@ -307,12 +307,12 @@ func _setup_dash_bars() -> void:
 
 	_dash_bar_left = _make_dash_bar(
 		hud, false,
-		20.0, 108.0, 320.0, 144.0,
+		30.0, 126.0, 308.0, 154.0,
 		Color(0.25, 0.95, 0.78, 1.0), bg_left, font
 	)
 	_dash_bar_right = _make_dash_bar(
 		hud, true,
-		-320.0, 108.0, -20.0, 144.0,
+		-308.0, 126.0, -30.0, 154.0,
 		Color(1.0, 0.72, 0.15, 1.0), bg_right, font
 	)
 
