@@ -5,10 +5,13 @@ extends Control
 @onready var select_btn: Button = $CenterContainer/VBoxContainer/SelectButton
 @onready var exit_btn: Button = $CenterContainer/VBoxContainer/ExitButton
 @onready var enemy_viewport: SubViewport = $EnemyViewport/SubViewport
+@onready var button_container: CenterContainer = $CenterContainer
 
 var _enemy_model: Node3D = null
 
 func _ready() -> void:
+	if not MenuMusic.playing:
+		MenuMusic.play()
 	_setup_winner_display()
 	_setup_buttons()
 	_animate_title()
@@ -18,11 +21,10 @@ func _setup_winner_display() -> void:
 
 	if winner_id == 0:
 		title_label.text = "DRAW!"
-		title_label.add_theme_color_override("font_color", Color(1, 0.92, 0.05, 1))
+		button_container.offset_top = 50.0
+		button_container.offset_bottom = 320.0
 	else:
 		title_label.text = "PLAYER %d WIN!" % winner_id
-		var color := Color(0.25, 0.95, 0.78, 1) if winner_id == 1 else Color(1, 0.6, 0.1, 1)
-		title_label.add_theme_color_override("font_color", color)
 
 	if winner_id > 0:
 		_load_enemy_model(winner_id)
@@ -139,6 +141,7 @@ func _play_press_anim(btn: Button, callback: Callable) -> void:
 
 func _on_restart() -> void:
 	_play_press_anim(restart_btn, func():
+		MenuMusic.stop()
 		get_tree().change_scene_to_file("res://global/node_3d.tscn")
 	)
 
