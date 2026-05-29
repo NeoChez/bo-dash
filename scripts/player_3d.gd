@@ -88,6 +88,8 @@ var _is_recoil_active: bool = false
 const ANIM_FALL_STANDUP_SPEED: float = 3.0
 const FALL_IMMUNITY_DURATION: float = 0.4
 var _fall_immunity_timer: float = 0.0
+const FLOOR_GRACE_TIME: float = 0.12
+var _floor_grace_timer: float = 0.0
 
 func _ready():
 	spawn_position = global_position
@@ -114,9 +116,14 @@ func _physics_process(delta: float) -> void:
 	_fall_immunity_timer = maxf(_fall_immunity_timer - delta, 0.0)
 	rope_grace_timer = maxf(rope_grace_timer - delta, 0.0)
 
+	if is_on_floor():
+		_floor_grace_timer = FLOOR_GRACE_TIME
+	else:
+		_floor_grace_timer = maxf(_floor_grace_timer - delta, 0.0)
+
 	# State machine: jangan override state spesial (FALLING/STANDING_UP/FLOATING)
 	if current_state != PlayerState.FALLING and current_state != PlayerState.STANDING_UP and current_state != PlayerState.FLOATING:
-		if is_on_floor():
+		if is_on_floor() or _floor_grace_timer > 0.0:
 			change_state(PlayerState.RUNNING)
 		else:
 			change_state(PlayerState.JUMPING)
@@ -209,8 +216,12 @@ func _update_3d_animations(delta: float, input_dir: Vector2, direction: Vector3,
 	var base_scale = rex_model_scale
 	
 	# 1. Rotasi model ke arah pergerakan (Y-axis)
+	# Prioritas: input direction (stabil) > velocity (osilasi saat diblok obstacle)
 	var horiz_vel = Vector2(velocity.x, velocity.z)
-	if horiz_vel.length() > 0.5:
+	if input_dir != Vector2.ZERO:
+		var target_angle = atan2(direction.x, direction.z)
+		visuals.rotation.y = rotate_toward(visuals.rotation.y, target_angle, delta * rotation_speed)
+	elif horiz_vel.length() > 0.5:
 		var target_angle = atan2(velocity.x, velocity.z)
 		visuals.rotation.y = rotate_toward(visuals.rotation.y, target_angle, delta * rotation_speed)
 	
@@ -228,10 +239,12 @@ func _update_3d_animations(delta: float, input_dir: Vector2, direction: Vector3,
 		_landing_recoil_time = 0.0
 	
 	# 3. Hitung posisi Y, Rotasi X/Z (Waddle/Recoil), dan Skala (Squash & Stretch)
-	if is_on_floor():
+	# Pakai state (sudah punya coyote time) bukan raw is_on_floor() agar tidak flip 1-2 frame
+	var on_ground = (current_state == PlayerState.RUNNING)
+	if on_ground:
 		# Reset rotasi X ke normal secara bertahap
 		visuals.rotation.x = rotate_toward(visuals.rotation.x, 0.0, delta * 12.0)
-		
+
 		# Jika sedang membal setelah mendarat
 		if _is_recoil_active:
 			_landing_recoil_time += delta * 15.0 # Kecepatan pantulan pegas
@@ -252,10 +265,14 @@ func _update_3d_animations(delta: float, input_dir: Vector2, direction: Vector3,
 				visuals.rotation.x = rotate_toward(visuals.rotation.x, amp * 0.12, delta * 15.0)
 				visuals.position.y = base_y_offset - amp * 0.16
 				
-		elif horiz_vel.length() > 0.5:
+		elif horiz_vel.length() > 0.5 or input_dir != Vector2.ZERO:
 			# Berjalan (Waddle walk)
-			# Kecepatan animasi berskala dengan pergerakan player
-			var speed_factor = clamp(horiz_vel.length() / SPEED, 0.3, 1.8)
+			# Saat input ada: pakai max(velocity, minimum) agar speed stabil saat diblok obstacle
+			var speed_factor: float
+			if input_dir != Vector2.ZERO:
+				speed_factor = clamp(maxf(horiz_vel.length(), SPEED * 0.5) / SPEED, 0.4, 1.8)
+			else:
+				speed_factor = clamp(horiz_vel.length() / SPEED, 0.3, 1.8)
 			_anim_time += delta * speed_factor * 10.0
 			
 			# Kemiringan badan ke samping kiri-kanan (Waddle)
@@ -281,7 +298,7 @@ func _update_3d_animations(delta: float, input_dir: Vector2, direction: Vector3,
 			var target_scale = Vector3(base_scale.x * breathe_xz, base_scale.y * breathe_y, base_scale.z * breathe_xz)
 			visuals.scale = visuals.scale.lerp(target_scale, delta * 5.0)
 			
-	else:
+	else: # not on_ground
 		# Sedang melompat atau jatuh (Di udara)
 		_is_recoil_active = false # matikan recoil saat lepas landas
 		
