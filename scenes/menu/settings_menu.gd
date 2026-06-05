@@ -131,6 +131,45 @@ func _build_ui() -> void:
 
 	_add_separator(content)
 
+	# ── CONTROLLER section
+	_add_section_label(content, "CONTROLLER", font)
+
+	var layout_lbl := Label.new()
+	layout_lbl.text = "PS Controller layout (same for P1 & P2):\n🕹️ Left Stick → Move   ✕ Cross → Jump   ○ Circle → Dash   △ Triangle → Skill"
+	layout_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	layout_lbl.add_theme_font_size_override("font_size", 17)
+	layout_lbl.add_theme_color_override("font_color", Color(0.82, 0.92, 1.0, 0.9))
+	layout_lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	layout_lbl.add_theme_constant_override("outline_size", 3)
+	content.add_child(layout_lbl)
+
+	var p1_ctrl_lbl := Label.new()
+	p1_ctrl_lbl.text = _controller_status_text(1)
+	p1_ctrl_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	p1_ctrl_lbl.add_theme_font_size_override("font_size", 18)
+	p1_ctrl_lbl.add_theme_color_override("font_color", Color(0.4, 0.88, 1.0, 1))
+	content.add_child(p1_ctrl_lbl)
+
+	var p2_ctrl_lbl := Label.new()
+	p2_ctrl_lbl.text = _controller_status_text(2)
+	p2_ctrl_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	p2_ctrl_lbl.add_theme_font_size_override("font_size", 18)
+	p2_ctrl_lbl.add_theme_color_override("font_color", Color(1.0, 0.72, 0.15, 1))
+	content.add_child(p2_ctrl_lbl)
+
+	var swap_btn := _make_button("SWAP P1 ↔ P2", font)
+	swap_btn.custom_minimum_size = Vector2(260, 52)
+	swap_btn.pressed.connect(func():
+		GlobalSettings.swap_controllers()
+		p1_ctrl_lbl.text = _controller_status_text(1)
+		p2_ctrl_lbl.text = _controller_status_text(2)
+	)
+	var swap_center := CenterContainer.new()
+	swap_center.add_child(swap_btn)
+	content.add_child(swap_center)
+
+	_add_separator(content)
+
 	# ── Back button
 	var back_btn := _make_button("BACK", font)
 	back_btn.custom_minimum_size = Vector2(200, 52)
@@ -350,6 +389,14 @@ func _on_sfx_changed(value: float) -> void:
 	GlobalSettings.sfx_volume = value
 	GlobalSettings.apply_audio()
 	GlobalSettings.save_settings()
+
+
+func _controller_status_text(player: int) -> String:
+	var device: int = GlobalSettings.controller_p1 if player == 1 else GlobalSettings.controller_p2
+	if device < 0:
+		return "Player %d: Keyboard only" % player
+	var joy_name := Input.get_joy_name(device)
+	return "Player %d: %s" % [player, joy_name if joy_name != "" else "Controller #%d" % (device + 1)]
 
 
 func _on_back_pressed() -> void:

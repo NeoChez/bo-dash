@@ -45,23 +45,23 @@ extends Node3D
 @export var skill_spawn_chance: float = 0.65
 
 # --- Kurva intensitas (internal, tidak perlu diubah) ---
-var min_spawn_interval: float = 1.35
-var max_move_speed_multiplier: float = 1.45
+var min_spawn_interval: float = 0.65
+var max_move_speed_multiplier: float = 3.0
 var early_game_spawn_scale: float = 1.2
-var late_game_spawn_scale: float = 0.78
+var late_game_spawn_scale: float = 0.38
 var mid_game_start: float = 0.28
 var late_game_start: float = 0.62
 var frenzy_start: float = 0.84
 var star_early_chance: float = 0.58
-var star_late_chance: float = 0.90
+var star_late_chance: float = 0.98
 var star_early_interval_scale: float = 1.18
-var star_late_interval_scale: float = 0.68
-var star_min_interval: float = 2.5
+var star_late_interval_scale: float = 0.33
+var star_min_interval: float = 1.2
 var skill_early_chance: float = 0.50
-var skill_late_chance: float = 0.75
+var skill_late_chance: float = 0.95
 var skill_early_interval_scale: float = 1.22
-var skill_late_interval_scale: float = 0.62
-var skill_min_interval: float = 5.0
+var skill_late_interval_scale: float = 0.30
+var skill_min_interval: float = 2.4
 
 # Titik tengah untuk obstacle (node "Lane")
 var _obstacle_lane: Marker3D = null

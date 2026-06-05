@@ -51,6 +51,9 @@ var _dash_timer: float = 0.0
 var _dash_active_timer: float = 0.0
 var _rope_constraint_pull: Vector3 = Vector3.ZERO
 var _knockback_timer: float = 0.0
+var _dash_requested: bool = false
+var _jump_requested: bool = false
+var _skill_requested: bool = false
 var shield_active: bool = false
 var _shield_visual: Node3D = null
 var anchor_resist: float = 0.0
@@ -124,6 +127,17 @@ func _ready():
 		_change_model("res://assets/player/" + _get_character_name() + "/running.glb")
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if not match_active or not is_alive or not can_move:
+		return
+	if event.is_action_pressed(action_jump):
+		_jump_requested = true
+	if event.is_action_pressed(action_dash):
+		_dash_requested = true
+	if event.is_action_pressed(action_skill):
+		_skill_requested = true
+
+
 func _physics_process(delta: float) -> void:
 	if not match_active or not is_alive:
 		return
@@ -153,21 +167,27 @@ func _physics_process(delta: float) -> void:
 
 	# Handle jump, dash, movement inputs
 	if can_move:
-		# Jump: hanya via tombol jump (Right Alt P1 / Left Alt P2), BUKAN tombol gerak W/P
-		if Input.is_action_just_pressed(action_jump) and is_on_floor():
-			velocity.y = jump_velocity
-			change_state(PlayerState.JUMPING)
-			jump_sfx.play()
+		# Jump
+		if _jump_requested:
+			if is_on_floor() or (_floor_grace_timer > 0.0 and current_state != PlayerState.JUMPING):
+				velocity.y = jump_velocity
+				change_state(PlayerState.JUMPING)
+				jump_sfx.play()
+			_jump_requested = false
 
 		# Handle dash
 		if _dash_timer > 0.0:
 			_dash_timer -= delta
 		_dash_active_timer = maxf(_dash_active_timer - delta, 0.0)
-		if Input.is_action_just_pressed(action_dash) and _dash_timer <= 0.0:
+		if _dash_requested and _dash_timer <= 0.0:
+			_dash_requested = false
 			_do_dash()
+		else:
+			_dash_requested = false
 
 		# Handle skill use
-		if Input.is_action_just_pressed(action_skill):
+		if _skill_requested:
+			_skill_requested = false
 			get_tree().call_group("match_controller", "use_skill", player_id)
 
 		# Pergerakan 8 arah: W/A/S/D untuk P2, P/L/;/' untuk P1
@@ -212,7 +232,7 @@ func _physics_process(delta: float) -> void:
 	
 	var was_on_floor_before = is_on_floor()
 	move_and_slide()
-	_apply_anchor_and_balloon()
+	_apply_anchor_and_balloon(delta)
 	_clamp_to_conveyor_side()
 	var just_landed = is_on_floor() and not was_on_floor_before
 	
@@ -699,20 +719,25 @@ func _apply_meteor_strike(strength: float) -> void:
 		meteor.call("setup", other.global_position, strength)
 
 
-func _apply_anchor_and_balloon() -> void:
+func _apply_anchor_and_balloon(delta: float) -> void:
 	var now := Time.get_ticks_msec() / 1000.0
 	var pv := get_platform_velocity()
 	var flat_platform := Vector3(pv.x, 0.0, pv.z)
 	if flat_platform.length_squared() < 0.01:
+		if now > anchor_end_time:
+			anchor_resist = 0.0
+		if now > balloon_curse_end_time:
+			balloon_curse_bonus = 0.0
 		return
+	# Koreksi posisi langsung setelah move_and_slide agar tidak akumulasi di velocity
 	if now <= anchor_end_time:
-		velocity.x -= flat_platform.x * anchor_resist
-		velocity.z -= flat_platform.z * anchor_resist
+		global_position.x -= flat_platform.x * anchor_resist * delta
+		global_position.z -= flat_platform.z * anchor_resist * delta
 	else:
 		anchor_resist = 0.0
 	if now <= balloon_curse_end_time:
-		velocity.x += flat_platform.x * balloon_curse_bonus
-		velocity.z += flat_platform.z * balloon_curse_bonus
+		global_position.x += flat_platform.x * balloon_curse_bonus * delta
+		global_position.z += flat_platform.z * balloon_curse_bonus * delta
 	else:
 		balloon_curse_bonus = 0.0
 

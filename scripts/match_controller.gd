@@ -17,16 +17,16 @@ const SKILL_EMOJI := {
 
 @export_group("Tweak — Conveyor")
 @export var conveyor_start_multiplier: float = 0.92
-@export var conveyor_end_multiplier: float = 1.45
+@export var conveyor_end_multiplier: float = 3.0
 
 @export_group("Sudden Death")
 @export var sudden_death_enabled: bool = true
 @export var sudden_death_duration: float = 60.0
-@export var sd_conveyor_multiplier: float = 1.8
-@export var sd_star_interval: float = 2.5
-@export var sd_star_chance: float = 0.95
-@export var sd_skill_interval: float = 6.0
-@export var sd_skill_chance: float = 0.85
+@export var sd_conveyor_multiplier: float = 3.7
+@export var sd_star_interval: float = 1.2
+@export var sd_star_chance: float = 0.98
+@export var sd_skill_interval: float = 2.9
+@export var sd_skill_chance: float = 0.95
 
 @onready var _skill_registry: Dictionary = GlobalSettings.skills
 
@@ -169,7 +169,7 @@ func on_player_down(player_id: int) -> void:
 	if not _scores.has(player_id):
 		return
 
-	const FALL_PENALTY := 1
+	const FALL_PENALTY := 2
 	if _scores[player_id] > 0:
 		var actual_penalty := mini(FALL_PENALTY, _scores[player_id])
 		_scores[player_id] -= actual_penalty

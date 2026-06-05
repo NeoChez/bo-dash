@@ -92,10 +92,15 @@ var skills: Dictionary = {
 var controller_p1: int = -1
 var controller_p2: int = -1
 
+var controller_dialog_enabled: bool = false
+
 var _notif_label: Label = null
 var _notif_tween: Tween = null
 var _dialog: Control = null
+var _dialog_label: Label = null
+var _dialog_mode: String = "bind"  # "bind" = assign free slot, "switch" = take over
 var _pending_device: int = -1
+var _pending_device_queue: Array[int] = []
 
 # Mapping tombol PS per action suffix
 const _BINDINGS: Dictionary = {
@@ -103,9 +108,9 @@ const _BINDINGS: Dictionary = {
 	"right": [{"type": "button", "index": 15}, {"type": "motion", "axis": 0, "value":  1.0}],
 	"up":    [{"type": "button", "index": 12}, {"type": "motion", "axis": 1, "value": -1.0}],
 	"down":  [{"type": "button", "index": 13}, {"type": "motion", "axis": 1, "value":  1.0}],
-	"jump":  [{"type": "button", "index": 0}],   # Cross
-	"dash":  [{"type": "button", "index": 5}],   # R1
-	"skill": [{"type": "button", "index": 3}],   # Triangle
+	"jump":  [{"type": "button", "index": 0}],   # Cross/X
+	"dash":  [{"type": "button", "index": 1}],   # Circle/○
+	"skill": [{"type": "button", "index": 3}],   # Triangle/△
 }
 
 
@@ -200,31 +205,57 @@ func _on_joy_connection_changed(device: int, connected: bool) -> void:
 		_handle_disconnect(device)
 
 
+func enable_controller_dialog() -> void:
+	controller_dialog_enabled = true
+	_process_next_queued_device()
+
+
 func _handle_connect(device: int) -> void:
 	var p1_free := controller_p1 == -1
 	var p2_free := controller_p2 == -1
 
+	if not controller_dialog_enabled:
+		if not _pending_device_queue.has(device):
+			_pending_device_queue.append(device)
+		return
+
+	if _dialog.visible:
+		# Dialog sudah terbuka untuk device lain — antre
+		if not _pending_device_queue.has(device):
+			_pending_device_queue.append(device)
+		return
+
 	if p1_free and p2_free:
+		_dialog_mode = "bind"
 		_show_bind_dialog(device)
 	elif not p1_free and p2_free:
 		_bind(2, device)
-		_show_notif("Controller P2 otomatis terhubung ✓", true)
+		_show_notif("Controller P2 connected ✓", true)
 	elif p1_free and not p2_free:
 		_bind(1, device)
-		_show_notif("Controller P1 otomatis terhubung ✓", true)
+		_show_notif("Controller P1 connected ✓", true)
 	else:
-		_show_notif("Semua slot controller sudah terisi", false)
+		_dialog_mode = "switch"
+		_show_bind_dialog(device)
 
 
 func _handle_disconnect(device: int) -> void:
+	_pending_device_queue.erase(device)
 	if controller_p1 == device:
 		controller_p1 = -1
 		_clear_joy_bindings(1)
-		_show_notif("Controller P1 terputus ✗", false)
+		_show_notif("Controller P1 disconnected ✗", false)
 	elif controller_p2 == device:
 		controller_p2 = -1
 		_clear_joy_bindings(2)
-		_show_notif("Controller P2 terputus ✗", false)
+		_show_notif("Controller P2 disconnected ✗", false)
+
+
+func _process_next_queued_device() -> void:
+	if _pending_device_queue.is_empty():
+		return
+	var next: int = _pending_device_queue.pop_front()
+	_handle_connect(next)
 
 
 func _bind(player: int, device: int) -> void:
@@ -300,67 +331,122 @@ func _build_dialog() -> Control:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.visible = false
 
-	# Overlay gelap
 	var overlay := ColorRect.new()
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	overlay.color = Color(0, 0, 0, 0.55)
+	overlay.color = Color(0, 0, 0, 0.60)
 	root.add_child(overlay)
 
-	# Panel tengah
-	var panel := PanelContainer.new()
-	panel.anchor_left = 0.5
-	panel.anchor_top = 0.5
-	panel.anchor_right = 0.5
-	panel.anchor_bottom = 0.5
-	panel.offset_left = -160.0
-	panel.offset_top = -80.0
-	panel.offset_right = 160.0
-	panel.offset_bottom = 80.0
+	var panel := Panel.new()
+	panel.anchor_left = 0.5; panel.anchor_top = 0.5
+	panel.anchor_right = 0.5; panel.anchor_bottom = 0.5
+	panel.offset_left = -200.0; panel.offset_top = -108.0
+	panel.offset_right = 200.0; panel.offset_bottom = 108.0
+	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	var ps := StyleBoxFlat.new()
+	ps.bg_color = Color(0.05, 0.08, 0.11, 0.97)
+	for s in [0,1,2,3]: ps.set_border_width(s, 2)
+	ps.border_width_bottom = 6
+	ps.border_color = Color(0.9, 0.78, 0.46, 0.9)
+	for c in range(4): ps.set_corner_radius(c, 22)
+	ps.shadow_color = Color(0, 0, 0, 0.5)
+	ps.shadow_size = 14
+	panel.add_theme_stylebox_override("panel", ps)
 	root.add_child(panel)
 
+	var font := load("res://assets/fonts/Wonder_Boys.ttf") as Font
+
 	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 14)
+	vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	vbox.offset_left = 24; vbox.offset_right = -24
+	vbox.offset_top = 18; vbox.offset_bottom = -18
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override("separation", 18)
 	panel.add_child(vbox)
 
 	var lbl := Label.new()
-	lbl.text = "Controller terhubung!\nBind ke player mana?"
+	lbl.text = "Controller connected!\nAssign to which player?"
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl.add_theme_font_size_override("font_size", 16)
+	lbl.add_theme_font_size_override("font_size", 20)
+	if font: lbl.add_theme_font_override("font", font)
+	lbl.add_theme_color_override("font_color", Color(1, 0.95, 0.8, 1))
+	lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	lbl.add_theme_constant_override("outline_size", 5)
 	vbox.add_child(lbl)
+	_dialog_label = lbl
 
 	var hbox := HBoxContainer.new()
 	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	hbox.add_theme_constant_override("separation", 20)
+	hbox.add_theme_constant_override("separation", 10)
 	vbox.add_child(hbox)
 
-	var btn1 := Button.new()
-	btn1.text = "Player 1"
-	btn1.custom_minimum_size = Vector2(110, 40)
+	var btn1 := _make_dialog_btn("Player 1", Color(0.0, 0.52, 0.88), Color(0.0, 0.32, 0.60), font)
 	btn1.pressed.connect(func(): _on_dialog_choose(1))
 	hbox.add_child(btn1)
 
-	var btn2 := Button.new()
-	btn2.text = "Player 2"
-	btn2.custom_minimum_size = Vector2(110, 40)
+	var btn2 := _make_dialog_btn("Player 2", Color(0.88, 0.44, 0.06), Color(0.60, 0.26, 0.02), font)
 	btn2.pressed.connect(func(): _on_dialog_choose(2))
 	hbox.add_child(btn2)
 
-	# Simpan referensi tombol agar bisa di-disable
+	var cancel_btn := _make_dialog_btn("Cancel", Color(0.30, 0.30, 0.35), Color(0.18, 0.18, 0.22), font)
+	cancel_btn.pressed.connect(func():
+		_dialog.visible = false
+		_pending_device = -1
+		_dialog_mode = "bind"
+		_process_next_queued_device()
+	)
+	hbox.add_child(cancel_btn)
+
 	root.set_meta("btn1", btn1)
 	root.set_meta("btn2", btn2)
-
 	return root
+
+
+func _make_dialog_btn(text: String, bg: Color, border: Color, font: Font) -> Button:
+	var btn := Button.new()
+	btn.text = text
+	btn.custom_minimum_size = Vector2(106, 48)
+	btn.add_theme_font_size_override("font_size", 18)
+	if font: btn.add_theme_font_override("font", font)
+	btn.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	btn.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	btn.add_theme_constant_override("outline_size", 6)
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = bg; normal.border_color = border
+	for s in [0,1,2,3]: normal.set_border_width(s, 2)
+	normal.border_width_bottom = 6
+	for c in range(4): normal.set_corner_radius(c, 16)
+	normal.content_margin_top = 8.0; normal.content_margin_bottom = 14.0
+	btn.add_theme_stylebox_override("normal", normal)
+	var hover := StyleBoxFlat.new()
+	hover.bg_color = bg.lightened(0.14); hover.border_color = border
+	for s in [0,1,2,3]: hover.set_border_width(s, 2)
+	hover.border_width_bottom = 6
+	for c in range(4): hover.set_corner_radius(c, 16)
+	hover.content_margin_top = 8.0; hover.content_margin_bottom = 14.0
+	btn.add_theme_stylebox_override("hover", hover)
+	btn.add_theme_stylebox_override("focus", hover)
+	return btn
 
 
 func _show_bind_dialog(device: int) -> void:
 	_pending_device = device
-	# Disable tombol slot yang sudah terisi
 	var btn1: Button = _dialog.get_meta("btn1")
 	var btn2: Button = _dialog.get_meta("btn2")
-	btn1.disabled = controller_p1 != -1
-	btn2.disabled = controller_p2 != -1
-	btn1.text = "Player 1" + (" (terisi)" if controller_p1 != -1 else "")
-	btn2.text = "Player 2" + (" (terisi)" if controller_p2 != -1 else "")
+	if _dialog_mode == "switch":
+		btn1.disabled = false
+		btn2.disabled = false
+		btn1.text = "Player 1" + (" (active)" if controller_p1 != -1 else "")
+		btn2.text = "Player 2" + (" (active)" if controller_p2 != -1 else "")
+		if _dialog_label:
+			_dialog_label.text = "New controller detected!\nTake over which player?"
+	else:
+		btn1.disabled = controller_p1 != -1
+		btn2.disabled = controller_p2 != -1
+		btn1.text = "Player 1" + (" (taken)" if controller_p1 != -1 else "")
+		btn2.text = "Player 2" + (" (taken)" if controller_p2 != -1 else "")
+		if _dialog_label:
+			_dialog_label.text = "Controller connected!\nAssign to which player?"
 	_dialog.visible = true
 
 
@@ -368,9 +454,30 @@ func _on_dialog_choose(player: int) -> void:
 	_dialog.visible = false
 	if _pending_device == -1:
 		return
+	if _dialog_mode == "switch":
+		_clear_joy_bindings(player)
+		if player == 1: controller_p1 = -1
+		else: controller_p2 = -1
 	_bind(player, _pending_device)
-	_show_notif("Controller P%d terhubung ✓" % player, true)
+	_show_notif("Controller P%d connected ✓" % player, true)
 	_pending_device = -1
+	_dialog_mode = "bind"
+	_process_next_queued_device()
+
+
+func swap_controllers() -> void:
+	var temp := controller_p1
+	controller_p1 = controller_p2
+	controller_p2 = temp
+	if controller_p1 >= 0:
+		_bind(1, controller_p1)
+	else:
+		_clear_joy_bindings(1)
+	if controller_p2 >= 0:
+		_bind(2, controller_p2)
+	else:
+		_clear_joy_bindings(2)
+	_show_notif("Controller P1 ↔ P2 swapped ✓", true)
 
 
 func _show_notif(msg: String, success: bool) -> void:

@@ -6,6 +6,7 @@ extends Control
 @onready var title = $TitleLabel
 
 func _ready() -> void:
+	GlobalSettings.enable_controller_dialog()
 	if not MenuMusic.playing:
 		MenuMusic.play()
 	
